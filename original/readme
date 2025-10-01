@@ -1,0 +1,53 @@
+Source code for Scheme engine
+and "Lists of Lists"
+
+Copyright 1996 by Andrew Plotkin (erkyrath@netcom.com)
+This source code may be copied and distributed freely. The
+Scheme interpreter source may be freely used, modified, and
+incorporated into other works.
+
+There are five Inform source files in this archive: 
+
+zlisp.inf: simple execution shell
+lists.inf: game source for the competition entry itself
+lists-manual.inf: the manual used by the competition entry
+zlisp-core.inf: Scheme interpreter
+zlisp-funs.inf: functions used by Scheme interpreter
+
+The Scheme interpreter itself is in zlisp-core.inf and zlisp-funs.inf.
+(Please don't tell me I should rename them "zscheme" -- it's not worth
+the effort.) Note that zlisp-core.inf includes zlisp-funs.inf.
+
+To compile the interpreter on its own, just compile zlisp.inf. As you'll
+note, it's just a Main() function which calls LispLoop(), the top-
+level function of the interpreter, which is defined in zlisp-core.inf.
+This does not include the Inform libraries.
+
+To compile "Lists and Lists" (my competition entry per se), compile
+lists.inf. You'll note that this calls LispLoop(), in the before:Push
+clause of the green button, just where you'd expect. This file includes
+zlisp-core.inf, of course, and also includes lists-manual.inf, the
+manual, which was big enough that I kept it in a separate file.
+
+This should be enough exemplery for you to use the interpreter in your
+own Inform programs, should you desire. 
+
+The interpreter allocates a huge array to act as the Scheme memory
+heap. You should use $MAX_STATIC_DATA=13000 at least -- more if your
+game is large.
+
+This code has only been compiled under Inform 5.5. I'm sure the 
+interpreter would make a great link module, but you'll have to do it
+yourself.
+
+Functions in the interpreter interface:
+
+LispLoop(): Call this to run the interpreter. It will exit when
+the user types ":q".
+
+LispReset(): Call this to reset the interpreter.
+
+LispEscapeCodes(): Define this in your own code to define extra
+escape codes (the engine only defines ":q", ":e", ":c", and ":g".)
+It must be defined before you include zlisp-core.inf.
+

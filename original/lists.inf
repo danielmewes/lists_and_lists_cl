@@ -1,0 +1,1494 @@
+Switches xv5;
+Release 3;
+
+! Constant NO_PLACES;
+! Constant ZDEBUG;  
+
+Constant Story "Lists And Lists";
+Constant Headline "^An Interactive Tutorial^\
+	Copyright 1996 by Andrew Plotkin.^\
+	(First-time players should type ~about~.)^";
+
+Constant TopProblemNum 8;
+
+Replace DrawStatusLine;
+Replace ScoreSub;
+Replace FullScoreSub;
+Replace DoMenu;
+
+Include "Parser";
+
+Fake_Action SayYes;
+Fake_Action SayNo;
+Fake_Action SayRepeat;
+Fake_Action SayHelp;
+
+Object LibraryMessages "lib_messages"
+  with 
+	before [;
+	];
+
+Include "VerbLib";
+
+! ------------- Objects
+
+#ifdef ZDEBUG;
+
+Object wand "magic wand",
+  with
+	name "magic" "wand",
+	description "It's your magic wand! [BUG]",
+	before [;
+		Wave:
+			if (self hasnt light) {
+				give self light;	
+				"The wand starts to glow.";
+			}
+			else {
+				give self ~light;
+				"The wand goes out.";
+			}
+	];
+
+#endif;  ! ZDEBUG
+
+! ------------- Rooms
+
+Object Entry "A Familiar Place"
+  with
+  	name "familiar" "place",
+	description "Everything here is just like it always is, except for that door.",
+	in_to [;
+		<<Enter entrydoor>>;
+	],
+	out_to [;
+		print_ret "You ", (emphstring) "are", " outside.";
+	],
+	n_to [;
+		if (entrydoor hasnt open) {
+			print "You push the door open. It doesn't creak at all.^";
+			give entrydoor open;
+		}
+		return entrydoor;
+	],
+	cant_go "You've been that way before.",
+  has light;
+
+Nearby entrystuff "stuff"
+  with
+	name "stuff" "thing" "things" "everything" "wall",
+	before [;
+		"Leave that alone; there's nothing new about it.";
+	],
+  has scenery;
+
+Nearby entrydoor "door"
+  with
+	article "that",
+	name "that" "strange" "door",
+	description [;
+		print "The door to the north is ancient, stained, knotted wood. \
+			It looks terribly out of place here. In fact, it ", (emphstring) "is", 
+			" out of place here. The door";
+		if (self hasnt open)
+			" is closed.";
+		else
+			" stands open.";
+	],
+	door_dir n_to,
+	door_to Lab,
+	before [;
+		Enter:
+			if (self hasnt open) {
+				print "You push the door open. It doesn't creak at all.^";
+				give self open;
+			}
+			rfalse;
+		Search:
+			if (self hasnt open)
+				"The door is closed.";
+			else
+				"I refuse to ruin the suspense.";
+	],
+	after [;
+		Open:
+			"You push the door open. It doesn't creak at all.";
+		Close:
+			"Closed.";
+	],
+  has scenery door openable ~open;
+
+Object Lab "White Room"
+  with
+	description [;
+		print "This is a comfortably cluttered room. Cluttered with bookshelves, \
+			mostly. To one side is a large desk, on which a computer squats regally.";
+		if (couch in self)
+			print " A lumpy couch is the only other furniture of note.";
+		new_line;
+		rtrue;
+	],
+	s_to [;
+		if (genie.number > TopProblemNum) {
+			<<Quit>>;
+		}
+		"Leaving so soon?";
+	],
+	out_to [; <<Go s_obj>>; ],
+  has light;
+
+Nearby innerdoor "door"
+  with
+	name "door",
+	description "The door isn't nearly so interesting from the inside.",
+	before [;
+		Examine:
+			rfalse;
+		Enter:
+			<<Go s_obj>>;
+		default:
+			"Leave it alone. It's done its job.";
+	],
+  has scenery;
+
+Nearby bookshelves "bookshelves"
+  with
+	name "shelf" "shelves" "bookshelf" "books" "bookshelves",
+	description [;
+		"Clearly a geek's collection. Fantasy and science fiction on one side, puzzle \
+			books and loony philosophy on the other, and several shelves of little \
+			toys and puzzles in the middle.";
+	],
+	before [;
+		Examine:
+			rfalse;
+		default:
+			"You decide that the stuff on the shelves is not what you're in here for.";
+	],
+  has scenery;
+
+Nearby toycollection "toys and puzzles"
+  with
+	name "toy" "toys" "puzzle" "puzzles",
+	description "You expected puzzle-less IF?",
+	before [;
+		Examine:
+			rfalse;
+		default:
+			"You decide that the stuff on the shelves is not what you're in here for.";
+	],
+  has scenery;
+
+Nearby desk "desk"
+  with
+	name "large" "desk",
+	describe [;
+		if (children(self) == 1)
+			rtrue;
+		print "^Beside the computer";
+		WriteListFrom(child(self), ENGLISH_BIT | RECURSE_BIT | ISARE_BIT | CONCEAL_BIT);
+		".";
+	],
+	description [;
+		print "The desk is obviously from that school of design that says that furniture \
+			should be clean, efficient, unadorned, and capable of being disassembled \
+			with allen wrenches and put into a box \
+			six feet by three feet by two inches high. On the desk";
+		WriteListFrom(child(self), ENGLISH_BIT | RECURSE_BIT | ISARE_BIT);
+		".";
+	],
+	before [;
+		Open, Close:
+			"The desk doesn't have any drawers. It doesn't even have an inside.";
+		LookUnder:
+			"This is not that sort of game.";
+	],
+  has static supporter;
+
+Nearby couch "large couch"
+  with
+	name "large" "couch",
+	description "The couch has that peculiar slump of cushion that says that \
+		this couch has seen much service, mostly to a single vast rear end. \
+		Indeed, the depression is perfectly molded to the tuchus that occupies \
+		it at this very moment.",
+	before [;
+		Enter, Receive:
+			"The couch is occupied.";
+		LookUnder:
+			"This is not that sort of game.";
+		Search:
+			"The couch is occupied by a genie.";
+	],
+  has scenery supporter;
+
+Object computer "computer" desk
+  with
+	name "computer" "keyboard" "monitor",
+	description "The computer is a bulky grey thing. It gives the distinct impression \
+		that it's full of vacuum tubes. The monitor is blank at the moment. However, \
+		the keyboard is surmounted by two painfully obvious buttons; the green one \
+		is labelled ~run~, and the yellow one is labelled ~reset~.",
+	before [;
+		Switchon:
+			<<Push gobutton>>;
+	],
+  has scenery transparent;
+
+Object gobutton "green button" computer
+  with
+	name "green" "go" "run" "button",
+	before [;
+		Push:
+			if (self hasnt general) {
+				!give self general;
+				print "The computer comes to life: whirr, feeple, feep! You settle yourself \
+					before the keyboard as text appears on the screen...^^^";
+			}
+			else {
+				print "The computer returns to life...^^^";
+			}
+			print "[Welcome to the interpreter. Enter ~:q~ to exit, or ~:m~ for documentation, \
+				or ~:?~ for a list of other ~:~ commands.]^";
+			if (self hasnt general) {
+				give self general;
+				print "[Interpreter warning:^Since the Z-machine has no way to check for \
+					stack overflow, it ", (emphstring) "is", " possible to crash ",
+					(emphstring) "your", " interpreter (or even your computer) by confusing \
+					this intepreter. In particular, infinite loops are dangerous. Be careful.]^";
+			}
+			LispLoop();
+			print "[Suspending interpreter. Press green button to reactivate.]^^";
+			if (genie.number >= 2 && genie.number <= TopProblemNum) {
+				give genie general;
+				"You lean back. The genie glances over, and asks, ~Got it working yet?~";
+			}
+			else {
+				"You lean back and glance around.";
+			}
+	],
+  has scenery;	! general means you've done it before.
+
+Object resetbutton "yellow button" computer
+  with
+	name "yellow" "reset" "button",
+	before [;
+		Push:
+			print "A single line flashes on the screen:^^";
+			LispReset();
+			rtrue;
+	],
+  has scenery;
+
+Object alarmbox "small glass box" desk
+  with
+	name "small" "glass" "box",
+	description "It's a small cube of frosted glass. \
+		Neatly etched on one side are the words ~Break glass to wake owner.~ \
+		Something turns slowly inside the box... you can't quite see what.",
+	before [;
+		Search:
+			"You can't make out what's inside the translucent box.";
+		Open:
+			"The translucent glass is seamless.";
+		Attack:
+			remove self;
+			genie.number = 1;
+			print "You turn the box over carefully, then shrug and swing it sharply \
+				towards the table...^^~No no don't break it I'm awake!~ \
+				A gleaming hand catches your wrist. The genie gently -- very gently -- \
+				removes the box from your grasp, and tucks it carefully away into nothing.^";
+			if (genie hasnt general) {
+				print "^The genie looks you over, squinching his face in a manner to which \
+					mere mortal flesh could not aspire. ~So. You're here to learn, are you?~^";
+			}
+			else {
+				print "^The genie yawns. ~Ready to begin?~^";
+			}
+			rtrue;
+	];
+
+Object manual "book"
+  with
+	name "massive" "book" "tome" "manual",
+	before [;
+		Examine, Open, Search:
+			EnterManual();
+			rtrue;
+	];
+
+Object genie "genie" Lab
+  with
+	name "huge" "genie",
+	number 0,	! 0: asleep; 1: awake
+	initial [;
+		if (self.number == 0)
+			"Resting on the couch, and snoring in a manner which you suspect infringes \
+				copyrights owned by several local earthquakes, is a huge genie. Honest.";
+		"A huge genie is resting on the couch.";
+	],
+	description [;
+		print "You always thought genies were folklore, but now that you've encountered \
+			one you find you really can't mistake it. He's eight feet tall, bright \
+			shimmering bronze, absolutely covered with tasteless wrought-gold jewelry, \
+			and he smells of ozone.";
+		switch (self.number) {
+			0:
+				print " He's also quite dead to the world, snoring like mad on the lumpy couch.";
+			2:
+				print " He's reading a magazine.";
+			3:
+				print " He's eating a box of Turkish Delight.";
+			4:
+				print " He's playing with a yo-yo.";
+			5:
+				print " He's smoking a cigar.";
+			6:
+				print " He's playing ~System's Twilight~ on a laptop.";
+			7:
+				print " He's playing ~So Far~ on a laptop.";
+			8:
+				print " He's fiddling with a Berrocal sculpture.";
+		}
+
+		new_line;
+		rtrue;
+	],
+	react_before [;
+		Yes:
+			print "(to the genie)^";
+			<<SayYes self>>;
+		No:
+			print "(to the genie)^";
+			<<SayNo self>>;
+		CheckProb:
+			if (self.number >= 2) {
+				print "(tell the genie that)^";
+				<<SayYes self>>;
+			}
+		RepeatProb:
+			if (self.number >= 1) {
+				print "(tell the genie that)^";
+				<<SayRepeat self>>;
+			}
+	],
+	life [;
+		WakeOther:
+			if (self.number == 0) {
+				switch (random(3)) {
+					1: "The genie rolls over.";
+					2: "The genie snorts. ~'z a louse,~ he mumbles.";
+					3: "The genie mumbles, ~M'm awake, mmf,~ and throws an arm \
+						over his ear."; 
+				}
+			}
+			else {
+				"The genie glances up at you. ~I'm not about to fall asleep, not \
+					with you muttering to yourself and scribbling all those notes.~";
+			}
+		Answer:
+			switch (noun) {
+				'yes', 'check':
+					<<SayYes self>>;
+				'repeat', 'problem', 'remember', 'recall':
+					<<SayRepeat self>>;
+				'no':
+					<<SayNo self>>;
+				'help', 'hint':
+					<<SayHelp self>>;
+				default:
+					if (self.number == 0)
+						<<SayYes self>>;
+					"~I have no idea what you're blithering about.~";
+			}
+		Kiss, Attack:
+			if (self.number == 0)
+				<<Wake self>>;
+	],
+	orders [;
+		Yes:
+			<<SayYes self>>;
+		No:
+			<<SayNo self>>;
+		CheckProb:
+			<<SayYes self>>;
+		RepeatProb:
+			<<SayRepeat self>>;
+		Help:
+			<<SayHelp self>>;
+		default:
+			if (self.number == 0)
+				<<SayNo self>>;
+			"~You don't get it. You act. I guide.~";
+	],
+	before [ res;
+		SayHelp:
+			switch (self.number) {
+				0:
+					"The genie, unconscious, quite ignores you.";
+				1:
+					"~What part of a yes-or-no question don't you understand?~";
+				default:
+					GiveHint(self.number);
+					rtrue;
+			}
+		SayRepeat:
+			switch (self.number) {
+				0:
+					"The genie, unconscious, quite ignores you.";
+				1:
+					"~I thought the question was simple enough. Are you interested in learning \
+						what I have to teach? Yes or no will do.~";
+				default:
+					PrintProblem(self.number);
+					rtrue;
+			}
+		SayNo:
+			switch (self.number) {
+				0:
+					"The genie, unconscious, quite ignores you.";
+				1:
+					move alarmbox to player;
+					self.number = 0;
+					give self general;
+					"The genie frowns thunderously -- and maybe that won't be a metaphor \
+						for long. ~Fine, go play around on your own. See where it gets you. \
+						Wake me when you're tired of wasting time.~ He tosses you the glass \
+						box, turns over, and begins snoring. Thunderously.";
+				default:
+					if (self.number >= 2 && self.number <= TopProblemNum) {
+						give self ~general;
+						"~Tell me when you're ready, then.~";
+					}
+					
+					! else, not in problem set
+					"~What?~";
+			}
+		SayYes:
+			switch (self.number) {
+				0:
+					"The genie, unconscious, quite ignores you.";
+				1:
+					self.number = 2;
+					give self ~general;
+					move manual to player;
+					print "The genie nods in satisfaction. ~Right. Let's see, let's see...~ \
+						He pulls a massive tome out of nowhere; opens it; pokes studiously \
+						at it; turns a page; snorts. Then he arises from the couch to his \
+						full height, raises the book, and booms...^^";
+					print (boldstring) "~How To Program In Lisp!~", "^^";
+					print "Then he plops back into the couch, and adds, ~...a self-paced \
+						course.~ He hands you the book.^^";
+					PrintProblem(self.number);
+					rtrue;
+				default:
+					if (self.number >= 2 && self.number <= TopProblemNum) {
+						give self ~general;
+						res = CheckProblem(self.number);
+						if (res == 2) {
+							! solved.
+							self.number = self.number + 1;
+							if (self.number > TopProblemNum) {
+								move prize to player;
+								remove self;
+								remove couch;
+								"^~Congratulations,~ the genie booms. ~You are now an accredited \
+									hacker of Lisp.~ He hands you something. ~I'll let you keep \
+									playing with the machine. I,~ he adds with sudden intensity, \
+									~am going to return to my nap.~^^The genie vanishes in a puff \
+									of silver smoke. A moment later, the couch follows.";
+							}
+							else {
+								new_line;
+								PrintProblem(self.number);
+							}
+						}
+						else {
+							! nothing
+						}
+						rtrue;
+					}
+					
+					! else, not in problem set
+					"~What?~";
+			}
+	],
+  has static animate transparent;	
+  ! general means:	0: you've woken him before
+  !					prob: he just asked you whether you're done.
+
+Object genietoys "genie's possessions" genie
+  with
+	name "magazine" "turkish" "delight" "yo" "yo-yo" "cigar" "laptop" "berrocal" "sculpture",
+	before [;
+		"The genie's possessions are not important.";
+	],
+  has scenery;
+	
+Object prize "gold plaque"
+  with
+	name "gold" "plaque" "plate" "something",
+	description [;
+		print "It's a plate of thin gold, engraved with angular designs. In the center you \
+			see the words^^";
+		print (boldstring) "    *** You have won ***";
+		new_line;
+		if (self hasnt general) {
+			give self general;
+			move poem to Lab;
+			print "^As you turn the plaque over, a slip of paper flutters to the floor.^";
+		}
+		rtrue;
+	],
+  has ~general; 	! general means the poem has fallen off.
+
+Object poem "slip of paper"
+  with
+	name "slip" "of" "paper",
+	description [;
+		print "The paper is titled:^^";
+		print (emphstring) "What I Learned In 15-212", "^^";
+		print "The rest is too faded to read.^";
+		rtrue;
+	];
+
+! ------------- Verbs and helper routines
+
+! see manual p.98
+[ ChooseObjects obj code;
+	if (code < 2) {
+		if (obj has scenery)
+			return 2;
+		rfalse;
+	}
+	if (obj hasnt scenery)
+		return 2;
+	return 1;
+];
+
+[ ParserError errnum;
+	switch (errnum) {
+		SCENERY_PE:
+			"That's not important here.";
+		default:
+			rfalse;
+	}
+];
+
+[ PauseClear 
+	dummy;
+	print "[Hit any key.] ";
+	new_line; ! new_line;
+	@read_char 1 dummy;
+	@erase_window $ffff;
+	new_line;
+];
+
+[ emphstring str;
+	style underline;
+	print (string) str;
+	style roman;
+];
+
+[ boldstring str;
+	style bold;
+	print (string) str;
+	style roman;
+];
+
+[ atomstring str;
+	!font off;
+	style bold;
+	print (string) str;
+	style roman;
+	!font on;
+];
+
+[ AboutSub;
+	print (emphstring) Story;
+	print " is copyright 1996 by Andrew Plotkin. It may be copied, distributed, \
+		and played freely.^";
+	print "^Now that the competition is over, this source code is also \
+		freely distributable and usable.^";
+	print "^Type ~help~ for help with whatever you are currently \
+		stuck on.^";
+	print "^Thanks for beta-testing and comments: Michael Kinyon, Dylan Thurston, \
+		Dave Seybert.^";
+	
+	if (genie.number > TopProblemNum) {
+		print "^The author was very, very tempted to call this game \
+			~Lists And Lists: An Interactive Take That, Mister Gareth \
+			Rees And His Goddamn Recursive Toychest Lock Puzzle.~^";
+	}
+	
+	rtrue;
+];
+
+[ HelpSub;
+	if (location == Entry)
+		"Consider going inside.";
+	if (genie.number == 0) {
+		if (alarmbox hasnt moved)
+			"Check out the desk.";
+		else
+			"Check out the box.";
+	}
+	if (genie.number > TopProblemNum)
+		"Read the plaque.";
+	if (genie.number < 2)
+		"The genie is your guide.";
+
+	GiveHint(genie.number);
+];
+
+[ ScoreSub;
+	if (deadflag == 0)
+		"That's not how education works.";
+	! otherwise, the game is over; no score.
+	if (deadflag==2) {
+		! extra winning message?
+	}
+	rtrue;
+];
+
+[ FullScoreSub;
+	<<Score>>;
+];
+
+[ CheckProbSub;
+	"I'm not sure what you mean.";
+];
+
+[ RepeatProbSub;
+	"I'm not sure what you mean.";
+];
+
+#ifdef ZDEBUG;
+
+[ ZapToSub;
+	!print "[DEBUG] Printing chapter ", noun, "...^^";
+	!PrintChapter(noun);
+	
+	if (noun == 99) {
+		move prize to player;
+		"Ninety-nine; you get a prize.";
+	}
+	
+	print "[DEBUG] genie.number set to ", noun, ".^^";
+	genie.number = noun;
+	give genie ~general;
+	PrintProblem(genie.number);
+];
+
+#endif;
+
+[ DrawStatusLine
+	width;
+	@split_window 1; @set_window 1; @set_cursor 1 1; style reverse;
+	width = 0->33; 
+	spaces (width-1);   ! A pox upon buggy interpreters!
+	@set_cursor 1 3;  
+	PrintShortName(location);
+	@set_cursor 1 1; style roman; @set_window 0;
+];
+
+#include "lists-manual.inf";
+
+! ------------- Startup routine
+
+[ Initialise
+	;
+
+	location = Entry;
+#ifdef ZDEBUG;
+	move wand to player;
+	print "^[DEBUG mode active]^";
+#endif;
+
+	! lookmode = 2;  ! verbose
+	inventory_style = FULLINV_BIT + ENGLISH_BIT + RECURSE_BIT;
+	
+	new_line; new_line;
+	
+	print "Hey, that door wasn't there last time you walked by this spot. What \
+		the heck?^^";
+];
+
+! ------------- Grammar
+
+Include "Grammar";
+
+Verb meta "about" "info"
+                *								-> About;
+
+Verb "hint" "help"
+                *								-> Help;
+
+Extend only "check" replace
+				*								-> CheckProb
+				* special						-> CheckProb;
+
+Verb "repeat" "problem" "remember" "recall"
+				*								-> RepeatProb
+				* special						-> RepeatProb;
+
+#ifdef ZDEBUG;
+Verb "zapto"
+				* special						-> ZapTo;
+#endif;
+
+! ------------- Lisp engine
+
+[ LispEscapeCodes key;
+	switch (key) {
+		'm':
+			if (genie.number <= 1) {
+				"[No manual is available. (You're the one who wanted to explore without guidance...) \
+					To obtain documentation, please consult your local genie.]";
+			}
+			EnterManual();
+		'r':
+			if (genie.number >= 2 && genie.number <= TopProblemNum)
+				PrintProblem(genie.number);
+			else
+				"[No problem has been posed.]";
+		'?':
+			print "[The following codes have special meaning at the ~>>~ prompt:^";
+			print "  :?  Print this list.^";
+			print "  :q  Leave the interpreter. (When you re-enter, it will be in the same \
+				state that you left it.)^";
+			if (genie.number <= 1)
+				print "  :m  Read the manual, if you have one.^";
+			else
+				print "  :m  Read the manual.^";
+			print "  :r  Redisplay the problem that you are working on.^";
+			print "  :c  Cancel the expression you are typing. (Useful if you are lost halfway \
+				through a multi-line input.)^";
+			print "  :g  Force garbage to be collected.^";
+			print "  :e  Display everything in the current environment.^";
+			print "A colon followed by any other symbol does nothing.]^";
+			rtrue;
+	}
+];
+
+Include "zlisp-core.inf";
+
+Global MentionedExtras = 0;
+[ PrintProblem num;
+	switch (num) {
+		! 0: wake genie
+		! 1: start lessons
+		2:
+			print "~Your first problem is just to acquaint you with the system. \
+				Start up the machine, and define ",
+				(atomstring) "twentyseven", " to have the value 27.";
+			if (MentionedExtras == 0) {
+				MentionedExtras = 1;
+				print " You can ask me to 'check' when you're ready, or 'repeat' \
+					the problem if you need me to.";
+			}
+			"~";
+		3:
+			print_ret "~Let's try creating some lists. \
+				Define values for ", (atomstring) "cat", " and ",
+				(atomstring) "dog", " so that ", (atomstring) "cat", " and ",
+				(atomstring) "dog", " are ", (atomstring) "equal?", " but not ",
+				(atomstring) "eqv?", ". Furthermore, ", (atomstring) "cdr(cat)", " and ",
+				(atomstring) "cdr(dog)", " must be ", (atomstring) "eqv?", ".~";
+		4:
+			print_ret "~Define ", (atomstring) "abs", " to be the absolute value function \
+				for integers. That is, ", (atomstring) "(abs 4)", " should return ",
+				(atomstring) "4", "; ", (atomstring) "(abs -5)", " should return ",
+				(atomstring) "5", "; and ", (atomstring) "(abs 0)", " should return ",
+				(atomstring) "0", ".~";
+		5:
+			print_ret "~Define ", (atomstring) "sum", " to be a function that adds up a \
+				list of integers. So ", (atomstring) "(sum '(8 2 3))", " should return ",
+				(atomstring) "13", ". Make sure it works correctly for the empty list; ",
+				(atomstring) "(sum nil)", " should return ", (atomstring) "0", ".~";
+		6:
+			print_ret "~This problem is like the last one, but more general. Define ",
+				(atomstring) "megasum", " to add up an arbitrarily nested list of integers. \
+				That is, ", (atomstring) "(megasum '((8) 5 (2 () (9 1) 3)))", 
+				" should return ", (atomstring) "28", ".~";
+		7:
+			print_ret "~Define ", (atomstring) "max", " to be a function that finds the \
+				maximum of a \
+				list of integers. So ", (atomstring) "(max '(5 14 -3))", " should return ",
+				(atomstring) "14", ". You can assume the list will have at least one term.~";
+		8:
+			print "~Last problem. You're going to define a function called ",
+				(atomstring) "pocket", ". This function should take one argument. Now \
+				pay attention here: ", (atomstring) "pocket", " does two different things, \
+				depending on the argument. If you give it ", (atomstring) "nil", 
+				" as the argument, it should simply return ", (atomstring) "8", ". But if \
+				you give ", (atomstring) "pocket", " any integer as an argument, it should \
+				return a new pocket function -- a function just like ", (atomstring) "pocket", 
+				", but with that new integer hidden inside, replacing the 8.^";
+			print_trans("(pocket nil)", "8");
+			print_trans("(pocket 12)", "[function]");
+			print_trans("(define newpocket (pocket 12))", "[function]");
+			print_trans("(newpocket nil)", "12");
+			print_trans("(define thirdpocket (newpocket 3))", "[function]");
+			print_trans("(thirdpocket nil)", "3");
+			print_trans("(newpocket nil)", "12");
+			print_trans("(pocket nil)", "8");
+			print_ret "Note that when you create a new pocket function, previously-existing \
+				functions should keep working.~";
+		default:
+			"~No problem here, pal.~";
+	}
+];
+
+[ CantTest;
+	"^The genie glares at the machine. Then he turns to you. ~I'm sorry; \
+		the thing's memory is full. I can't check your solution. You'll \
+		have to reset the thing and do it all again.~ He shrugs helplessly.";
+];
+
+[ GenieTypes inp
+	res;
+	print "He types: "; 
+	style bold; 
+	write_obj(inp); 
+	style roman;
+	new_line;
+	
+	eval_fuel = MAX_FUEL;
+	res = eval_obj(inp);
+	
+	print "The machine responds: "; 
+	write_obj(res); 
+	new_line;
+	
+	return res;
+];
+
+[ IsTrueAtom s;
+	if (s==0 || s==tok_Error)
+		rfalse;
+	if (s->0 ~= bt_Atom)
+		rfalse;
+	if (s-->1 ~= atom_t-->1)
+		rfalse;
+	rtrue;
+];
+
+[ IsNumAtom s val;
+	if (s==0 || s==tok_Error)
+		rfalse;
+	if (s->0 ~= bt_Num)
+		rfalse;
+	if (s-->1 ~= val)
+		rfalse;
+	rtrue;
+];
+
+[ IsFunction s;
+	if (s==0 || s==tok_Error)
+		rfalse;
+	if (s->0 ~= bt_Function)
+		rfalse;
+	rtrue;
+];
+
+Global RecursiveTotal;
+[ BuildRecursiveInts depth
+	ix len max res sub subdepth;
+	if (depth < 0) {
+		res = random(21) - 6;
+		RecursiveTotal = RecursiveTotal + res;
+		return num_to_atom(res);
+	}
+	if (depth == 0)
+		return 0;	! nil
+	len = random(3)+1;
+	max = random(len) - 1;	! [0..len-1]
+	res = 0;
+	for (ix=0 : ix<len : ix++) {
+		if (ix == max)
+			subdepth = depth-1;
+		else {
+			if (random(41) <= 20) {
+				subdepth = random(depth) - 1;	! [0..depth-1]
+				if (subdepth == 0 && random(41) <= 20)
+					subdepth = -1;
+			}
+			else
+				subdepth = -1;
+		}
+		sub = BuildRecursiveInts(subdepth);
+		res = alloc_cons(sub, res);
+	}
+	return res;
+];
+
+! HintProblem is the last problem that was hinted; 
+! HintLevel is the last hint given for that problem.
+Global HintProblem = -1;
+Global HintLevel = 0;
+
+[ GiveHint prob;
+	if (prob < 2 || prob > TopProblemNum)
+		"Not a problem. [BUG]";
+	if (HintProblem == -1) {
+		HintProblem = 0;
+		"The genie glowers hugely at you. \
+			~Sigh. Yes, I do give hints. I am required to tell you, blah blah blah, \
+			irreparable loss of fun, blah blah, no refunds, fine. So if you still \
+			want help, ask again. If any hint I give isn't enough, ask again.~";
+	}
+	if (HintProblem ~= prob) {
+		HintProblem = prob;
+		HintLevel = 0;
+	}
+	HintLevel = HintLevel+1;
+	!print "[DEBUG problem ", prob, ", hint ", HintLevel, ".]^^";
+	
+	switch (HintProblem) {
+		2: 
+			switch (HintLevel) {
+				1: print_ret "~Have you read up through chapter 6 of the manual?~";
+				2: print_ret "~You need to use the ", (atomstring) "define", " command.~";
+				3: print "~Do this:^";
+					print_trans("(define twentyseven 27)", 2); 
+					print "Note that you can put a quote mark before the ", (atomstring) "27", 
+						", but it's optional, because numbers evaluate to themselves. But you \
+						can't put a quote before the ", (atomstring) "twentyseven", ". The first \
+						argument of a ", (atomstring) "define", " command must be just an atom.~^";
+					rtrue;
+			}
+		3: 
+			switch (HintLevel) {
+				1: print_ret "~Have you read up through chapter 10 of the manual?~";
+				2: print_ret "~If you define ", (atomstring) "cat", " and ", 
+					(atomstring) "dog", " to be identical lists, that will satisfy the \
+					first condition. They will be ", (atomstring) "equal?", ", but since they \
+					are created in two separate places, they will not be ", 
+					(atomstring) "eqv?", "~.";
+				3: print_ret "~You also need the two lists to have ", (atomstring) "eqv?", 
+					" cdrs. So you need to define a single list -- define it once, I mean -- \
+					to be the cdr for both of them.~";
+				4: print_ret "~Use ", (atomstring) "cons", " to attach an atom to \
+					the single cdr list. \
+					This creates a new list, so if you do it twice, you get two \
+					lists which are not ", (atomstring) "eqv?", ".~";
+				5: print "~Do this:^";
+					print_trans ("(define tail '(end))", 2);
+					print_trans ("(define cat (cons 'head tail))", 2);
+					print_trans ("(define dog (cons 'head tail))", 2);
+					rtrue;
+			}
+			
+		4:
+			switch (HintLevel) {
+				1: print_ret "~Have you read up through chapter 12 of the manual?~";
+				2: print_ret "~You can modify the ", (atomstring) "positive negative \
+					zero", " example from chapter 11.~";
+				3: print "~Do this:^";
+					print_multitrans(
+					"(define abs (lambda (val)",
+					"  (cond",
+					"    ((> val 0) val)",
+					"    ((< val 0) (- 0 val))",
+					"    (t 0)",
+					"  )))"
+					);
+					rtrue;
+			}
+			
+		5:
+			switch (HintLevel) {
+				1: print_ret "~Have you read up through chapter 13 of the manual?~";
+				2: print_ret "~You can use a recursive strategy, like the ",
+					(atomstring) "last", " example in chapter 13. You have a list of \
+					numbers to add up; consider the first term separately from all \
+					the rest.~";
+				3: print_ret "~The base case, the simplest case, is when the list is \
+					empty; then you can just return 0.~";
+				4: print_ret "~If the list is not empty, add the first term to the sum \
+					of all the rest of the terms. Use the ", (atomstring) "sum", " function \
+					recursively to work that out.~";
+				5: print "~Do this:^";
+					print_multitrans(
+					"(define sum (lambda (s)",
+					"  (cond",
+					"    ((null? s) 0)",
+					"    (t (+",
+					"        (car s)",
+					"        (sum (cdr s)))",
+					"    ))))"
+					);
+					rtrue;
+				
+			}
+			
+		6:
+			switch (HintLevel) {
+				1: print_ret "~You can actually build ", (atomstring) "megasum", " the \
+					same way you built ", (atomstring) "sum", ", with one change.~";
+				2: print_ret "~The change is that when you're considering the first \
+					term of the list, it might be a list instead of a number.~";
+				3: print_ret "~So use a ", (atomstring) "cond", " expression and test \
+					the first term with \
+					the ", (atomstring) "list?", " function. If it is a list, call ",
+					(atomstring) "megasum", " recursively to add it up.~";
+				4: print "~Do this:^";
+					print_multitrans(
+					"(define megasum (lambda (s)",
+					"  (cond",
+					"    ((null? s) 0)",
+					"    (t (+"
+					);
+					print_moretrans(
+					"        (cond",
+					"          ((list? (car s)) (megasum (car s)))",
+					"          (t (car s)))",
+					"        (megasum (cdr s))))",
+					"  )))"
+					);
+					rtrue;
+
+			}
+			
+		7:
+			switch (HintLevel) {
+				1: print_ret "~Have you read up through chapter 14 of the manual?~";
+				2: print_ret "~There are a few ways to build ", (atomstring) "max", ", but \
+					consider how you might do it using ", (atomstring) "let", ". Be \
+					efficient; finding the ", (atomstring) "max", " of a list of N terms \
+					shouldn't take more than N calls to ", (atomstring) "max", ".~";
+				3: print_ret "~The recursive approach is pretty clear: look at the first \
+					term, look at ", (atomstring) "max", " of the remaining terms, \
+					choose the larger of these. But you don't want to call ",
+					(atomstring) "max", " twice on the same list. That would be \
+					miserably inefficient. So you should use a temporary binding to \
+					store the result of the call.~";
+				4: print_ret "~The base case will be a one-term list, not an empty list. \
+					And in that case the maximum is just the first (only) term. \
+					Use the same test that was used in the ", (atomstring) "last", " example \
+					in chapter 13.~";
+				5: print "~Do this:^";
+					print_multitrans(
+					"(define max (lambda (s)",
+					"  (cond",
+					"    ((null? (cdr s)) (car s))",
+					"    (t (let",
+					"        (",
+					"          (hd (car s))"
+					);
+					print_moretrans(
+					"          (tl (max (cdr s)))",
+					"        )",
+					"        (cond",
+					"          ((> hd tl) hd)",
+					"          (t tl)))))))"
+					);
+					rtrue;
+			}
+			
+		8:
+			switch (HintLevel) {
+				1: print_ret "~The obvious approach is to store the pocket value in a top-level \
+					variable, using ", (atomstring) "define", ". But this can't work, because \
+					the variable can only be defined to one value at a time, and you have to \
+					have more than one pocket function working at a time.~";
+				2: print_ret "~You might think you can store the pocket value in a ", 
+					(atomstring) "let", " binding, but in fact ", (atomstring) "let",
+					" bindings are really only good for temporary storage of unchanging \
+					values, not long-term variable storage.~";
+				3: print_ret "~In fact, the best way to store the pocket value is as an \
+					argument to a function that returns a function. Because of static scoping, \
+					the inner function always sees the same value for the outer function's \
+					bindings. If you call the outer function more than once, you get distinct \
+					inner functions, with distinct bindings.~";
+				4: print_ret "~Life is much easier if you think about a pocket-generator function \
+					rather than a pocket function. A pocket-generator is a function ",
+					(atomstring) "gen", " such that ", (atomstring) "(gen 5)", " returns \
+					a pocket function containing 5, and so on.~";
+				5: print_ret "~The generator will construct its pocket functions so that \
+					they can call the generator when needed.~";
+				6: print "~The generator should take one numeric argument ", (atomstring) "x",
+					", and return the pocket function for that value:^";
+					print_multiatom(
+					"(lambda (y)", 
+					"  (cond", 
+					"    ((null? y) x)", 
+					"    (t (generator y))))"
+					);
+					print "As you can see, this is a direct transcription of the definition \
+						of a pocket function. It is given one argument ", (atomstring) "y",
+						"; if ", (atomstring) "y", " is ", (atomstring) "nil", ", it returns \
+						the pocket value ", (atomstring) "x", ", and otherwise it calls the \
+						generator, creating a new pocket function which stores ", 
+						(atomstring) "y", ".~";
+					new_line;
+					rtrue;
+				7: print_ret "~There is more than one way to do this, but since you're asking \
+					for hints, I'll describe the most elegant and persnickety way. Use ",
+					(atomstring) "letrec", " to create a recursive function. (The alternative \
+					would be to define the generator to be a top-level function. But that \
+					would be cluttery; and if anyone redefined the generator's name to be \
+					something else, all the pockets would stop working.)~";
+				8: print "~Do this:^";
+					print_multitrans(
+						"(define pocket", 
+						"  (letrec", 
+						"    (", 
+						"      (generator (lambda (x)", 
+						"        (lambda (y)"
+					);
+					print_moretrans(
+						"          (cond", 
+						"            ((null? y) x)", 
+						"            (t (generator y))))))", 
+						"    )", 
+						"    (generator 8)))"
+					);
+					rtrue;
+			}
+			
+		default:
+			"No hints. [BUG]";
+	}
+	
+	"~I really can't get any more explicit.~";
+];
+
+Array Probstring1 string "twentyseven";
+Array Probstring2a string "cat";
+Array Probstring2b string "dog";
+Array Probstring3 string "abs";
+Array Probstring4 string "sum";
+Array Probstring5 string "megasum";
+Array Probstring6 string "max";
+Array Probstring7 string "pocket";
+Array Probstring7a string "pockdeu";
+Array Probstring7b string "pocktre";
+Array Problist7 --> 4;
+
+! return 2 if it worked, 1 if it didn't
+[ CheckProblem num
+	inp inp2 inp3 inp4 res res2 res3 res4 ix jx;
+	if (interpreter_state == 0)
+		"The genie looks at the screen. ~The interpreter isn't even started up! \
+			It's the green button. Go on, get with the, uh, get started.~";
+	print "The genie appropriates the keyboard. ~Let's see, now...~^^";
+	check_garbage_level();
+	switch (num) {
+		! 0: wake genie
+		! 1: start lessons
+		2:
+			inp = string_to_atom(probstring1);
+			if (inp == tok_Error)
+				return CantTest();
+			res = GenieTypes(inp);
+			if (res == tok_Error) 
+				print_ret "^The genie shakes his head. ~Looks like ", 
+					(atomstring) "twentyseven", " isn't defined at all. Or if it is, \
+					you've done something really magical to it. Try again.~";
+			if (res ~= 0 && res->0 == bt_Num && res-->1 == 27) {
+				print "^~Aha! Very good.~^";
+				return 2;
+			}
+			"^~Nope; that's not 27. Try again.~";
+		3:
+			inp = string_to_atom(probstring2a);
+			if (inp == tok_Error)
+				return CantTest();
+			res = GenieTypes(inp);
+			if (res == tok_Error) 
+				"~That isn't going to work.~";
+				
+			inp2 = string_to_atom(probstring2b);
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (res2 == tok_Error) 
+				"~That isn't going to work.~";
+				
+			inp3 = alloc_cons(string_to_atom(aname_equalp),
+					alloc_cons(inp, 
+					alloc_cons(inp2, 
+					0)));
+			if (inp3 == tok_Error)
+				return CantTest();
+			res3 = GenieTypes(inp3);
+			if (IsTrueAtom(res3) == 0)
+				print_ret "~Oops -- that's not right. They should be ", 
+					(atomstring) "equal?", ".~";
+			
+			inp3 = alloc_cons(string_to_atom(aname_eqvp),
+					alloc_cons(inp, 
+					alloc_cons(inp2, 
+					0)));
+			if (inp3 == tok_Error)
+				return CantTest();
+			res3 = GenieTypes(inp3);
+			if (res3 ~= 0)
+				print_ret "~Oops -- that's not right. They should not be ", 
+					(atomstring) "eqv?", ".~";
+
+			inp3 = alloc_cons(string_to_atom(aname_eqvp),
+					alloc_cons(alloc_cons(string_to_atom(aname_cdr), alloc_cons(inp, 0)), 
+					alloc_cons(alloc_cons(string_to_atom(aname_cdr), alloc_cons(inp2, 0)), 
+					0)));
+			if (inp3 == tok_Error)
+				return CantTest();
+			res3 = GenieTypes(inp3);
+			if (IsTrueAtom(res3) == 0)
+				print_ret "~Nope. Remember that ", (atomstring) "cdr(cat)", " and ",
+					(atomstring) "cdr(dog)", " must be ",
+					(atomstring) "eqv?", ".~";
+			
+			print "~Perfect! There are actually two ways to solve this problem.";
+			if (res ~= 0 && res->0 == bt_Cons && res-->2 == 0) {
+				print " You used the simpler one, using one-term lists. The trickier solution \
+					would be something like this:^";
+				print (atomstring) "(define tail '(end))", "^";
+				print (atomstring) "(define cat (cons 'head tail))", "^";
+				print (atomstring) "(define dog (cons 'head tail))", "^";
+				print "~The cdrs are ", (atomstring) "eqv?", " because they are both \
+					the thing defined on the first line. See?~^";
+			}
+			else {
+				print " The simple way is just to define both ", (atomstring) "cat", 
+					" and ", (atomstring) "dog", " to be one-term lists. That way, \
+					the cdrs are both ", (atomstring) "nil", ", and ", (atomstring) "nil", 
+					" is always ", (atomstring) "eqv?", " to ", (atomstring) "nil", ".~^";
+			}
+			return 2;
+		4:
+			inp = string_to_atom(probstring3);
+			if (inp == tok_Error)
+				return CantTest();
+			
+			inp2 = random(11) + 5;
+			inp3 = alloc_cons(inp, 
+					alloc_cons(num_to_atom(inp2), 
+					0));
+			if (inp3 == tok_Error)
+				return CantTest();
+			res3 = GenieTypes(inp3);
+			if (IsNumAtom(res3, inp2) == 0)
+				print_ret "~Oops -- that's not right. The result should be ", 
+					inp2, ".~";
+			
+			inp2 = -(random(11) + 5);
+			inp3 = alloc_cons(inp, 
+					alloc_cons(num_to_atom(inp2), 
+					0));
+			if (inp3 == tok_Error)
+				return CantTest();
+			res3 = GenieTypes(inp3);
+			if (IsNumAtom(res3, -inp2) == 0)
+				print_ret "~Oops -- that's not right. The result should be ", 
+					-inp2, ".~";
+			
+			inp2 = 0;
+			inp3 = alloc_cons(inp, 
+					alloc_cons(num_to_atom(inp2), 
+					0));
+			if (inp3 == tok_Error)
+				return CantTest();
+			res3 = GenieTypes(inp3);
+			if (IsNumAtom(res3, inp2) == 0)
+				print_ret "~Oops -- that's not right. The result should be ", 
+					inp2, ".~";
+			
+			print "~Very good.~^";
+			return 2;
+		
+		5:
+			inp = string_to_atom(probstring4);
+			if (inp == tok_Error)
+				return CantTest();
+			
+			for (ix=0 : ix<5 : ix++) {
+				switch (ix) {
+					4: inp4 = 0;
+					3: inp4 = 1;
+					default: inp4 = random(5) + 1;
+				}
+				res4 = 0;
+				inp3 = 0;
+				for (jx=0 : jx<inp4 : jx++) {
+					res3 = random(37) - 11;
+					res4 = res4 + res3;
+					inp3 = alloc_cons(num_to_atom(res3), inp3);
+				}
+				inp3 = alloc_cons(string_to_atom(aname_quote), 
+						alloc_cons(inp3, 0));
+				inp2 = alloc_cons(inp, 
+						alloc_cons(inp3, 0));
+				if (inp2 == tok_Error)
+					return CantTest();
+				res2 = GenieTypes(inp2);
+				if (IsNumAtom(res2, res4) == 0)
+					print_ret "~Oops -- that's not right. The result should be ", 
+						res4, ".~";
+			}
+			print "~Seems to work.~^";
+			return 2;
+		
+		6:
+			inp = string_to_atom(probstring5);
+			if (inp == tok_Error)
+				return CantTest();
+			
+			for (ix=0 : ix<4 : ix++) {
+				switch (ix) {
+					0: inp4 = 1;
+					1: inp4 = 2;
+					2: inp4 = 3;
+					3: inp4 = 0;
+				}
+				RecursiveTotal = 0;
+				inp3 = BuildRecursiveInts(inp4);
+				res4 = RecursiveTotal;
+				inp3 = alloc_cons(string_to_atom(aname_quote), 
+						alloc_cons(inp3, 0));
+				inp2 = alloc_cons(inp, 
+						alloc_cons(inp3, 0));
+				if (inp2 == tok_Error)
+					return CantTest();
+				res2 = GenieTypes(inp2);
+				if (IsNumAtom(res2, res4) == 0)
+					print_ret "~Oops -- that's not right. The result should be ", 
+						res4, ".~";
+			}
+			print "~Seems to work.~^";
+			return 2;
+			
+		7:
+			inp = string_to_atom(probstring6);
+			if (inp == tok_Error)
+				return CantTest();
+			
+			for (ix=0 : ix<3 : ix++) {
+				inp4 = random(4) + 1;
+				if (ix==2)
+					res = 40;
+				else
+					res = 11;
+				res4 = random(37) - res;
+				inp3 = alloc_cons(num_to_atom(res4), 0);
+				for (jx=0 : jx<inp4 : jx++) {
+					res3 = random(37) - res;
+					if (res3 > res4)
+						res4 = res3;
+					inp3 = alloc_cons(num_to_atom(res3), inp3);
+				}
+				inp3 = alloc_cons(string_to_atom(aname_quote), 
+						alloc_cons(inp3, 0));
+				inp2 = alloc_cons(inp, 
+						alloc_cons(inp3, 0));
+				if (inp2 == tok_Error)
+					return CantTest();
+				res2 = GenieTypes(inp2);
+				if (IsNumAtom(res2, res4) == 0)
+					print_ret "~Oops -- that's not right. The result should be ", 
+						res4, ".~";
+			}
+			print "~Seems to work.~^";
+			return 2;
+		
+		8:
+			problist7-->0 = 8;
+			problist7-->1 = random(49) + 10;	! we want to make sure it's not 8
+			problist7-->2 = (problist7-->1) + random(49);
+			
+			ix = string_to_atom(aname_define);
+			if (ix == tok_Error)
+				return CantTest();
+
+			inp4 = string_to_atom(probstring7);
+			if (inp4 == tok_Error)
+				return CantTest();
+			inp2 = alloc_cons(inp4,
+				alloc_cons(0, 0));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsNumAtom(res2, problist7-->0) == 0)
+				print_ret "~No; the initial pocket function should have ",
+					problist7-->0, " stored inside it.~";
+			
+			inp3 = string_to_atom(probstring7a);
+			if (inp3 == tok_Error)
+				return CantTest();
+			inp2 = alloc_cons(ix,
+				alloc_cons(inp3, 
+				alloc_cons(
+					alloc_cons(inp4,
+					alloc_cons(num_to_atom(problist7-->1),
+					0)),
+				0)));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsFunction(res2) == 0)
+				print_ret "~No; a pocket function should return another function, when \
+					given an integer argument.~";
+
+			inp2 = alloc_cons(inp3,
+				alloc_cons(0, 0));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsNumAtom(res2, problist7-->1) == 0)
+				print_ret "~No; the new pocket function should have ",
+					problist7-->1, " stored inside it.~";
+			
+			res3 = string_to_atom(probstring7b);
+			if (res3 == tok_Error)
+				return CantTest();
+			inp2 = alloc_cons(ix,
+				alloc_cons(res3, 
+				alloc_cons(
+					alloc_cons(inp3,
+					alloc_cons(num_to_atom(problist7-->2),
+					0)),
+				0)));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsFunction(res2) == 0)
+				print_ret "~No; a pocket function should return another function, when \
+					given an integer argument.~";
+
+			inp2 = alloc_cons(res3,
+				alloc_cons(0, 0));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsNumAtom(res2, problist7-->2) == 0)
+				print_ret "~No; the third pocket function should have ",
+					problist7-->2, " stored inside it.~";
+			
+			inp2 = alloc_cons(inp3,
+				alloc_cons(0, 0));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsNumAtom(res2, problist7-->1) == 0)
+				print_ret "~No; the second pocket function should still have ",
+					problist7-->1, " stored inside it.~";
+			
+			inp2 = alloc_cons(inp4,
+				alloc_cons(0, 0));
+			if (inp2 == tok_Error)
+				return CantTest();
+			res2 = GenieTypes(inp2);
+			if (IsNumAtom(res2, problist7-->0) == 0)
+				print_ret "~No; the initial pocket function should still have ",
+					problist7-->0, " stored inside it.~";
+
+			print "~Perfect.~^";
+			return 2;
+		
+		default:
+			"~I'm not sure what you want me to check.~";
+	}
+];
+

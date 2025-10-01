@@ -1,0 +1,643 @@
+
+Constant MAX_LIST_ARGS 4;
+
+Array list_args --> MAX_LIST_ARGS;
+Global num_list_args;
+
+Array aname_quote string "quote";
+Array aname_internal_dict string "internal-dict";
+Array aname_error string "error";
+Array aname_nil string "nil";
+Array aname_t string "t";
+Array aname_s string "s";
+Array aname_s2 string "s2";
+Array aname_s3 string "s3";
+Array aname_not string "not";
+Array aname_eqvp string "eqv?";
+Array aname_equalp string "equal?";
+Array aname_nullp string "null?";
+Array aname_listp string "list?";
+Array aname_eqnum string "=";
+Array aname_gt string ">";
+Array aname_lt string "<";
+Array aname_gte string ">=";
+Array aname_lte string "<=";
+Array aname_plus string "+";
+Array aname_minus string "-";
+Array aname_car string "car";
+Array aname_cdr string "cdr";
+Array aname_cons string "cons";
+Array aname_length string "length";
+Array aname_cond string "cond";
+Array aname_lambda string "lambda";
+Array aname_define string "define";
+Array aname_let string "let";
+Array aname_letstar string "let*";
+Array aname_letrec string "letrec";
+Array aname_list string "list";
+Array aname_eval string "eval";
+
+Global atom_quote;
+Global atom_t;
+Global atom_s;
+Global atom_s2;
+Global atom_s3;
+
+! --- startup code
+
+[ make_initial_stuff
+	dict atm ix;
+	
+	dict = 0;
+	top_level_env = 0;
+	
+	atm = string_to_atom(aname_quote);
+	if (atm == tok_Error)
+		return tok_Error;
+	atom_quote = atm;
+	dict = alloc_cons(atm, dict);
+
+	atm = string_to_atom(aname_s);
+	if (atm == tok_Error)
+		return tok_Error;
+	atom_s = atm;
+	dict = alloc_cons(atm, dict);
+	
+	atm = string_to_atom(aname_s2);
+	if (atm == tok_Error)
+		return tok_Error;
+	atom_s2 = atm;
+	dict = alloc_cons(atm, dict);
+	
+	atm = string_to_atom(aname_s3);
+	if (atm == tok_Error)
+		return tok_Error;
+	atom_s3 = atm;
+	dict = alloc_cons(atm, dict);
+	
+	if (dict == tok_Error)
+		return tok_Error;
+
+	! finished with dictionary. Now add it, and other stuff, to the top_level_env.
+	
+	atm = string_to_atom(aname_internal_dict);
+	if (atm == tok_Error)
+		return tok_Error;
+	ix = alloc_cons(atm, dict);
+	top_level_env = alloc_cons(ix, top_level_env);
+	if (top_level_env == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_error, -1, #r$fn_error) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_plus, -1, #r$fn_plus) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_minus, -1, #r$fn_minus) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_gt, -1, #r$fn_gt) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_lt, -1, #r$fn_lt) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_gte, -1, #r$fn_gte) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_lte, -1, #r$fn_lte) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_eqnum, -1, #r$fn_eqnum) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_eqvp, 2, #r$fn_eqvp) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_equalp, 2, #r$fn_equalp) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_not, 1, #r$fn_not) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_nullp, 1, #r$fn_nullp) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_listp, 1, #r$fn_listp) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_list, -1, #r$fn_list) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_length, 1, #r$fn_length) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_cond, -1, #r$fn_cond) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_eval, 1, #r$fn_eval) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_define, 2, #r$fn_define) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_let, 2, #r$fn_let) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_letrec, 2, #r$fn_letrec) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_letstar, 2, #r$fn_letstar) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_lambda, 2, #r$fn_lambda) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_car, 1, #r$fn_car) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_cdr, 1, #r$fn_cdr) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Function, aname_cons, 2, #r$fn_cons) == tok_Error)
+		return tok_Error;
+	
+	if (build_function(bt_Form, aname_quote, 1, #r$fn_quote) == tok_Error)
+		return tok_Error;
+	
+	atm = string_to_atom(aname_nil);
+	if (atm == tok_Error)
+		return tok_Error;
+	ix = alloc_cons(atm, 0);
+	top_level_env = alloc_cons(ix, top_level_env);
+	if (top_level_env == tok_Error)
+		return tok_Error;
+	
+	atm = string_to_atom(aname_t);
+	if (atm == tok_Error)
+		return tok_Error;
+	ix = alloc_cons(atm, atm);
+	top_level_env = alloc_cons(ix, top_level_env);
+	if (top_level_env == tok_Error)
+		return tok_Error;
+	atom_t = atm;
+	
+	return 0;
+];
+
+[ build_function funcform fname args fptr
+	atm ix val;
+	atm = string_to_atom(fname);
+	if (atm == tok_Error)
+		return tok_Error;
+	val = alloc_node(funcform, 0, 
+		alloc_node(bt_Builtin, num_to_atom(args), num_to_atom(fptr)));
+	if (val == tok_Error)
+		return tok_Error;
+	ix = alloc_cons(atm, val);
+	ix = alloc_cons(ix, top_level_env);
+	if (ix == tok_Error)
+		return tok_Error;
+	top_level_env = ix;
+	return 0;
+];
+
+! --- the built-in functions and forms. Note that the supplied arguments
+!       will never be tok_Error, and there will be the right number of them.
+
+[ fn_debug 
+	ix;
+	print "[debug got ", num_list_args, " args:^";
+	for (ix=0 : ix < num_list_args : ix++) {
+		print "  ", ix, ": ";
+		write_obj(list_args-->ix);
+		new_line;
+	}
+	print "]^";
+	return 0;
+];
+
+[ fn_quote;
+	return list_args-->0;
+];
+
+[ fn_list;
+	return list_args-->0;
+];
+
+[ fn_lambda env
+	v;
+	v = list_args-->0;
+	if (v ~= 0 && v->0 ~= bt_Cons && v->0 ~= bt_Atom) {
+		show_error("lambda: bad argument template", v, 1);
+		return tok_Error;
+	}
+	v = alloc_node(bt_Dynamic, v, list_args-->1);
+	if (v == tok_Error)
+		return tok_Error;
+	v = alloc_node(bt_Function, env, v);
+	if (v == tok_Error)
+		return tok_Error;
+	return v;
+];
+
+[ fn_define env
+	envp namat def s;
+	namat = list_args-->0;
+	def = list_args-->1;
+	if (namat == 0 || namat->0 ~= bt_Atom) {
+		show_error("define: first argument is not an atom", namat, 1);
+		return tok_Error;
+	}
+	def = eval_obj(def, env);
+	if (def == tok_Error)
+		return tok_Error;
+	envp = top_level_env;
+	for ( : envp ~= 0 : envp = envp-->2) {
+		s = envp-->1;
+		if ((s-->1)-->1 == namat-->1) {
+			break;
+		}
+	}
+	if (envp == 0) {
+		! didn't find the atom; add it to top_level_env
+		s = alloc_cons(namat, def);
+		s = alloc_cons(s, top_level_env);
+		if (s == tok_Error)
+			return tok_Error;
+		top_level_env = s;
+	}
+	else {
+		! found it; it's s.
+		s-->2 = def;
+	}
+	return def;
+];
+
+[ fn_eval env
+	s;
+	s = list_args-->0;
+	s = eval_obj(s, env);
+	return s;
+];
+
+[ fn_let env
+	defs expr s atm adef newenv;
+	defs = list_args-->0;
+	expr = list_args-->1;
+	if (defs ~= 0 && defs->0 ~= bt_Cons) {
+		show_error("let: first argument is not a list of lists", defs, 1);
+		return tok_Error;
+	}
+	newenv = env;
+	for ( : defs~=0 : defs=defs-->2 ) {
+		s = defs-->1;
+		if (s ~= 0 && s->0 ~= bt_Cons) {
+			show_error("let: binding is not a list", s, 1);
+			return tok_Error;
+		}
+		atm = s-->1;
+		if (atm == 0 || atm->0 ~= bt_Atom) {
+			show_error("let: binding must start with an atom", s, 1);
+			return tok_Error;
+		}
+		adef = s-->2;
+		if (adef == 0 || adef->0 ~= bt_Cons) {
+			show_error("let: binding must contain a definition", s, 1);
+			return tok_Error;
+		}
+		adef = adef-->1;
+		adef = eval_obj(adef, env);
+		if (adef == tok_Error)
+			return tok_Error;
+		newenv = alloc_cons(alloc_cons(atm, adef), newenv);
+		if (newenv == tok_Error)
+			return tok_Error;
+	}
+	s = eval_obj(expr, newenv);
+	return s;
+];
+
+[ fn_letrec env
+	origdefs defs expr s atm adef newenv tmpenv;
+	origdefs = list_args-->0;
+	expr = list_args-->1;
+	if (origdefs ~= 0 && origdefs->0 ~= bt_Cons) {
+		show_error("letrec: first argument is not a list of lists", origdefs, 1);
+		return tok_Error;
+	}
+	newenv = env;
+	for ( defs = origdefs : defs~=0 : defs=defs-->2 ) {
+		s = defs-->1;
+		if (s ~= 0 && s->0 ~= bt_Cons) {
+			show_error("letrec: binding is not a list", s, 1);
+			return tok_Error;
+		}
+		atm = s-->1;
+		if (atm == 0 || atm->0 ~= bt_Atom) {
+			show_error("letrec: binding must start with an atom", s, 1);
+			return tok_Error;
+		}
+		adef = 0;
+		newenv = alloc_cons(alloc_cons(atm, adef), newenv);
+		if (newenv == tok_Error)
+			return tok_Error;
+	}
+	tmpenv = newenv;
+	for ( defs = origdefs : defs~=0 : defs=defs-->2 ) {
+		s = defs-->1;
+		atm = s-->1;
+		adef = s-->2;
+		if (adef == 0 || adef->0 ~= bt_Cons) {
+			show_error("letrec: binding must contain a definition", s, 1);
+			return tok_Error;
+		}
+		adef = adef-->1;
+		adef = eval_obj(adef, newenv);
+		if (adef == tok_Error)
+			return tok_Error;
+		(tmpenv-->1)-->1 = atm;
+		(tmpenv-->1)-->2 = adef;
+		tmpenv = tmpenv-->2;
+	}
+	s = eval_obj(expr, newenv);
+	return s;
+];
+
+[ fn_letstar env
+	defs expr s atm adef;
+	defs = list_args-->0;
+	expr = list_args-->1;
+	if (defs ~= 0 && defs->0 ~= bt_Cons) {
+		show_error("let: first argument is not a list of lists", defs, 1);
+		return tok_Error;
+	}
+	for ( : defs~=0 : defs=defs-->2 ) {
+		s = defs-->1;
+		if (s ~= 0 && s->0 ~= bt_Cons) {
+			show_error("let: binding is not a list", s, 1);
+			return tok_Error;
+		}
+		atm = s-->1;
+		if (atm == 0 || atm->0 ~= bt_Atom) {
+			show_error("let: binding must start with an atom", s, 1);
+			return tok_Error;
+		}
+		adef = s-->2;
+		if (adef == 0 || adef->0 ~= bt_Cons) {
+			show_error("let: binding must contain a definition", s, 1);
+			return tok_Error;
+		}
+		adef = adef-->1;
+		adef = eval_obj(adef, env);
+		if (adef == tok_Error)
+			return tok_Error;
+		env = alloc_cons(alloc_cons(atm, adef), env);
+		if (env == tok_Error)
+			return tok_Error;
+	}
+	s = eval_obj(expr, env);
+	return s;
+];
+
+[ fn_length
+	s len;
+	len = 0;
+	for (s = list_args-->0 : s ~= 0 : s = s-->2, len++ ) {
+		if (s->0 ~= bt_Cons) {
+			show_error("length: not a proper list", list_args-->0, 1);
+			return tok_Error;
+		}
+	}
+	return num_to_atom(len);
+];
+
+[ fn_cons;
+	return alloc_cons(list_args-->0, list_args-->1);
+];
+
+[ fn_car
+	s;
+	s = list_args-->0;
+	if (s == 0 || s->0 ~= bt_Cons) {
+		show_error("car: bad argument", s, 1);
+		return tok_Error;
+	}
+	return (s-->1);
+];
+
+[ fn_cdr
+	s;
+	s = list_args-->0;
+	if (s == 0 || s->0 ~= bt_Cons) {
+		show_error("cdr: bad argument", s, 1);
+		return tok_Error;
+	}
+	return (s-->2);
+];
+
+[ fn_not
+	;
+	if (is_true(list_args-->0) ~= 0)
+		return 0;
+	else
+		return atom_t;
+];
+
+[ fn_nullp
+	;
+	if (list_args-->0 ~= 0)
+		return 0;
+	else
+		return atom_t;
+];
+
+[ fn_listp
+	s;
+	s = list_args-->0;
+	if (s == 0)
+		return atom_t;
+	if (s->0 == bt_Cons)
+		return atom_t;
+	return 0;
+];
+
+[ fn_cond env
+	s cl tex cle;
+	s = list_args-->0;
+	for ( : s ~= 0 : s = s-->2) {
+		if (s->0 ~= bt_Cons) {
+			show_error("cond: argument is not a list", s, 1);
+			return tok_Error;
+		}
+		cl = s-->1;
+		if (cl->0 ~= bt_Cons) {
+			show_error("cond: clause is not a list", cl, 1);
+			return tok_Error;
+		}
+		tex = cl-->1;
+		tex = eval_obj(tex, env);
+		if (tex == tok_Error)
+			return tok_Error;
+		if (is_true(tex) ~= 0) {
+			cle = cl-->2;
+			if (cle == 0) 
+				return tex;
+			if (cle->0 ~= bt_Cons) {
+				show_error("cond: clause does not end in an expression", cl, 1);
+				return tok_Error;
+			}
+			tex = eval_obj(cle-->1, env);
+			return tex;
+		}
+	}
+	return 0;
+];
+
+[ fn_eqvp
+	s1 s2;
+	s1 = list_args-->0;
+	s2 = list_args-->1;
+	if (s1 == s2)
+		return atom_t;
+	if (s1 == 0 || s2 == 0)
+		return 0;
+	if (s1->0 ~= s2->0)
+		return 0;
+	switch (s1->0) {
+		bt_Atom, bt_Num:
+			if (s1-->1 == s2-->1)
+				return atom_t;
+			return 0;
+		bt_Cons:
+			return 0;
+		default:
+			return 0;
+	}
+];
+
+[ fn_equalp
+	;
+	return is_equalp(list_args-->0, list_args-->1);
+];
+
+[ is_equalp s1 s2;
+	if (s1 == s2)
+		return atom_t;
+	if (s1 == 0 || s2 == 0)
+		return 0;
+	if (s1->0 ~= s2->0)
+		return 0;
+	switch (s1->0) {
+		bt_Atom, bt_Num:
+			if (s1-->1 == s2-->1)
+				return atom_t;
+			return 0;
+		bt_Cons:
+			if (is_equalp(s1-->1, s2-->1) == 0)
+				return 0;
+			if (is_equalp(s1-->2, s2-->2) == 0)
+				return 0;
+			return atom_t;
+		default:
+			return 0;
+	}
+];
+
+[ fn_gt;
+	return fn_numcompare(aname_gt);
+];
+
+[ fn_lt;
+	return fn_numcompare(aname_lt);
+];
+
+[ fn_gte;
+	return fn_numcompare(aname_gte);
+];
+
+[ fn_lte;
+	return fn_numcompare(aname_lte);
+];
+
+[ fn_eqnum;
+	return fn_numcompare(aname_eqnum);
+];
+
+[ fn_numcompare op
+	s v cur;
+	s = list_args-->0;
+	if (s == 0) {
+		show_error("numeric compare: must have at least one argument");
+		return tok_Error;
+	}
+	v = s-->1;
+	if (v == 0 || v->0 ~= bt_Num) {
+		show_error("numeric compare: non-numeric argument", v, 1);
+		return tok_Error;
+	}
+	cur = v-->1;
+	for ( s = s-->2 : s ~= 0 : s = s-->2 ) {
+		v = s-->1;
+		if (v == 0 || v->0 ~= bt_Num) {
+			show_error("numeric compare: non-numeric argument", v, 1);
+			return tok_Error;
+		}
+		switch (op) {
+			aname_gt:
+				if (cur <= v-->1) return 0;
+			aname_lt:
+				if (cur >= v-->1) return 0;
+			aname_gte:
+				if (cur < v-->1) return 0;
+			aname_lte:
+				if (cur > v-->1) return 0;
+			aname_eqnum:
+				if (cur ~= v-->1) return 0;
+		}
+		cur = v-->1;
+	}
+	return atom_t;
+];
+
+[ fn_plus
+	sum ptr v;
+	sum = 0;
+	for ( ptr = list_args-->0 : ptr~=0 : ptr=ptr-->2 ) {
+		v = ptr-->1;
+		if (v == 0 || v->0 ~= bt_Num) {
+			show_error("+: non-numeric argument", v, 1);
+			return tok_Error;
+		}
+		sum = sum + v-->1;
+	}
+	return num_to_atom(sum);
+];
+
+[ fn_minus
+	sum ptr v pos;
+	sum = 0;
+	pos = 0;
+	for ( ptr = list_args-->0 : ptr~=0 : ptr=ptr-->2, pos++ ) {
+		v = ptr-->1;
+		if (v == 0 || v->0 ~= bt_Num) {
+			show_error("+: non-numeric argument", v, 1);
+			return tok_Error;
+		}
+		if (pos == 0) {
+			sum = sum + v-->1;
+		}
+		else {
+			sum = sum - v-->1;
+		}
+	}
+	if (pos == 1)
+		sum = 0-sum;
+	return num_to_atom(sum);
+];
+
+[ fn_error;
+	show_error();
+	return tok_Error;
+];

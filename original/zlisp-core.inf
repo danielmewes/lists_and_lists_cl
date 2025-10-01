@@ -1,0 +1,881 @@
+
+! Structure of a block:
+! 0: use. 0=free, 1=just alloced, 2=atom, 3=int, 4=cons cell
+! 1: flag for garbage collection?
+! 2-5: 
+! cons cell: -->1 = head, -->2 = tail
+! int:       -->1 = value
+! atom:		 -->1 = name
+! form, function, builtin, dynamic are just variants of cons
+
+Constant bt_Free  0;
+Constant bt_Ready 1;
+Constant bt_Atom  2;
+Constant bt_Num   3;
+Constant bt_Cons  4;
+Constant bt_Function 5;
+Constant bt_Form     6;
+Constant bt_Builtin  7;
+Constant bt_Dynamic  8;
+Constant tok_Nil   0;
+Constant tok_Error 1;
+Constant tok_Open  2;
+Constant tok_Close 3;
+Constant tok_Quote 4;
+Constant tok_Dot   5;
+
+Global interpreter_state = 0; 
+! This is normally 0: uninitialized; 1: running. But read_token can also set it to
+!  one of 2: suspend now; 3: reset now; 4: collect garbage now.
+
+Constant BUFFER_SIZE 128;
+Array lispbuffer -> BUFFER_SIZE;
+Global bufferpos = 2;	! offset in lispbuffer, including header vals
+Global input_depth;
+
+Global top_level_env;
+
+Constant MAX_FUEL 1000;
+Global eval_fuel;		! used to detect infinite loops
+ 
+[ donothing; 
+];
+
+[ ZTRACE v1 v2 
+	dummy;
+	print (string) v1, (char) ' ', v2, "^";
+	print "...";
+	@read_char 1 dummy;
+	print "continuing...^";
+];
+
+[ LispLoop
+	s v;
+
+	if (interpreter_state == 0) {
+		print "[Setting up interpreter...]^";
+		init_alloc();
+		init_string_alloc();
+		if (make_initial_stuff() == tok_Error) {
+			show_error("unable to set up the environment");
+			rfalse;
+		}
+		interpreter_state = 1;
+	}
+
+	clear_input_buffer();
+	
+	while (1==1) {
+		check_garbage_level();
+		s = read_obj();
+		switch (s) {
+			tok_Close:
+				show_error("unmatched right parenthesis");
+			tok_Dot:
+				show_error("dot was used outside of a list");
+			tok_Error:
+				! read error -- ignore rest of input line
+				switch (interpreter_state) {
+					2:
+						interpreter_state = 1;
+						rtrue;
+					4:
+						interpreter_state = 1;
+						garbage_collect();
+				}
+				clear_input_buffer();
+			default:
+				!print "Input: ";
+				!write_obj(s); new_line;
+				eval_fuel = MAX_FUEL;
+				v = eval_obj(s);
+				if (v ~= tok_Error) {
+					!print "Output: ";
+					print " ";
+					write_obj(v); new_line;
+				}
+				!print "TopEnv: ";
+				!write_obj(top_level_env); new_line;
+		}
+	}
+];
+
+[ LispReset;
+	if (interpreter_state == 0) {
+		print "[Interpreter already reset.]^";
+	}
+	else {
+		interpreter_state = 0;
+		print "[Interpreter reset.]^";
+	}
+];
+
+#include "zlisp-funs.inf";
+
+[ read_list
+	s sh st;
+	sh = read_obj();
+	switch (sh) {
+		tok_Error:
+			return tok_Error;
+		tok_Close:
+			return 0;
+		tok_Dot:
+			sh = read_obj();
+			switch (sh) {
+				tok_Error:
+					return tok_Error;
+				tok_Dot, tok_Close:
+					show_error("a dot must be followed by an object");
+					return tok_Error;
+			}
+			st = read_list();
+			if (st == tok_Error)
+				return tok_Error;
+			if (st ~= 0) {
+				show_error("only one object may follow a dot");
+				return tok_Error;
+			}
+			return sh;
+		default:
+			st = read_list();
+			if (st == tok_Error)
+				return tok_Error;
+			s = alloc_cons(sh, st);
+			return s;
+	}
+];
+
+[ read_obj
+	tok s;
+	tok = read_token();
+	switch (tok) {
+		tok_Error:
+			return tok_Error;
+		tok_Close:
+			return tok_Close;
+		tok_Dot:
+			return tok_Dot;
+		tok_Open:
+			input_depth++;
+			s = read_list();
+			input_depth--;
+			return s;
+		tok_Quote:
+			input_depth++;
+			tok = read_obj();
+			input_depth--;
+			switch (tok) {
+				tok_Close:
+					show_warning("ignoring quote before close parenthesis");
+					return tok;
+				tok_Dot:
+					show_warning("ignoring quote before dot");
+					return tok;
+				tok_Error:
+					return tok;
+				default:
+					s = alloc_cons(atom_quote, alloc_cons(tok, 0));
+					return s;
+			}
+		default:
+			return tok;
+	}
+];
+
+[ write_list s
+	st;
+	write_obj(s-->1);
+	st = s-->2;
+	if (st==0)
+		return;
+	if (st->0 == bt_Cons) {
+		print (char) ' ';
+		write_list(st);
+	}
+	else {
+		print " . ";
+		write_obj(st);
+	}
+];
+
+[ write_obj s;
+	if (s == 0) {
+		print "nil";
+		return;
+	}
+	if (s == tok_Error) {
+		print "[ERROR]";
+		return;
+	}
+	switch (s->0) {
+		bt_Atom:
+			print (hashstring) s-->1;
+		bt_Num:
+			!print "{", s-->1, "}";
+			print s-->1;
+		bt_Cons:
+			print (char) '(';
+			if (s~=0) write_list(s);
+			print (char) ')';
+		bt_Free:
+			print "[NULL]";
+		bt_Form:
+			print "[syntax]";
+		bt_Function:
+			print "[function]";
+		default:
+			print "[???]";
+	}
+];
+
+[ write_env s
+	def;
+	print "( ";
+	while (s ~= 0) {
+		if (s->0 ~= bt_Cons) {
+			print "[ERROR])";
+			rfalse;
+		}
+		def = s-->1;
+		print "(";
+		write_obj(def-->1);
+		print " . ";
+		write_obj(def-->2);
+		print ") ";
+		s = s-->2;
+	}
+	print ")";
+	rtrue;
+];
+
+[ clear_input_buffer;
+	lispbuffer->1 = 0;
+	bufferpos = 2;
+	input_depth = 0;
+];
+
+[ read_token
+	bufend ch tok strbeg res;
+.l_beginread;
+	bufend = 2+lispbuffer->1;
+	while (bufferpos < bufend && lispbuffer->bufferpos == ' ') {
+		bufferpos++;
+	}
+	if (lispbuffer->bufferpos == ':' or 59) {	! colon or semicolon
+		if (lispbuffer->bufferpos == ':') {
+			bufferpos++;
+			if (bufferpos < bufend) {
+				switch (lispbuffer->bufferpos) {
+					'q':
+						interpreter_state = 2;
+						return tok_Error;
+					'c':
+						return tok_Error;
+					'e':
+						write_env(top_level_env);
+						new_line;
+					'g':
+						interpreter_state = 4;
+						return tok_Error;
+					default:
+						#ifdef LispEscapeCodes;
+						res = indirect(#r$LispEscapeCodes, lispbuffer->bufferpos);
+						#ifnot;
+						res = 0;
+						#endif;
+						if (res == 2)
+							return tok_Error;
+				}
+			}
+		}
+		bufferpos = bufend;
+	}
+	if (bufferpos >= bufend) {
+		!new_line;
+		if (input_depth == 0)
+			print " >>";
+		else
+			print "  >";
+		lispbuffer->0 = BUFFER_SIZE-3;
+		read lispbuffer 0 LispStatusLine;
+		bufferpos = 2;
+		! goto beginning of routine
+		jump l_beginread;
+	}
+	ch = lispbuffer->bufferpos;
+	switch (ch) {
+		'(':
+			bufferpos++; 
+			return tok_Open;
+		')': 
+			bufferpos++; 
+			return tok_Close;
+		39:	! single quote 
+			bufferpos++; 
+			return tok_Quote;
+		'.': 
+			bufferpos++; 
+			return tok_Dot;
+		default:
+			strbeg = bufferpos;
+			bufferpos++;
+			while (bufferpos < bufend) {
+				ch = lispbuffer->bufferpos;
+				if ((ch == ' ' or '.') || (ch == '(' or 41)) {
+					break;
+				}
+				bufferpos++;
+			}
+			if (bufferpos==strbeg) {
+				show_warning("(internal) zero-length atom name");
+			}
+			tok = string_to_atom(lispbuffer+strbeg, bufferpos-strbeg);
+			return tok;
+	}
+];
+
+! can be called with one argument (Pascal string) or two (char* and length)
+[ string_to_atom buf len
+	tok ch ix val neg;
+	if (len == 0) {
+		len = buf->0;
+		buf++;
+	}
+	ch = buf->0;
+	if ((ch == '-' && len >= 2) || (ch >= '0' && ch <= '9')) {
+		! see if it's a number
+		val = 0;
+		if (ch == '-') {
+			neg = 1;
+			ix = 1;
+		}
+		else {
+			neg = 0;
+			ix = 0;
+		}
+		for ( : ix<len : ix++) {
+			ch = buf->ix;
+			if (ch >= '0' && ch <= '9') {
+				val = (val * 10) + (ch - '0');
+			}
+			else 
+				break;
+		}
+		if (ix == len) {
+			! it's a number, all right
+			if (neg ~= 0)
+				val = -val;
+			tok = num_to_atom(val);
+			return tok;
+		}
+	}
+	if (len == 3 && buf->0 == 'n' && buf->1 == 'i' && buf->2 == 'l') {
+		! it's the nil atom.
+		return tok_Nil;
+	}
+	tok = alloc();
+	if (tok == 0) {
+		return tok_Error;
+	}
+	tok->0 = bt_Atom;
+	tok-->1 = addstring(buf, len);
+	if (tok-->1 == 0)
+		return tok_Error;
+	return tok;
+];
+
+[ num_to_atom val
+	tok;
+	tok = alloc_node(bt_Num, val);
+	return tok;
+];
+
+[ look_up_atomname nam env
+	s;
+	for ( : env ~= 0 : env = env-->2) {
+		s = env-->1;
+		if ((s-->1)-->1 == nam) {
+			return s-->2;
+		}
+	}
+	env = top_level_env;
+	for ( : env ~= 0 : env = env-->2) {
+		s = env-->1;
+		if ((s-->1)-->1 == nam) {
+			return s-->2;
+		}
+	}
+	return tok_Error;
+];
+
+! evaluate s in the environment env (may be 0)
+[ eval_obj s env
+	v f f2 newenv;
+	
+	if (s == 0 || s == tok_Error) {
+		return s;
+	}
+	
+	eval_fuel--;
+	if (eval_fuel <= 0) {
+		print "[Computation may be in an infinite loop. Continue?] (y/n):";
+		v = ' ';
+		while (v ~= 'y' && v ~= 'n') {
+			v = getchar();
+		}
+		print (char) v, "^";
+		if (v == 'n') {
+			show_error("computation interrupted");
+			return tok_Error;
+		}
+		eval_fuel = MAX_FUEL;
+	}
+	
+	switch (s->0) {
+		bt_Atom:
+			v = look_up_atomname(s-->1, env);
+			if (v == tok_Error) {
+				show_error("undefined atom", s, 1);
+				return tok_Error;
+			}
+			return v;
+		bt_Num:
+			return s;
+		bt_Function:
+			return s;
+		bt_Cons:
+			f = eval_obj(s-->1, env);
+			if (f == tok_Error) {
+				return tok_Error;
+			}
+			if (f == 0 || (f->0 ~= bt_Function && f->0 ~= bt_Form)) {
+				show_error("object is not a function", s-->1, 1);
+				return tok_Error;
+			}
+			f2 = f-->2;
+			if (f->0 == bt_Function)
+				newenv = f-->1;
+			else
+				newenv = env;
+			newenv = bind_args(newenv, f->0, f2-->1, s-->2, env);
+			if (newenv == tok_Error)
+				return tok_Error;
+			if (f2->0 == bt_Builtin) {
+				return indirect((f2-->2)-->1, newenv);
+			}
+			else {
+				return eval_obj(f2-->2, newenv);
+			}
+		bt_Free:
+			show_error("attempt to evaluate free memory");
+			return tok_Error;
+		default:
+			show_error("cannot evaluate object", s, 1);
+			return tok_Error;
+	}
+];
+
+! create and return an association list, on top of oldenv, in which the values of
+! 	vallist are bound to the names in template. If funcform is bt_Function, the
+!	values in vallist are evaluated first (in the environment curenv)
+[ bind_args oldenv funcform template vallist curenv
+	v vptr ptr;
+	if (template->0 == bt_Atom || template->0 == bt_Num) {
+		! bind the list to this atom; or create a list to stuff in list_args.
+		if (funcform == bt_Function) {
+			v = 0;
+			for ( ptr=vallist : ptr~=0 : ptr=ptr-->2 ) {
+				v = alloc_cons(0, v);
+				if (v == tok_Error) 
+					return tok_Error;
+			}
+			for ( ptr=vallist, vptr=v : ptr~=0 : ptr=ptr-->2, vptr=vptr-->2 ) {
+				vptr-->1 = eval_obj(ptr-->1, curenv);
+				if (vptr-->1 == tok_Error) 
+					return tok_Error;
+			}
+		}
+		else {
+			v = vallist;
+		}
+		! v is now the list of values (or evaluated values)
+		if (template->0 == bt_Atom) {
+			v = alloc_cons(template, v);
+			oldenv = alloc_cons(v, oldenv);
+		}
+		else {
+			if (template-->1 == -1) {
+				num_list_args = 1;
+				list_args-->0 = v;
+			}
+			else {
+				num_list_args = template-->1;
+				if (num_list_args > MAX_LIST_ARGS) {
+					show_error("(internal) too many arguments in built-in function");
+					return tok_Error;
+				}
+				for ( ptr=v, vptr=0 : ptr~=0 && vptr<num_list_args : ptr=ptr-->2, vptr++ ) {
+					list_args-->vptr = ptr-->1;
+				}
+				if (ptr ~= 0) {
+					show_error("too many arguments to function");
+					return tok_Error;
+				}
+				if (vptr < template-->1) {
+					show_error("too few arguments to function");
+					return tok_Error;
+				}
+			}
+		}
+		return oldenv;
+	}
+	! bind the elements of the list to this list of atoms
+	for ( vptr=template, ptr=vallist : ptr~=0 && vptr~=0 : ptr=ptr-->2, vptr=vptr-->2 ) {
+		if (funcform == bt_Function) {
+			v = alloc_cons(vptr-->1, eval_obj(ptr-->1, curenv));
+		}
+		else {
+			v = alloc_cons(vptr-->1, ptr-->1);
+		}
+		if (v == tok_Error) 
+			return tok_Error;
+		oldenv = alloc_cons(v, oldenv);
+		if (oldenv == tok_Error) 
+			return tok_Error;
+	}
+	if (ptr ~= 0) {
+		show_error("too many arguments to function");
+		return tok_Error;
+	}
+	if (vptr ~= 0) {
+		show_error("too few arguments to function");
+		return tok_Error;
+	}
+	return oldenv;
+];
+
+[ alloc_cons head tail
+	s;
+	if (head == tok_Error || tail == tok_Error)
+		return tok_Error;
+	s = alloc();
+	if (s == 0)
+		return tok_Error;
+	s->0 = bt_Cons;
+	s-->1 = head;
+	s-->2 = tail;
+	return s;
+];
+
+! takes one, two, or three args. The head and tail values may be external values
+!    or zero, so they are not error-checked.
+[ alloc_node type head tail
+	s;
+	s = alloc();
+	if (s == 0)
+		return tok_Error;
+	s->0 = type;
+	s-->1 = head;
+	s-->2 = tail;
+	return s;
+];
+
+[ is_true s;
+	if (s==0)
+		rfalse;
+	rtrue;
+];
+
+[ getchar dummy;
+	@read_char 1 dummy;
+	return dummy;
+];
+
+[ rawstring ptr
+	end;
+	end = ptr + ptr->0;
+	for (ptr++ : ptr <= end : ptr++) 
+		print (char) ptr->0;
+];
+
+! print str if it exists. if sflag exists, print the Lisp-object s too. 
+[ show_error str s sflag
+	;
+	if (str == 0)
+		print "[Error]^";
+	else {
+		print "[Error: ", (string) str;
+		if (sflag ~= 0) {
+			print ": ";
+			write_obj(s);
+		}
+		print "]^";
+	}
+	return tok_Error;
+];
+
+[ show_warning str
+	;
+	if (str == 0)
+		print "[Warning]^";
+	else
+		print "[Warning: ", (string) str, "]^";
+	return 0;
+];
+
+! ---------------
+! Here's a fixed-size allocation package.
+! ---------------
+
+Constant ALLOC_SIZE 6;
+Constant HEAP_SIZE 9600;
+Global num_blocks_free;
+Global max_blocks_free;
+Global perm_blocks_used;
+Global alloc_index;
+Array alloc_heap -> HEAP_SIZE;
+
+[ init_alloc
+	ix max;
+	max_blocks_free = HEAP_SIZE / ALLOC_SIZE;
+	num_blocks_free = max_blocks_free;
+	perm_blocks_used = 0;
+	alloc_index = 0;
+	max = HEAP_SIZE/2;
+	for ( ix=0 : ix<max : ix++ ) {
+		alloc_heap-->ix = 0;
+	}
+];
+
+[ alloc
+	ptr;
+	if (num_blocks_free <= 0) {
+		show_error("heap memory is full");
+		return 0;
+	}
+	ptr = alloc_heap + ALLOC_SIZE*alloc_index;
+	while (1==1) {
+		if (ptr->0 == bt_Free) {
+			! This block is free. Return it.
+			ptr->0 = bt_Ready;
+			num_blocks_free--;
+			return ptr;
+		}
+		alloc_index++;
+		ptr = ptr + ALLOC_SIZE;
+		if (alloc_index == max_blocks_free) {
+			alloc_index = 0;
+			ptr = alloc_heap;
+		}
+	}
+];
+
+[ free ptr;
+	if (compare_addr(ptr, alloc_heap) == -1
+		|| compare_addr(ptr, alloc_heap+ALLOC_SIZE*max_blocks_free) ~= -1) {
+		show_warning("(internal) attempt to free a garbage pointer");
+		rfalse;
+	}
+	if (ptr->0 == bt_Free) {
+		show_warning("(internal) attempt to free a free block");
+		rfalse;
+	}
+	ptr->0 = bt_Free;
+	ptr->1 = 0;
+	ptr-->1 = 0;
+	ptr-->2 = 0;
+	num_blocks_free++;
+	rtrue;
+];
+
+! returns -1, 0, 1 as x is less, equal, greater than y.
+[ compare_addr x y
+	u v;
+	if (x==y) return 0;
+	if (x<0 && y>=0) return 1;
+	if (x>=0 && y<0) return -1;
+	u = x & $7fff; v= y & $7fff;
+	if (u>v) return 1;
+	return -1;
+];
+
+[ check_garbage_level
+	;
+	if (num_blocks_free < (max_blocks_free - perm_blocks_used) / 2) {
+		garbage_collect();
+	}
+];
+
+[ garbage_collect
+	ix ptr origfree;
+	origfree = num_blocks_free;
+	garbage_mark(top_level_env);
+	for ( ix=0, ptr=alloc_heap : ix<max_blocks_free : ix++, ptr=ptr+ALLOC_SIZE ) {
+		if (ptr->0 ~= 0) {
+			if (ptr->1 == 1) {
+				ptr->1 = 0;
+			}
+			else {
+				free(ptr);
+			}
+		}
+	}
+	perm_blocks_used = max_blocks_free - num_blocks_free;
+	print "[garbage collection: ", num_blocks_free-origfree, " blocks freed.]^";
+	rtrue;
+];
+
+[ garbage_mark s
+	;
+	while (s ~= 0 && s->1 == 0) {
+		s->1 = 1;
+		switch (s->0) {
+			bt_Free:
+				show_error("garbage-collect: encountered free memory block in environment");
+				rfalse;
+			bt_Ready:
+				show_error("garbage-collect: encountered unused memory block in environment");
+				rfalse;
+			bt_Atom, bt_Num:
+				rfalse;
+			default: ! cons, form, function, builtin, dynamic
+				garbage_mark(s-->1);
+		}
+		s = s-->2;
+	}
+];
+
+! ---------------
+! Here's a string allocation package (no freeing)
+! ---------------
+
+Constant STRING_HEAP_SIZE 800;
+Global string_alloc_index;
+Array string_alloc_heap -> STRING_HEAP_SIZE;
+
+! Each string is in the format:
+! 0-1: two-byte rock (used for hash chains)
+! 2: length of string
+! 3...: data
+
+Constant STRING_HASH_SIZE 29;
+Array string_hash_table --> STRING_HASH_SIZE;
+
+[ init_string_alloc
+	ix;
+	for (ix=0 : ix < STRING_HASH_SIZE : ix++) {
+		string_hash_table-->ix = 0;
+	}
+	string_alloc_index = 0;
+];
+
+[ addstring src len
+	bucket pptr ptr;
+	if (len == 0)
+		bucket = 0;
+	else
+		bucket = (len + src->0) % STRING_HASH_SIZE;
+	pptr = string_hash_table + (2*bucket);
+	while (pptr-->0 ~= 0) {
+		ptr = pptr-->0;
+		if (strdateq(ptr, src, len) ~= 0) {
+			return ptr;	
+		}
+		pptr = ptr;
+	}
+	ptr = stralloc(src, len, 0);
+	if (ptr == 0)
+		rfalse;
+	pptr-->0 = ptr;
+	return ptr;
+];
+
+[ strdateq str src len
+	ix;
+	if (len ~= str->2)
+		rfalse;
+	str = str+3;
+	for (ix=0 : ix < len : ix++) {
+		if (str->ix ~= src->ix)
+			rfalse;
+	}
+	rtrue;
+];
+
+[ hashstring ptr
+	end;
+	if (ptr == 0) {
+		print "[NULL]";
+		rfalse;
+	}
+	end = ptr + 2 + ptr->2;
+	for (ptr=ptr+3 : ptr <= end : ptr++) 
+		print (char) ptr->0;
+	rtrue;
+];
+
+[ streq strx stry
+	ix len;
+	len = strx->2;
+	if (len ~= stry->2)
+		rfalse;
+	strx = strx+3;
+	stry = stry+3;
+	for (ix=0 : ix < len : ix++) {
+		if (strx->ix ~= stry->ix)
+			rfalse;
+	}
+	rtrue;
+];
+
+[ stralloc src len rock
+	ptr nptr ix;
+	if (string_alloc_index+len+3 > STRING_HEAP_SIZE) {
+		show_error("atom name memory is full");
+		return 0;
+	}
+	ptr = string_alloc_heap + string_alloc_index;
+	string_alloc_index = string_alloc_index+len+3;
+	ptr-->0 = rock;
+	ptr->2 = len;
+	nptr = ptr+3;
+	for (ix=0 : ix < len : ix++) {
+		nptr->ix = src->ix;
+	}
+	return ptr;
+];
+
+! ---------------
+! some debugging procedures
+! ---------------
+
+[ get_indexed_block ix;
+	return alloc_heap + ALLOC_SIZE*ix;
+];
+
+[ LispStatusLine width 
+	ix;
+	@split_window 1; @set_window 1; @set_cursor 1 1; style reverse;
+	width = 0->33; 
+	spaces (width-1);
+	@set_cursor 1 2; 
+	print "Heap: ", max_blocks_free-num_blocks_free, "/", max_blocks_free;
+	@set_cursor 1 25; 
+	print "Atom name space: ", string_alloc_index, "/", STRING_HEAP_SIZE;
+	@set_cursor 1 55;
+	for (ix=0 : ix<input_depth : ix++) {
+		print (char) '(';
+	} 
+	@set_cursor 1 1; style roman; @set_window 0;
+];
+
+[ dump_alloc_status
+	ix ptr;
+	for (ix=0, ptr=alloc_heap : ix<max_blocks_free : ix++, ptr=ptr+ALLOC_SIZE) {
+		print ptr->0;
+	}
+	print " : ", num_blocks_free, " free.^";
+	print "String heap at ", string_alloc_index, " of ", STRING_HEAP_SIZE, ".^";
+];
+

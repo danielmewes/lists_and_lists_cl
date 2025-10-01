@@ -1,0 +1,1661 @@
+
+[ print_title str;
+	style bold;
+	print (string) str;
+	style roman;
+	new_line; new_line;
+];
+
+! in arguments, 1 means blank line; 2 means skip entirely
+[ print_trans inpstr outstr;
+	!font off;
+	if (inpstr ~= 2) {
+		print " >>";
+		if (inpstr ~= 1) {
+			style bold;
+			print (string) inpstr;
+			style roman;
+		}
+		new_line;
+	}
+	if (outstr ~= 2) {
+		if (outstr ~= 1) {
+			print " ", (string) outstr;
+		}
+		new_line;
+	}
+	!font on;
+];
+
+[ print_multiatom a1 a2 a3 a4 a5 a6 a7 a8;
+	style bold;
+	if (a1 ~= 0)
+		print (string) a1, "^";
+	if (a2 ~= 0)
+		print (string) a2, "^";
+	if (a3 ~= 0)
+		print (string) a3, "^";
+	if (a4 ~= 0)
+		print (string) a4, "^";
+	if (a5 ~= 0)
+		print (string) a5, "^";
+	if (a6 ~= 0)
+		print (string) a6, "^";
+	if (a7 ~= 0)
+		print (string) a7, "^";
+	if (a8 ~= 0)
+		print (string) a8, "^";
+	style roman;
+];
+
+[ print_multitrans a1 a2 a3 a4 a5 a6 a7 a8;
+	print " >>";
+	style bold; print (string) a1; style roman; new_line;
+	if (a2 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a2; style roman; new_line;
+	if (a3 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a3; style roman; new_line;
+	if (a4 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a4; style roman; new_line;
+	if (a5 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a5; style roman; new_line;
+	if (a6 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a6; style roman; new_line;
+	if (a7 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a7; style roman; new_line;
+	if (a8 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a8; style roman; new_line;
+	
+	return;
+];
+
+[ print_moretrans a1 a2 a3 a4 a5 a6 a7 a8;
+	print "  >";
+	style bold; print (string) a1; style roman; new_line;
+	if (a2 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a2; style roman; new_line;
+	if (a3 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a3; style roman; new_line;
+	if (a4 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a4; style roman; new_line;
+	if (a5 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a5; style roman; new_line;
+	if (a6 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a6; style roman; new_line;
+	if (a7 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a7; style roman; new_line;
+	if (a8 == 0)
+		return;
+	print "  >";
+	style bold; print (string) a8; style roman; new_line;
+	
+	return;
+];
+
+Constant ManualContents "Table of Contents:^\
+		^    0:  Introduction\
+		^    1:  What's Going On Here\
+		^    2:  What's An Atom?\
+		^    3:  What's a List?\
+		^    4:  Functions\
+		^    5:  Quoting Expressions\
+		^    6:  Defining Atoms\
+		^    7:  List Chopping\
+		^    8:  List Constructing\
+		^    9:  Tests and Logic\
+		^    10: Comparisons\
+		^    11: Conditionals\
+		^    12: Creating Functions\
+		^    13: Fun With Recursion\
+		^    14: Local Definitions With Let\
+		^    15: Recursion, Functions, Endless Fun\
+		^    16: Scope\
+		^    17: Return\
+		^    18: Reference: Functions\
+		^    19: Reference: Syntactic Forms\
+		^    20: Reference: Improper Lists^";
+
+[ EnterManual;
+	DoMenu(#r$PrintManualContents, #r$ManualMenu, #r$ManualEntry);
+];
+
+! Assumes we're set to the status window
+[ PrintManualContents
+	wid lines i j k;
+	
+	wid = 0->33;
+	if (wid==0) i=80;
+	lines = 21;
+	
+	@set_cursor 5 2;
+	print "Table of Contents:";
+	
+	for (i=0 : i<lines : i++) {
+		menu_item = i+1;
+		ManualMenu();
+		if (i < lines/2) {
+			j = i+7;
+			k = 4;
+		}
+		else {
+			j = i-lines/2+7; 
+			k = wid/2+4;
+		}
+		k = k+1;
+		@set_cursor j k;
+		print (string) item_name;
+	}
+];
+
+[ ManualMenu;
+	if (menu_item == 0) {
+		item_name =     "A Simple Programmer's Introduction to Scheme";
+		item_width = 22;
+		return 21;
+	}
+	switch (menu_item-1) {
+		0:
+			item_name = "Introduction";
+			item_width = 6;
+		1:
+			item_name = "What's Going On Here";
+			item_width = 10;
+		2:
+			item_name = "What's An Atom?";
+			item_width = 7;
+		3:
+			item_name = "What's a List?";
+			item_width = 7;
+		4:
+			item_name = "Functions";
+			item_width = 4;
+		5:
+			item_name = "Quoting Expressions";
+			item_width = 9;
+		6:
+			item_name = "Defining Atoms";
+			item_width = 7;
+		7:
+			item_name = "List Chopping";
+			item_width = 6;
+		8:
+			item_name = "List Constructing";
+			item_width = 8;
+		9:
+			item_name = "Tests and Logic";
+			item_width = 7;
+		10:
+			item_name = "Comparisons";
+			item_width = 5;
+		11:
+			item_name = "Conditionals";
+			item_width = 6;
+		12:
+			item_name = "Creating Functions";
+			item_width = 9;
+		13:
+			item_name = "Fun With Recursion";
+			item_width = 9;
+		14:
+			item_name = "Local Definitions With Let";
+			item_width = 13;
+		15:
+			item_name = "Recursion, Functions";
+			item_width = 10;
+		16:
+			item_name = "Scope";
+			item_width = 2;
+		17:
+			item_name = "Return";
+			item_width = 3;
+		18:
+			item_name = "Reference: Functions";
+			item_width = 10;
+		19:
+			item_name = "Reference: Syntactic Forms";
+			item_width = 13;
+		20:
+			item_name = "Reference: Improper Lists";
+			item_width = 12;
+		default:
+			item_name = "ITEM";
+			item_width = 2;
+	}
+	rtrue;
+];
+
+[ ManualEntry;
+	PrintChapter(menu_item-1);
+];
+
+[ DoMenu menu_choices EntryR ChoiceR
+         lines main_title main_wid cl i j k oldcl pkey;
+  if (pretty_flag==0)
+  {   LowKey_Menu(menu_choices,EntryR,ChoiceR);
+      rfalse;
+  }
+  menu_nesting++;
+  menu_item=0;
+  lines=indirect(EntryR);
+  main_title=item_name; main_wid=item_width;
+  cl=0;
+  .ReDisplay;
+      oldcl=-1;
+      @erase_window $ffff;
+      i=(lines+1)/2+7;
+      @split_window i;
+      i = 0->33;
+      if (i==0) i=80;
+      @set_window 1;
+      @set_cursor 1 1;
+      style reverse;
+      spaces(i); j=i/2-main_wid;
+      @set_cursor 1 j;
+      print_paddr main_title;
+      @set_cursor 2 1; spaces(i);
+      @set_cursor 2 2; print "N = next subject";
+      j=i-12; @set_cursor 2 j; print "P = previous";
+      @set_cursor 3 1; spaces(i);
+      @set_cursor 3 2; print "RETURN = read subject";
+      j=i-17; @set_cursor 3 j;
+      if (menu_nesting==1)
+          print "  Q = resume game";
+      else
+          print "Q = previous menu";
+      style roman;
+      @set_cursor 5 2; font off;
+
+      if (ZRegion(menu_choices)==3) print_paddr menu_choices;
+      else indirect(menu_choices);
+
+      .KeyLoop;
+      if (cl~=oldcl)
+      {   if (oldcl>=0) { 
+	 	      if (oldcl < lines/2) {
+	 	      	j = oldcl+7;
+	 	      	k = 4;
+	 	      }
+	 	      else {
+	 	      	j = oldcl-lines/2+7; 
+	 	      	k = i/2+4;
+	 	      }
+	 	      @set_cursor j k; print " "; 
+	      }
+	      if (cl < lines/2) {
+	      	j = cl+7;
+	      	k = 4;
+	      }
+	      else {
+	      	j = cl-lines/2+7; 
+	      	k = i/2+4;
+	      }
+	      @set_cursor j k; 
+          print ">";
+      }
+      oldcl=cl;
+      @read_char 1 0 0 pkey;
+      if (pkey=='N' or 'n' or 130)
+          { cl++; if (cl>=lines) cl=0; jump KeyLoop; }
+      if (pkey=='P' or 'p' or 129)
+          { cl--; if (cl<0)  cl=lines-1; jump KeyLoop; }
+      if (pkey=='Q' or 'q' or 27) { jump QuitHelp; }
+      if (pkey==10 or 13)
+      {   @set_window 0; font on;
+          new_line; new_line; new_line;
+
+          menu_item=cl+1;
+          indirect(EntryR);
+
+          @erase_window $ffff;
+          @split_window 1;
+          i = 0->33; if (i==0) { i=80; }
+          @set_window 1; @set_cursor 1 1; style reverse; spaces(i);
+          j=i/2-item_width;
+          @set_cursor 1 j;
+          print_paddr item_name;
+          style roman; @set_window 0; new_line;
+
+          i = indirect(ChoiceR);
+          if (i==2) jump ReDisplay;
+          if (i==3) jump QuitHelp;
+
+          print "^[Please press SPACE.]^";
+          @read_char 1 0 0 pkey; jump ReDisplay;
+      }
+      jump KeyLoop;
+      .QuitHelp;
+      menu_nesting--; if (menu_nesting>0) rfalse;
+      font on; @set_cursor 1 1;
+      @erase_window $ffff; @set_window 0;
+      new_line; new_line; new_line;
+      ! if (deadflag==0) <<Look>>;
+];  
+
+[ PrintChapter num;
+	switch (num) {
+		0: Chapter0();
+		1: Chapter1();
+		2: Chapter2();
+		3: Chapter3();
+		4: Chapter4();
+		5: Chapter5();
+		6: Chapter6();
+		7: Chapter7();
+		8: Chapter8();
+		9: Chapter9();
+		10: Chapter10();
+		11: Chapter11();
+		12: Chapter12();
+		13: Chapter13();
+		14: Chapter14();
+		15: Chapter15();
+		16: Chapter16();
+		17: Chapter17();
+		18: Chapter18();
+		19: Chapter19();
+		20: Chapter20();
+	}
+];
+
+[ Chapter0;
+
+print_title ("0. Introduction");
+
+print (emphstring) "A Simple Programmer's Introduction to Scheme", "^^";
+
+print "This is a story about Lisp. Actually -- I'll admit it right now -- it's about \
+Scheme, which is a cleaned-up version of Lisp. More suitable for teaching, \
+and (more to the point) easier for me to implement inside the Z-Machine. And -- \
+to be really honest -- I didn't implement much of Scheme either. But I think \
+it'll do for a start.^^";
+
+print "Since you have the Scheme interpreter right underneath your fingers, your job \
+is to try all the examples. And experiment with new ones. Your friend the genie \
+will pose problems for you to solve, but it's all self-paced. Play around as \
+much as you want. Refer to this manual as much as you want. Or blow the whole \
+thing and go fight dragons. Will I care? (Sniff.)^^";
+
+];
+
+[ Chapter1;
+
+print_title ("1. What's Going On Here");
+
+print "When you start the Scheme interpreter, you see a prompt:^^";
+
+print_trans(1, 2);
+new_line;
+
+print "You type things, and the interpreter responds. Try it. Type ~5~ and hit Enter. \
+The interpreter will respond with ~5~.^^";
+
+print_trans(
+ "5",
+ "5"
+);
+new_line;
+
+print "That's all that happens in Scheme. You can go home now. Bye!^^";
+
+print "Ok, I'm kidding. Sort of. It's true, really -- all you do in Scheme is type \
+things, and get responses. The process is dynamic; the response can depend on \
+earlier things that you typed. Notice that this is different from languages \
+like C, or Pascal, or Inform. In those languages, you type in an entire \
+program, and chuck it into the compiler, which either grinds you out a program \
+or complains. In Scheme, or Lisp, you build programs out of small pieces. It's \
+much friendlier.^^";
+
+print "But enough about Pascal. What happens in Scheme?^^";
+
+print "What happens -- really -- is that you type an expression, and the interpreter \
+evaluates the expression and prints the result. Read, evaluate, print. Every \
+expression evaluates to another expression (unless it produces an error.) \
+We just demonstrated this; ", (atomstring) "5", " is an expression, and it evaluates \
+to the expression ", (atomstring) "5", ". Numbers evaluate to themselves. If that's confusing, \
+just try to get used to it. If it makes sense, you'll probably be confused \
+later on, because most expressions ", (emphstring) "don't", " evaluate to themselves. Oh well.^^";
+
+];
+
+[ Chapter2;
+
+print_title ("2. What's An Atom?");
+
+print "We start with atoms.^^";
+
+print "An atom is a bunch of characters. Letters, numbers, most punctuation. Here \
+are some atoms: ", (atomstring) "5", " ", (atomstring) "hello", " ", (atomstring) "-5", " ", (atomstring) "goodbye", " ", (atomstring) "darlene+mitchell", " ", (atomstring) "q-5", " ", (atomstring) "qq=5++qqq+", " ", (atomstring) "***", "^^";
+
+print "If you're familiar with languages like Pascal, you're probably desperately \
+trying to read some of those as additions, or subtractions, or whatever. Don't \
+bother. They're all just atoms. Letters, numbers, and punctuation are all \
+treated the same in an atom.^^";
+
+print "(For completeness, here's the list of punctuation which you ", (emphstring) "can't", " use in an \
+atom: ", (atomstring) "(", " ", (atomstring) ")", " ", (atomstring) ";", " ", (atomstring) ":", " ", (atomstring) "'", " ", (atomstring) ".", " Any kind of whitespace, such as spaces or line \
+breaks, will separate atoms as well.)^^";
+
+print "So ho, you ask, what about numbers? Good point. An atom which is entirely made \
+up of numbers, except possibly for a minus sign at the front, counts as a number. \
+(Get it? Counts? Never mind.)^^";
+
+print "We've already said that a number evaluates to itself. That is, if an expression \
+consists of just an atom, and the atom is a number, the value of that expression \
+is that very expression -- which is to say, that atom.^^";
+
+print_trans("5",
+ "5");
+print_trans("-597",
+ "-597");
+print_trans("0",
+ "0");
+new_line;
+
+print "What do other atoms evaluate to? Well, try it. I'll just cover my ears --^^";
+
+print_trans("hello",
+ "[Error: undefined atom: hello]");
+print_trans("q-5",
+ "[Error: undefined atom: q-5]");
+print_trans("***",
+ "[Error: undefined atom: ***]");
+new_line;
+
+print "Don't worry; no permanent damage done. Most non-numeric atoms produce errors when \
+you try to evaluate them. This is because they are not bound to any value. But \
+what that means, we'll get to later.^^";
+
+];
+
+[ Chapter3;
+
+print_title ("3. What's a List?");
+
+print "A single atom is an expression. Is there any other kind of expression? Of course. \
+An expression can also be a list. One list -- that's important. An expression is \
+a single atom or a single list.^^";
+
+print "What's a list? A list is a list of expressions. That is, a list is a list of atoms \
+and lists. A list is written as a pair of parentheses surrounding the contents of \
+the list. Here's a list: ", (atomstring) "(1)", " It contains one atom. Here's another list: ", (atomstring) "(2 fred)", " \
+It contains two atoms. The order is significant; ", (atomstring) "(2 fred)", " and ", (atomstring) "(fred 2)", " are two \
+different lists.^^";
+
+print "A list can contain nothing: ", (atomstring) "()", " is the empty list. It's famous. It's also called \
+", (atomstring) "nil", ", which I think isn't as pretty as ", (atomstring) "()", ", but it's historical, so there we are. \
+", (atomstring) "nil", " and ", (atomstring) "()", " both refer to the empty list.^^";
+
+print "As I said, a list can contain both atoms and other lists. So here are four more \
+lists: ", (atomstring) "(one (two) three)", " ", (atomstring) "(((one) 2 fred) xxxx9)", " ", (atomstring) "(())", " ", (atomstring) "(hello mr ((operator)))", " \
+Don't be frightened by the stacks of parentheses. It's all recursive. That last \
+list, for example, contains three expressions: the atom ", (atomstring) "hello", ", the atom ", (atomstring) "mr", ", and \
+the list ", (atomstring) "((operator))", ". Which, itself, is one-term list containing only the list \
+", (atomstring) "(operator)", ". Which is, itself, a one-term list containing only the atom ", (atomstring) "operator", ". \
+Get it?^^";
+
+print "By the way, remember that an expression is either a single atom or a single list. \
+", (atomstring) "1", " ", (atomstring) "2", " ", (atomstring) "3", " is three separate expressions, not any funky kind of parenthesis-stripped \
+list or anything. If you type several expressions at the Scheme prompt, the \
+interpreter will evaluate them one at a time.^^";
+
+print_trans("1 2 3 four",
+ "1");
+print_trans(2, "2");
+print_trans(2, "3");
+print_trans(2, "[Error: undefined atom: four]");
+new_line;
+
+];
+
+[ Chapter4;
+
+print_title ("4. Functions");
+
+print "We've seen that numeric atoms evaluate to themselves, and other atoms seem to \
+produce raging error messages. What does a list evaluate to? Aha! You've heard of \
+functions? I really hope so. Anyway, when you evaluate a list, you're calling a \
+function. The first element of the list is the function; the rest of the elements \
+are its arguments.^^";
+
+print_trans("(+ 1 1)",
+ "2");
+new_line;
+
+print "Right! Addition! Let's take a closer look. We typed in an expression: \
+", (atomstring) "(+ 1 1)", ". Nothing magic there; it's a list containing three atoms, of which \
+the first is a plus sign and the last two are both the number 1. The Scheme \
+interpreter evaluates all of these. The plus sign means addition; the ", (atomstring) "1", " atoms \
+both evaluate to themselves. So the interpreter runs the addition function, and \
+hands it a pair of ", (atomstring) "1", " atoms to work with. One plus one is two, so the function \
+returns the expression ", (atomstring) "2", ". And that's what ", (atomstring) "(+ 1 1)", " evaluates to.^^";
+
+print "Sneaky people will raise their hands at this point. What am I trying to pull? \
+~The plus sign means addition?~ Ok, ok. What I mean is, the atom ", (atomstring) "+", " is not \
+one of those pernicious undefined atoms. It ", (emphstring) "is", " defined. Its value is the \
+addition function. Here, try it:^^";
+
+print_trans("+",
+ "[function]");
+new_line;
+
+print "The interpreter doesn't try to actually print out the addition function, because \
+that's a bunch of internal program code. All functions print out looking like \
+", (atomstring) "[function]", ".^^";
+
+print_trans("(- 1 1)",
+ "0");
+print_trans("-",
+ "[function]");
+new_line;
+
+print "You can probably guess what function ", (atomstring) "-", " evaluates to.^^";
+
+print "Did I say that the interpreter evaluates ", (emphstring) "all", " the terms of a list? Indeed I \
+did. This is important. Guess what ", (atomstring) "(+ (+ 1 1) 4)", " evaluates to? Ok, it's not too \
+hard, but we'll go through it step by step anyway. It's a three-term list. The \
+first term is ", (atomstring) "+", ", which evaluates to the addition function. The second term is \
+the list ", (atomstring) "(+ 1 1)", ", and we've already discovered that evaluates to ", (atomstring) "2", ". The third \
+term is ", (atomstring) "4", ", and that evaluates to ", (atomstring) "4", ". The addition function is handed the results, \
+", (atomstring) "2", " and ", (atomstring) "4", ", and guess what...^^";
+
+print_trans("(+ (+ 1 1) 4)",
+ "6");
+new_line;
+
+print "Actually, the addition and subtraction functions can take any number of arguments, \
+not just two.^^";
+
+print_trans("(+ 1 1 4)",
+ "6");
+new_line;
+
+print "What happens if you try to evaluate a list, and the first term doesn't evaluate \
+to a function? You get errors, that's what. There are a couple of ways you can \
+get this wrong. As your end-of-chapter exercise, meditate upon the following \
+exchanges:^^";
+
+print_trans("(1 2 3 4)",
+ "[Error: object is not a function: 1]");
+print_trans("(spoggly 2 3 4)",
+ "[Error: undefined atom: spoggly]");
+new_line;
+
+print "Oops, one more thing. The empty list -- whether you write it as ", (atomstring) "()", " or ", (atomstring) "nil", " -- \
+evaluates to itself. No function is called.^^";
+
+print_trans("()",
+ "nil");
+print_trans("nil",
+ "nil");
+new_line;
+
+];
+
+[ Chapter5;
+
+print_title ("5. Quoting Expressions");
+
+print "What's an expression which evaluates to the atom ", (atomstring) "hello", "? We know that ", (atomstring) "hello", " doesn't; \
+that produces an error.^^";
+
+print_trans("hello",
+ "[Error: undefined atom: hello]");
+new_line;
+
+print "It sure would be handy if there were a way to produce an arbitrary atom. Well, \
+watch:^^";
+
+print_trans("(quote hello)",
+ "hello");
+new_line;
+
+print (atomstring) "quote", " acts sort of like a function which returns its argument unchanged. \
+(Actually, it's not a function; it's a special piece of syntax. Can you see why? \
+It breaks a rule of functions. Answer at the end of this chapter.) You can quote \
+a list too:^^";
+
+print_trans("(quote (+ 1 1))",
+ "(+ 1 1)");
+new_line;
+
+print (atomstring) "quote", " is so useful that you can abbreviate it, by skipping the parentheses and \
+just writing a single quote mark.^^";
+
+print_trans("'hello",
+ "hello");
+print_trans("'(+ 1 1)",
+ "(+ 1 1)");
+print_trans("'5",
+ "5");
+print_trans("'+",
+ "+");
+new_line;
+
+print "That last example is important. It doesn't matter that ", (atomstring) "+", " has a value; the \
+expression ", (atomstring) "'+", " -- that is, ", (atomstring) "(quote +)", " -- just evaluates to ", (atomstring) "+", ".^^";
+
+print "End of the chapter time. Why is ", (atomstring) "quote", " not a function? Because when Scheme evaluates \
+a function, it evaluates all the arguments before handing them in to the function. \
+The argument to ", (atomstring) "quote", " is ", (emphstring) "not", " evaluated; it's handed straight in, so that it can \
+be handed out unchanged. Watch this:^^";
+
+print_trans("quote",
+ "[syntax]");
+new_line;
+
+print "Special syntax forms are applied the same way functions are, but they can have \
+funkier effects, and they don't necessarily evaluate all their arguments. Keep track \
+of this fact, because someday it'll unconfuse you about something.^^";
+
+];
+
+[ Chapter6;
+
+print_title ("6. Defining Atoms");
+
+print (atomstring) "+", " has a value which is automatically defined by the interpreter. Can we define \
+values for atoms ourselves? Would I ask if the answer were no? Watch this:^^";
+
+print_trans("(define x 5)",
+ "5");
+new_line;
+
+print (atomstring) "define", " is another piece of special syntax. It evaluates its third argument, and \
+assigns the resulting value to its second argument, which must be an atom. (Why can't ",
+(atomstring) "define", " be a function? Because all the arguments to a function are evaluated. If ", (atomstring) "define", " \
+tried to evaluate its second argument, it would get an undefined atom error, because \
+the atom hasn't been defined until ", (atomstring) "define", " defines it! Whew.)  For clarity, ", (atomstring) "define", " \
+returns the value it just assigned. We set ", (atomstring) "x", " to ", (atomstring) "5", "; now the expression ", (atomstring) "x", " evaluates \
+to ", (atomstring) "5", ".^^";
+
+print_trans("x",
+ "5");
+print_trans("(+ x 1)",
+ "6");
+new_line;
+
+print "We don't have to use numbers, by the way. Let's set ", (atomstring) "x", " to be ", (atomstring) "bob", ":^^";
+
+print_trans("(define x bob)",
+ "[Error: undefined atom: bob]");
+new_line;
+
+print "Oops -- forgot that the third value in a ", (atomstring) "define", " statement ", (emphstring) "is", " evaluated. We can't \
+use the ", (emphstring) "atom", " ", (atomstring) "bob", "; we need to use an expression whose ", (emphstring) "value", " is ", (atomstring) "bob", ".^^";
+
+print_trans("(define x 'bob)",
+ "bob");
+print_trans("x",
+ "bob");
+print_trans("(+ x 1)",
+ "[Error: +: non-numeric argument: bob]");
+print_trans("'x",
+ "x");
+new_line;
+
+print "That works. Notice that we've replaced the earlier definition of ", (atomstring) "x", " as ", (atomstring) "5", ". Also note \
+that addition righteously complains when we feed it an atom which isn't a number. And \
+also also note that ", (atomstring) "'x", " is, still and always, just plain ", (atomstring) "x", ".^^";
+
+print "You can replace the definitions of predefined functions, too. You could do ", (atomstring) "(define + 5)", ", \
+for example. But I really don't recommend it. Reset the interpreter if you get carried \
+away with this stuff.^^";
+
+print "Last trick of the chapter. What's going on here?^^";
+
+print_trans("(define addify +)",
+ "[function]");
+print_trans("(addify 5 6)",
+ "11");
+new_line;
+
+];
+
+[ Chapter7;
+
+print_title ("7. List Chopping");
+
+print "Back to lists. We often want to take them apart, see what makes them tick, and put \
+together new ones. For that, we'll need some tools.^^";
+
+print "A list can be split into two parts: its first term, and its everything else. Now, \
+in Scheme (and Lisp), the first term is called the list's ", (emphstring) "car", ", and the everything \
+else is called the list's ", (emphstring) "cdr", " (rhymes with ~wooder~, more or less.) Now every \
+damn Lisp book in the universe explains why these things are called car and cdr, \
+and I'm so sick of it I'm going to leave you in the dark. Go look it up, if you \
+care.^^";
+
+print "The car of ", (atomstring) "(a bb ccc)", " is ", (atomstring) "a", ". The cdr of ", (atomstring) "(a bb ccc)", " is ", (atomstring) "(bb ccc)", ". See that? The \
+car is the first ", (emphstring) "term", "; the cdr is the ", (emphstring) "list", " minus the first term. Important, that. \
+Now, this doesn't mean that the car of a list is always an atom. The car of \
+", (atomstring) "((1 2) x y z)", " is ", (atomstring) "(1 2)", ". But the cdr of a list is always a list. It might be the \
+empty list, though. The cdr of ", (atomstring) "(hello)", " is the empty list ", (atomstring) "nil", ".^^";
+
+print "The empty list has neither a car nor a cdr.^^";
+
+print (atomstring) "car", " and ", (atomstring) "cdr", " are pre-defined functions in Scheme. (Ok, I'm lying -- ", (atomstring) "car", " and ", (atomstring) "cdr", " \
+are atoms. But they're defined to evaluate to functions, just like ", (atomstring) "+", " and ", (atomstring) "-", ". Get \
+over it.)^^";
+
+print_trans("(car '(a bb ccc))",
+ "a");
+print_trans("(cdr '(a bb ccc))",
+ "(bb ccc)");
+new_line;
+
+print "Note the quote marks. What happens if you try to evaluate ", (atomstring) "(car (a bb cc))", "? Why?^^";
+
+print (atomstring) "car", " and ", (atomstring) "cdr", " are well-wired to complain if you try to mess with their heads:^^";
+
+print_trans("(car 'a)",
+ "[Error: car: bad argument: a]");
+print_trans("(car '())",
+ "[Error: car: bad argument: nil]");
+new_line;
+
+print (atomstring) "a", " isn't a list, so it can't have a car or cdr; and the empty list, as we've said, \
+has no car or cdr either.^^";
+
+];
+
+[ Chapter8;
+
+print_title ("8. List Constructing");
+
+print "We takes 'em apart, we puts 'em together. If you have a car and a cdr, you can \
+construct a list. The ", (atomstring) "cons", " function does this.^^";
+
+print_trans("(cons 'aaa '(bb c))",
+ "(aaa bb c)");
+print_trans("(cons 'aaa nil)",
+ "(aaa)");
+print_trans("(cons (car '(x y z z y)) (cdr '(x y z z y)))",
+ "(x y z z y)");
+new_line;
+
+print "That last example, dreadful as it appears, just demonstrates that you can take \
+a single list apart into car and cdr, and reassemble it. Maybe it'd help if I \
+did it like this:^^";
+
+print_trans("(define magic-word '(x y z z y))",
+ "(x y z z y)");
+print_trans("magic-word",
+ "(x y z z y)");
+print_trans("(cons (car magic-word) (cdr magic-word))",
+ "(x y z z y)");
+new_line;
+
+print "Oh, those lovely inside-out Scheme expressions! When in doubt, break out the \
+magnifying lens and count parentheses.^^";
+
+print "The cdr of a non-empty list is always a list, so the second argument you give \
+to ", (atomstring) "cons", " had better be a list. If you break this rule, you get a broken, twisted, \
+evil-twin kind of not-really-a-list, called an ~improper~ or ~dotted~ list.^^";
+
+print_trans("(cons 'a 'b)",
+ "(a . b)");
+new_line;
+
+print "I don't feel like explaining this right now, so just try not to do it.^^";
+
+print "Another convenient function is ", (atomstring) "list", ", which takes a bunch of expressions and \
+makes a list out of them.^^";
+
+print_trans("(list 'a 'zzz)",
+ "(a zzz)");
+print_trans("(list 'a '(1 2 3) 'end)",
+ "(a (1 2 3) end)");
+print_trans("(list)",
+ "nil");
+print_trans("(list '() (+ 4 5) '(+ 1 2) (cdr magic-word))",
+ "(nil 9 (+ 1 2) (y z z y))");
+new_line;
+
+print "I'm being tricky with that last one. If you try it yourself, make sure you've \
+defined ", (atomstring) "magic-word", " the way I did a few paragraphs back. Also, see the difference \
+a quote can make?^^";
+
+];
+
+[ Chapter9;
+
+print_title ("9. Tests and Logic");
+
+print "Some functions test a condition. The ", (atomstring) "=", " function, for example, tests to see if \
+two numbers are equal:^^";
+
+print_trans("(= 2 2)",
+ "t");
+print_trans("(= 2 5)",
+ "nil");
+new_line;
+
+print "As you see, the convention in Scheme is to use ", (atomstring) "nil", " to signify falsity, and \
+the atom ", (atomstring) "t", " to signify truth. (", (atomstring) "t", " evaluates to itself, by the way, just as ", (atomstring) "nil", " \
+does. More convenience; you don't have to quote ", (atomstring) "t", " when you use it.) Actually, \
+when a true/false value is required, you can generally supply any value; ", (atomstring) "nil", " \
+will be counted as false, and anything else at all will be counted as true.^^";
+
+print "The ", (atomstring) "<", ", ", (atomstring) ">", ", ", (atomstring) "<=", ", and ", (atomstring) ">=", " functions work as you'd expect. There are also some \
+pre-defined functions which test other properties. ", (atomstring) "null?", " returns ", (atomstring) "t", " if its \
+argument is ", (atomstring) "nil", ", and ", (atomstring) "nil", " otherwise. ", (atomstring) "list?", " returns ", (atomstring) "t", " if its argument is \
+a list (including ", (atomstring) "nil", "), and ", (atomstring) "nil", " otherwise.^^";
+
+print_trans("(null? nil)",
+ "t");
+print_trans("(null? t)",
+ "nil");
+print_trans("(null? 0)",
+ "nil");
+print_trans("(list? nil)",
+ "t");
+print_trans("(list? 1)",
+ "nil");
+print_trans("(list? 'a)",
+ "nil");
+print_trans("(list? '(a))",
+ "t");
+new_line;
+
+];
+
+[ Chapter10;
+
+print_title ("10. Comparisons");
+
+print "The ", (atomstring) "=", " function compares numbers, but it produces an error if you try to \
+use it on atoms or lists. For that, you need the ", (atomstring) "eqv?", " and ", (atomstring) "equal?", " functions. \
+These are slightly different, and the difference is sort of technical and \
+confusing, but it's historical. You want to learn Scheme, you have to know ", (atomstring) "eqv?", " \
+and ", (atomstring) "equal?", " (In fact, real Scheme has ", (atomstring) "eq?", " as well, but the difference wasn't \
+significant in this implementation, so I left it out.)^^";
+
+print "For atoms (including numbers), they both work as you'd expect. ", (atomstring) "nil", ", also.^^";
+
+print_trans("(eqv? 1 2)",
+ "nil");
+print_trans("(eqv? 2 2)",
+ "t");
+print_trans("(eqv? 'one 'two)",
+ "nil");
+print_trans("(eqv? 'two 'two)",
+ "t");
+print_trans("(eqv? 2 'two)",
+ "nil");
+print_trans("(eqv? nil 'two)",
+ "nil");
+print_trans("(eqv? nil nil)",
+ "t");
+new_line;
+
+print "(And ", (atomstring) "equal?", " would produce the same results.)^^";
+
+print "For complex objects, such as lists and functions, things are trickier. If you \
+hand two complex objects to ", (atomstring) "eqv?", ", you'll get ", (atomstring) "t", " only if they both stem from the \
+same act of creation. (See, I told you it was confusing.)^^";
+
+print_trans("(define greeting '(hi there))",
+ "(hi there)");
+print_trans("(define aloha (list 'hi 'there))",
+ "(hi there)");
+print_trans("(eqv? greeting greeting)",
+ "t");
+print_trans("(eqv? greeting '(hi there))",
+ "nil");
+print_trans("(eqv? greeting aloha)",
+ "nil");
+print_trans("(eqv? '(hi there) '(hi there))",
+ "nil");
+print_trans("(define hug greeting)",
+ "(hi there)");
+print_trans("(eqv? greeting hug)",
+ "t");
+print_trans("(eqv? aloha hug)",
+ "nil");
+new_line;
+
+print "How to put this... evaluating ", (atomstring) "'(hi there)", " creates a list of two atoms. Evaluating \
+", (atomstring) "(list 'hi 'there)", " creates another list of two atoms. The lists have the same \
+contents, but they're two separate objects. So they aren't ", (atomstring) "eqv?", " to each other. \
+Now, when we do ", (atomstring) "(define hug greeting)", ", we take the value of ", (atomstring) "greeting", " and \
+assign that very value to ", (atomstring) "hug", ", so they ", (emphstring) "are", " ", (atomstring) "eqv?", "... see? Well, maybe.^^";
+
+print (atomstring) "equal?", ", on the other hand, works sensibly. Two lists are ", (atomstring) "equal?", " if they are \
+the same length and each pair of terms is ", (atomstring) "equal?", ". Given the definitions above, \
+you'll see that:^^";
+
+print_trans("(equal? greeting greeting)",
+ "t");
+print_trans("(equal? greeting '(hi there))",
+ "t");
+print_trans("(equal? '(hi there) '(hi there))",
+ "t");
+print_trans("(equal? greeting aloha)",
+ "t");
+print_trans("(equal? greeting hug)",
+ "t");
+print_trans("(equal? aloha hug)",
+ "t");
+new_line;
+
+print "What's the point of ", (atomstring) "eqv?", ", seeing how weirdly it works? It's faster. ", (atomstring) "equal?", " \
+has to compare every element of a list, but ", (atomstring) "eqv?", " just compares two internal \
+pointers.^^";
+
+print "Up above I said that functions are as tricky as lists, when it comes to \
+comparison. In fact, they're trickier. If two functions stem from the same \
+act of creation, they're ", (atomstring) "eqv?", " and ", (atomstring) "equal?", ", just like lists. But otherwise, \
+two functions are never ", (atomstring) "eqv?", " or ", (atomstring) "equal?", ", even if they do the exact same thing. \
+(There's no good way to ", (emphstring) "tell", " if two functions do the exact same thing. I mean, \
+there's no way for a ", (emphstring) "person", " to tell. Not in all cases. Computers, forget it.)^^";
+
+];
+
+[ Chapter11;
+
+print_title ("11. Conditionals");
+
+print "Scheme offers a nice assortment of conditional syntax forms. Since I'm a lazy \
+bum, I've only implemented the most basic one, which is ", (atomstring) "cond", ". A ", (atomstring) "cond", " structure \
+looks like this:^^";
+
+print_multiatom(
+" (cond",
+"    (test1 result1)",
+"    (test2 result2)",
+"    ...",
+" )"
+);
+new_line;
+
+print "I've written it on multiple lines, but that's just for clarity. The point is, \
+you have a list of clauses, and each clause is a list of two expressions: a \
+test and a result. The ", (atomstring) "cond", " syntax goes through the clauses, in order. For \
+each one, it evaluates the test. If the test returns true (anything but ", (atomstring) "nil", "), \
+it evaluates the result, and returns that value. If the test returns ", (atomstring) "nil", ", it \
+goes on to the next clause. If all of the clauses return ", (atomstring) "nil", ", it returns ", (atomstring) "nil", ".^^";
+
+print "If you're not sure what this means, look at it this way: in C, we'd write this \
+as something like^^";
+
+print_multiatom(
+"  if (test1) return result1;",
+"  else if (test2) return result2;",
+"  ...",
+"  else return nil;"
+);
+new_line;
+
+print "If you want a final ~default~ clause, which will be used if all the others fail, \
+you can use ", (atomstring) "(t defaultresult)", ". ", (atomstring) "t", " is always true, and that's the effect you want.^^";
+
+print "You're still confused. Well, hark to the example.^^";
+
+print_trans("(define val -25)",
+ "-25");
+print_multitrans(
+"(cond",
+"  ((> val 0) 'positive)",
+"  ((< val 0) 'negative)",
+"  (t 'zero)",
+")"
+);
+print_trans(2, "negative");
+new_line;
+
+print "The conditional tests ", (atomstring) "val", " and returns one of the atoms ", (atomstring) "positive", ", ", (atomstring) "negative", ", or \
+", (atomstring) "zero", ". (Again, we've typed it in on several lines. Notice that the interpreter \
+prints a single-arrow prompt if you've started a list and not finished it yet; \
+the expression won't be evaluated until you've typed it all in. As a bonus, the \
+status line shows how many left parentheses are currently hanging open. Cool, \
+huh?)^^";
+
+];
+
+[ Chapter12;
+
+print_title ("12. Creating Functions");
+
+print "There'd be no point to Scheme (or Lisp) if you couldn't define your own functions. \
+You get a function when you evaluate a lambda-expression. ", (atomstring) "lambda", " is another piece \
+of special syntax, and here's how you use it:^^";
+
+print_trans("(lambda (n) (+ n 1))",
+ "[function]");
+new_line;
+
+print "See? A function! You can probably guess what it does, but let's check:^^";
+
+print_trans("(define fred (lambda (n) (+ n 1)))",
+ "[function]");
+print_trans("(fred 56)",
+ "57");
+new_line;
+
+print "First we define ", (atomstring) "fred", " to be our new function, and then we call it with ", (atomstring) "56", " as the \
+argument. You don't need the definition, by the way. ", (atomstring) "(lambda (n) (+ n 1))", " \
+evaluates to a function, so you can use it as the first term of a list, just like \
+", (atomstring) "+", " or ", (atomstring) "car", ":^^";
+
+print_trans("((lambda (n) (+ n 1)) 56)",
+ "57");
+new_line;
+
+print "It's a little hard to read, but count the parentheses and you'll see how it works.^^";
+
+print "Time to be more specific. The ", (atomstring) "lambda", " syntax takes two arguments. The first must \
+be a list of atoms, which are the names of the arguments of the function. The \
+second is an expression which is evaluated to produce the function result.^^";
+
+print "So when we call our little one-argument function, it's ", (emphstring) "kind", " of like we did the \
+following:^^";
+
+print_trans("(define n 56)",
+ "56");
+print_trans("(+ n 1)",
+ "57");
+new_line;
+
+print "Only, not really. Function argument definitions are local, not global. The assignment \
+of ", (atomstring) "56", " to ", (atomstring) "n", " is only visible ", (emphstring) "to the function", ". In the outside world, the real world, \
+", (atomstring) "n", " isn't affected at all.^^";
+
+print_trans("(define n 11)",
+ "11");
+print_trans("(fred 93)",
+ "94");
+print_trans("n",
+ "11");
+new_line;
+
+print "This is important. It's called static binding. Comp Sci types think it's really cool. \
+It means that functions are all wrapped up in themselves -- they can't have side \
+effects, and they can't be affected by outside influences (besides their arguments, \
+of course.) Um, mostly. If you're careful. We'll get back to this, I hope.^^";
+
+print "A function can have any number of arguments, including zero:^^";
+
+print_trans("(define greeter (lambda () 'hello))",
+ "[function]");
+print_trans("(greeter)",
+ "hello");
+print_trans("(greeter 5)",
+ "[Error: too many arguments to function]");
+new_line;
+
+print "You can also have a function with a variable number of arguments. (Remember ", (atomstring) "+", "?) \
+You do this by giving an atom as the second argument to ", (atomstring) "lambda", ", instead of a list \
+of atoms. The whole list of arguments (possibly empty) gets assigned to the atom, \
+inside the function.^^";
+
+print_trans("(define prefix-foo (lambda args (cons 'foo args)))",
+ "[function]");
+print_trans("(prefix-foo 5)",
+ "(foo 5)");
+print_trans("(prefix-foo 'a 'bb 'ccc)",
+ "(foo a bb ccc)");
+print_trans("(prefix-foo)",
+ "(foo)");
+new_line;
+
+];
+
+[ Chapter13;
+
+print_title ("13. Fun With Recursion");
+
+print "How shall we define recursion? The old (old, old) joke is ~Recursion: See recursion.~ \
+This is a stinking lie. The correct definition is ~Recursion: If you already know \
+what recursion is, just remember the answer. Otherwise, find someone who is standing \
+closer to Douglas Hofstadter than you are; then ask him or her what recursion is.~^^";
+
+print "(That's original with me, folks, so attribute it if you quote it. :-)^^";
+
+print "The idea is that you handle the very simplest case directly. For more complex cases, \
+you chop off the littlest toe of the problem, handle that bit, and call yourself on \
+the remaining nearly-as-big problem... because you know you can handle it. Because \
+you know you can handle the slightly-smaller-than-that problem. Because... eventually, \
+because you know you can handle the very simplest case. In math, your teacher called \
+this ~proof by induction.~^^";
+
+print "Scheme ", (emphstring) "loves", " this stuff. Look at the car and cdr stuff; they're designed to split \
+a list into the first bit and the remaining nearly-as-big bit. Perfect! Let's use this \
+to define a function which finds the ", (emphstring) "last", " term in a list.^^";
+
+print_multitrans(
+"(define last (lambda (ls)",
+"   (cond",
+"     ((null? (cdr ls)) (car ls))",
+"     (t (last (cdr ls)))",
+")))"
+);
+new_line;
+
+print "Well, that's a bargeload of parentheses, isn't it. Let's sort through it. We define \
+", (atomstring) "last", " to be a function, that is, the result of a lambda-expression. This function \
+takes one argument, ", (atomstring) "ls", ". It consists of a ", (atomstring) "cond", " expression. First clause: if \
+", (atomstring) "(cdr ls)", " is ", (atomstring) "null", "?, then return ", (atomstring) "(car ls)", ". Otherwise, return ", (atomstring) "(last (cdr ls))", ". \
+That's all.^^";
+
+print "Got it yet? The idea is this: if you have a one-term list, the last term is the \
+first term. You can check this by seeing if ", (atomstring) "(cdr ls)", " is ", (atomstring) "nil", ", because only in a \
+one-term list is the cdr empty. So if ", (atomstring) "(null? (cdr ls))", ", we should return the first \
+term in the list, which is ", (atomstring) "(car ls)", ". Otherwise, we have a list which is two terms or \
+more -- so we can find its last element by calling ", (atomstring) "last", " on its cdr! It's not an \
+infinite loop, because the cdr of ", (atomstring) "ls", " is shorter than ", (atomstring) "ls", " is.^^";
+
+print_trans("(last '(a))",
+ "a");
+print_trans("(last '(a bb))",
+ "bb");
+print_trans("(last '(a bb c))",
+ "c");
+print_trans("(last '(a bb c (xx)))",
+ "(xx)");
+new_line;
+
+print "And lo, it works.^^";
+
+];
+
+[ Chapter14;
+
+print_title ("14. Local Definitions With Let");
+
+print "You often want to define temporary values -- helper functions, or temporary storage \
+for partially-computed values, or whatever. Scheme allows you to do this with the \
+", (atomstring) "let", " syntax, and a few related ones.^^";
+
+print_multiatom(
+" (let",
+"    (",
+"      (atom1 value1)",
+"      (atom2 value2)"
+);
+print_multiatom(
+"      ...",
+"    )",
+"    result",
+" )"
+);
+new_line;
+
+print "What goes on here is this: First, each of the value expressions is evaluated. Then \
+a local binding is made, with each value assigned to its atom. Then the result \
+expression is evaluated, with those assignments in place. The local assignments \
+are thrown away, and the value of result is returned.^^";
+
+print "This sort of temporary assignment is exactly like what happens with function arguments. \
+The definitions are only visible to the result expression -- not in the outside world. \
+In fact, you can rewrite a ", (atomstring) "let", " expression as a function definition and call:^^";
+
+print_multiatom(
+" ((lambda (atom1 atom2 ...) result)  (value1 value2 ...))"
+);
+new_line;
+
+print "But the ", (atomstring) "let", " syntax is easier to read. Example time...^^";
+
+print_multitrans(
+"(let",
+"    ((a 1) (b 2))",
+"  (+ a b)",
+")"
+);
+print_trans(2, "3");
+print_multitrans(
+"(let",
+"    ((func car))",
+"  (func '(a b c))",
+")"
+);
+print_trans(2, "a");
+print_multitrans(
+"(let",
+"    ((cost '(nickel dime)))",
+"  (eqv? cost cost)",
+")"
+);
+print_trans(2, "t");
+print_trans("a",
+ "[Error: undefined atom: a]");
+print_trans("func",
+ "[Error: undefined atom: func]");
+print_trans("cost",
+ "[Error: undefined atom: cost]");
+new_line;
+
+print "It's important to understand that ", (emphstring) "all", " the values in a ", (atomstring) "let", " are evaluated before ", 
+(emphstring) "any", " of the assignments are made. More correctly, none of the local assignments are \
+visible to the value expressions; they're only visible to the result expression. If you \
+want to make several definitions that refer to each other, you could use nested ", (atomstring) "let", " \
+statements. It's easier to use the ", (atomstring) "let*", " syntax, however. ", (atomstring) "let*", " is just like ", (atomstring) "let", ", \
+except that the assignments are made in order, and each one is visible to all the \
+values after it.^^";
+
+print_multitrans(
+"(let*",
+"  ((a 1)  (b (+ a 1)))",
+"  b",
+")"
+);
+print_trans(2, "2");
+new_line;
+
+print "If you tried that with ", (atomstring) "let", ", you'd get an ~undefined atom: a", "~ error, because ", (atomstring) "a", " \
+isn't defined at the point where ", (atomstring) "(+ a 1)", " is evaluated.^^";
+
+];
+
+[ Chapter15;
+
+print_title ("15. Recursion, Functions, Endless Fun");
+
+print (atomstring) "let*", " is cool, but it doesn't allow you to do really funky recursive stuff, with \
+several definitions that ", (emphstring) "really", " all reference each other. For that, you need \
+", (atomstring) "letrec", ". ", (atomstring) "letrec", " has the same form as ", (atomstring) "let", " and ", (atomstring) "let*", ", but any of the assigned \
+values can use any of the other atoms being bound. Sort of. The catch is, the \
+atoms being bound can only be used ", (emphstring) "inside lambda-expressions.", " So this isn't \
+legal:^^";
+
+print_multitrans(
+"(letrec",
+"  ((a a))",
+"  a",
+")"
+);
+new_line;
+
+print "This is bad because the ", (emphstring) "use", " of the atom being defined (the second ", (atomstring) "a", ", that \
+is) isn't ~protected~ inside a lambda-expression. If you think this is an \
+arbitrary restriction, consider: if it were legal, what the heck would it \
+evaluate to?^^";
+
+print "In case you were about to try this, by the way -- yes, I see you in the corner \
+-- you'll find it doesn't produce an error; it returns ", (atomstring) "nil", ". If there were \
+more terms being defined in the ", (atomstring) "letrec", ", the results could be even stranger. \
+This is because I used a fairly unpleasant hack when writing the ", (atomstring) "letrec", " \
+code. (A legal hack, honest. The Scheme standard says that this sort of \
+", (atomstring) "letrec", " abuse produces undefined results.)^^";
+
+print "So how ", (emphstring) "can", " ", (atomstring) "letrec", " be used? Well, the following is legal:^^";
+
+print_multitrans(
+"(letrec",
+"  ((a (lambda () a)))",
+"  a",
+")"
+);
+new_line;
+
+print "The assignment value is ", (atomstring) "(lambda () a)", ", which only uses ", (atomstring) "a", " inside the \
+lambda-expression. (The final term of the ", (atomstring) "letrec", ", which in this case is ", (atomstring) "a", ", \
+is allowed to use all the defined atoms -- they've all been defined by that \
+time.) What does ", (emphstring) "this", " do? Let's see:^^";
+
+print_multitrans(
+"(define thing",
+"  (letrec",
+"    ((a (lambda () a)))",
+"    a",
+"  )",
+")"
+);
+print_trans(2, "[function]");
+new_line;
+
+print "Okay, ", (atomstring) "thing", " has been defined to be a function. What function is this? It's the \
+function which the ", (atomstring) "letrec", " statement temporarily defined to be ", (atomstring) "a", ". What was ", (atomstring) "a", " \
+defined as? A function which takes no arguments, and returns whatever ", (atomstring) "a", " was \
+defined as.^^";
+
+print "In other words, this is everyone's favorite twisted example: the function which \
+returns ", (emphstring) "itself", ". Let's check that:^^";
+
+print_trans("thing",
+ "[function]");
+print_trans("(thing)",
+ "[function]");
+print_trans("((thing))",
+ "[function]");
+print_trans("(eqv? thing (thing))",
+ "t");
+new_line;
+
+print "Even ", (atomstring) "eqv?", " agrees: the function assigned to ", (atomstring) "thing", " is the very same function \
+returned by evaluating ", (atomstring) "(thing)", ", which is to say, the result of calling the \
+function assigned to ", (atomstring) "thing", ". (Notice that in this chapter, I'm being careful \
+to distinguish the value assigned to ", (atomstring) "thing", " from the atom ", (atomstring) "thing", " itself. The \
+function doesn't return an atom; it returns a function.)^^";
+
+print "What would happen if we tried this with ", (atomstring) "let", " instead of ", (atomstring) "letrec", "? Go ahead, \
+try it.^^";
+
+print_multitrans(
+"(define thing",
+"  (let",
+"    ((a (lambda () a)))",
+"    a",
+"  )",
+")"
+);
+print_trans(2, "[function]");
+print_trans("(thing)",
+ "[Error: undefined atom: a]");
+new_line;
+
+print "Like we said, all the values in a ", (atomstring) "let", " are evaluated before any of the \
+assignments are made. So that lambda-expression is evaluated, producing a \
+function which returns whatever is assigned to ", (atomstring) "a", ". But at this point, nothing \
+", (emphstring) "has", " been assigned to ", (atomstring) "a", " yet. And -- remember static binding -- functions \
+are all wrapped up in themselves. The function can't see the temporary \
+assignment to ", (atomstring) "a", " which is made later on. That assignment only exists within \
+the scope of the ", (atomstring) "let", " statement. You can do it with ", (atomstring) "letrec", ", because all the \
+assignments in a ", (atomstring) "letrec", " exist within each other's scope. (Although they're \
+incomplete, in a funny sense, which is why they have to be protected in a \
+function.)^^";
+
+];
+
+[ Chapter16;
+
+print_title ("16. Scope");
+
+print "Oops, I started talking about scope. Time to define it.^^";
+
+print "All of the local assignments in a function -- its arguments, and any \
+assignments made by ", (atomstring) "let", " and variants -- are fixed at the point where the \
+function was defined. That's what ~static~ means. Look at the position of the \
+lambda expression, see what ", (atomstring) "let", " statements it's inside, and you can tell what \
+assignments it knows about. That's the function's scope.^^";
+
+print "Top-level definitions -- those created with ", (atomstring) "define", " -- are different. \
+They're visible everywhere. They can also change at any time. Convenient, \
+but possibly a source of bugs.^^";
+
+print "Best to illustrate the difference with an example. Can't you define the evil \
+function that returns itself more simply, this way?^^";
+
+print_multitrans(
+"(define selfer",
+"  (lambda () selfer)",
+")"
+);
+print_trans(2, "[function]");
+new_line;
+
+print "Well, yes, that works. But it's dependent on the global definition of ", (atomstring) "selfer", ". \
+If you break that, the function stops working.^^";
+
+print_trans("(define another-selfer selfer)",
+ "[function]");
+print_trans("(define selfer 'toast)",
+ "toast");
+print_trans("(another-selfer)",
+ "toast");
+print_trans("(eqv? another-selfer (another-selfer))",
+ "nil");
+new_line;
+
+print "The ", (atomstring) "thing", " function defined in the previous chapter will always keep working, \
+even if we assigned it to ", (atomstring) "another-thing", " and changed the definition of ", (atomstring) "thing", ". \
+If a function doesn't rely on top-level definitions that might change, its \
+behavior is completely predictable. This is generally a good thing.^^";
+
+print "On the other hand, a function that does rely on top-level definitions can be \
+affected by other functions that change that definition. This sort of thing is \
+called a side effect; doing one thing has a side effect which affects another \
+thing. In functional programming, people say they hate side effects, but actually \
+it's hard to break the habit of using them. (Imperative languages like Pascal \
+and C are ", (emphstring) "made", " of side effects. Every time you change the value of a variable, \
+you affect everything else that uses that variable.)^^";
+
+];
+
+[ Chapter17;
+
+print_title ("17. Return");
+
+print "Well, that's it for the manual. We haven't covered all of Scheme by any means, \
+but we've gone through all the foundations. If you've been following along with \
+the genie's exercises, you have a handle on how to think in Scheme.^^";
+
+print "The definitive reference book on Scheme is ", (emphstring) "The Scheme Programming Language,", 
+" by R. Kent Dybvig. (No, I have no idea. I can't think of a color which starts \
+with D.) Pick it up, and find a real Scheme interpreter, if you're interested \
+in learning more. If you ever figure out how continuations work, please come and \
+explain them to me.^^";
+
+print "If it crosses your path of life to learn Lisp, you'll find that it's pretty much \
+what you've learned here; just a little messier. (The biggest difference is that \
+atoms have two distinct values assigned to them -- a data value, and a function \
+value. I've never understood why. It's just something to remember.)^^";
+
+print "If you think this whole thing is a waste of your time... then why did you read \
+this far?^^";
+
+print "Have fun.^^";
+
+];
+
+[ Chapter18;
+
+print_title ("18. Reference: Functions");
+
+print "This is a list of all pre-defined functions. Some of them have more functionality \
+than the tutorial describes, so listen up.^^";
+
+print (atomstring) "(car v)", " : 1 argument (a non-empty list)^";
+print "Returns the first term of ", (atomstring) "v", ".^^";
+
+print (atomstring) "(cdr v)", " : 1 argument (a non-empty list)^";
+print "Returns the list containing all but the first term of ", (atomstring) "v", ".^^";
+
+print (atomstring) "(cons v w)", " : 2 arguments (the second a list)^";
+print "Returns the list whose first term is ", (atomstring) "v", " and the rest of whose terms are \
+the terms of ", (atomstring) "w", ".^^";
+
+print (atomstring) "(length v)", " : 1 argument (a list)^";
+print "Returns the number of terms in ", (atomstring) "v", ".^^";
+
+print (atomstring) "(list v ...)", " : 0 or more arguments^";
+print "Returns the list whose terms are the given arguments.^^";
+
+print (atomstring) "(not v)", " : 1 argument^";
+print "Returns ", (atomstring) "t", " if ", (atomstring) "v", " is ", (atomstring) "nil", ", and ", (atomstring) "nil", " otherwise.^^";
+
+print (atomstring) "(eqv? v w)", " : 2 arguments^";
+print "Returns ", (atomstring) "t", " if ", (atomstring) "v", " and ", (atomstring) "w", " are both ", (atomstring) "nil", ", or are the same atom, or were created at \
+the same time. Returns ", (atomstring) "nil", " otherwise.^^";
+
+print (atomstring) "(equal? v w)", " : 2 arguments^";
+print "Returns ", (atomstring) "t", " if ", (atomstring) "v", " and ", (atomstring) "w", " are ", (atomstring) "eqv?", ", or are lists of the same length all of whose \
+terms are ", (atomstring) "equal?", ".^^";
+
+print (atomstring) "(null? v)", " : 1 argument^";
+print "Returns ", (atomstring) "t", " if ", (atomstring) "v", " is ", (atomstring) "nil", ", and ", (atomstring) "nil", " otherwise. (Yes, this is the same as ", (atomstring) "not", ".)^^";
+
+print (atomstring) "(list? v)", " : 1 argument^";
+print "Returns ", (atomstring) "t", " if ", (atomstring) "v", " is a list, including ", (atomstring) "nil", ". Returns ", (atomstring) "nil", " if ", (atomstring) "v", " is anything \
+else, such as an atom or function.^^";
+
+print (atomstring) "(= v ...)", " : 1 or more arguments (all numbers)^";
+print "Returns ", (atomstring) "t", " if all the arguments are the same number. If there is only one \
+argument, always returns ", (atomstring) "t", ".^^";
+
+print (atomstring) "(> v ...)", " : 1 or more arguments (all numbers)^";
+print "Returns ", (atomstring) "t", " if all the arguments are numbers in strictly descending sequence. \
+Otherwise returns ", (atomstring) "nil", ". If there is only one argument, always returns ", (atomstring) "t", ".^^";
+
+print (atomstring) "(>= v ...)", " : 1 or more arguments (all numbers)^";
+print "Returns ", (atomstring) "t", " if all the arguments are numbers in descending sequence, not necessarily \
+strictly. Otherwise returns ", (atomstring) "nil", ". If there is only one argument, always returns ", (atomstring) "t", ".^^";
+
+print (atomstring) "(< v ...)", " : 1 or more arguments (all numbers)^";
+print "Returns ", (atomstring) "t", " if all the arguments are numbers in strictly ascending sequence. \
+Otherwise returns ", (atomstring) "nil", ". If there is only one argument, always returns ", (atomstring) "t", ".^^";
+
+print (atomstring) "(<= v ...)", " : 1 or more arguments (all numbers)^";
+print "Returns ", (atomstring) "t", " if all the arguments are numbers in ascending sequence, not necessarily \
+strictly. Otherwise returns ", (atomstring) "nil", ". If there is only one argument, always returns ", (atomstring) "t", ".^^";
+
+print (atomstring) "(+ v ...)", " : 0 or more arguments (all numbers)^";
+print "Returns the sum of all the arguments. If there are no arguments, returns ", (atomstring) "0", ".^^";
+
+print (atomstring) "(- v ...)", " : 0 or more arguments (all numbers)^";
+print "Returns the first argument minus the sum of all the other arguments. \
+If there is only one argument, returns its negative. If there are no arguments, \
+returns ", (atomstring) "0", ".^^";
+
+print (atomstring) "(eval v)", " : 1 argument^";
+print "Returns the result of evaluating ", (atomstring) "v", ". (Note that since ", (atomstring) "eval", " is a function, \
+whatever you give as the argument is evaluated before it is handed in. So \
+", (atomstring) "eval", " sort of double-evaluates whatever you give it.)^^";
+
+];
+
+[ Chapter19;
+
+print_title ("19. Reference: Syntactic Forms");
+
+print "This is a list of all the special syntax forms available.^^";
+
+print (atomstring) "(quote v)", " : 1 argument^";
+print "Returns ", (atomstring) "v", ", without evaluating it at all.^^";
+
+print (atomstring) "(error ...)", " : any number of arguments^";
+print "Causes an error. The arguments are ignored. This aborts the evaluation of an \
+expression; once any part causes an error, the entire thing results in an error.^^";
+
+print (atomstring) "(cond clause1 ...)", " : any number of clauses; each clause is a list of either one \
+or two terms^";
+print "Goes through the clauses, in order. If the first (or only) term of a clause \
+evaluates to ", (atomstring) "nil", ", it is skipped and the next one tested. The leftmost clause whose \
+first term evaluates to non-", (atomstring) "nil", " is the winner. If it has only one term, that \
+non-", (atomstring) "nil", " value is returned. If it has two, the result of evaluating the second \
+term is returned. If no clause is a winner, ", (atomstring) "nil", " is returned.^^";
+
+print (atomstring) "(define atom v)", " : two arguments; the first an atom^";
+print "The result of evaluating ", (atomstring) "v", " is assigned to ", (atomstring) "atom", " (a top-level definition). If \
+", (atomstring) "atom", " already has a top-level definition, the older definition is replaced. \
+The new value is also returned.^^";
+
+print (atomstring) "(lambda arglist v)", " : two arguments^";
+print "Returns a function. The scope of the function is the scope in which the \
+lambda-expression is evaluated to produce it. When a function is called, the arguments \
+it is given are assigned to the atoms in ", (atomstring) "arglist", ", producing a new scope on top \
+of the function's scope; ", (atomstring) "v", " is then evaluated in this new scope. ", (atomstring) "arglist", " may \
+be a single atom (in which case all the function's arguments are put into a list \
+which is assigned to that atom), or ", (atomstring) "nil", " (in which case the function takes zero \
+arguments), or a list of atoms (in which case the function takes that many \
+arguments.)^^";
+
+print (atomstring) "(let ((atom1 def1) ...) v)", " : two arguments; the first is a list of clauses; each \
+clause is a list of two terms^";
+print "All the definitions in the list of clauses are evaluated, in the current scope. \
+Then a new scope is created, in which those values are assigned to their respective \
+atoms (a local or temporary definition.) ", (atomstring) "v", " is evaluated in this new scope, and \
+the result is returned.^^";
+
+print (atomstring) "(let* ((atom1 def1) ...) v)", " : two arguments; the first is a list of clauses; each \
+clause is a list of two terms^";
+print "In the current scope, ", (atomstring) "def1", " is evaluated. A new scope is created in which \
+the resulting value is assigned to ", (atomstring) "atom1", ". In this new scope, ", (atomstring) "def2", " is evaluated. \
+A newer scope is created in which the resulting value is assigned to ", (atomstring) "atom2", ". This \
+continues until all clauses are handled. ", (atomstring) "v", " is evaluated in the final scope, and \
+the result is returned.^^";
+
+print (atomstring) "(letrec ((atom1 def1) ...) v)", " : two arguments; the first is a list of clauses; each \
+clause is a list of two terms^";
+print "A new scope is created in which the atoms of all the clauses are assigned undefined \
+values. All the definitions of the clauses are then evaluated, in this new scope. \
+(For the results to be valid, all uses of the atoms must be inside lambda-expressions.) \
+The resulting values are written into the scope, completing it, and then ", (atomstring) "v", " is \
+evaluated in the scope.^^";
+
+];
+
+[ Chapter20;
+
+print_title ("20. Reference: Improper Lists");
+
+print "And finally, I have been convinced to put in more about improper lists. (Chapter \
+8 was where I said that I didn't feel like explaining them.) This section is tacked \
+on as reference material because you don't really need to know about improper lists \
+for the purposes of this tutorial, but you're undoubtedly going to stumble into \
+them anyway. So you can think of this chapter as an appendix. A weird little \
+continuation tacked on after the manual's full stop. Ha! I just kill myself sometimes. \
+Or at least strain my back reaching after feeble jokes.^^";
+
+print "An improper list, or dotted list, is just what you get when the cdr of a list is \
+not a list. That is, if the second argument of a ", (atomstring) "cons", " call is not a list, the \
+result of the ", (atomstring) "cons", " will be an improper list.^^";
+
+print "You can also create an improper list by typing the dotted form itself.^^";
+
+print_trans("'(a . b)",
+ "(a . b)");
+new_line;
+
+print "If the second argument of a ", (atomstring) "cons", " call is an improper list, the result will be a \
+longer improper list.^^";
+
+print_trans("(cons 'z '(a . b))",
+ "(z a . b)");
+print_trans("(cons 'rats '(z a . b))",
+ "(rats z a . b)");
+new_line;
+
+print "There can only be one dot in an improper list, and it will always be just before \
+the last term. Why? Well, in a proper list, the cdr is either a non-empty list \
+(meaning there's more to come) or the empty list (meaning you've reached the \
+end.) In an improper list, the cdr is a non-list, meaning you've reached a \
+strange sort of appendix; but you can't go on after that, because the appendix \
+", (emphstring) "isn't", " a list, it's just one thing; so there's no more to do. The appendix is \
+written after the dot, and then you're done.^^";
+
+print "Of course, if the appendix ", (emphstring) "is", " a list, then you're not writing an improper \
+list at all. This follows directly from the rules, and a little experimentation \
+shows that it's true:^^";
+
+print_trans("'(a . (b c))",
+ "(a b c)");
+new_line;
+
+print "An improper list isn't actually that awful; ", (atomstring) "list?", " will say that it is a list, \
+and you can do anything with it that you can do with a proper list. The only \
+problem is that if you take its cdr, and assume the result is a list, you will \
+get an ugly surprise. Many Scheme functions (including some built-in ones) do \
+make this assumption, and they will choke horribly when fed improper lists. \
+However, if you want to use improper lists for your own purposes, there's no \
+reason not to.^^";
+
+print (emphstring) "Now", " we're done.^^";
+
+];

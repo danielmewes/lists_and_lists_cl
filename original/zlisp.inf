@@ -1,0 +1,11 @@
+Switches xv5;
+Release 1;
+
+[ Main;
+	print "[Welcome to ZLisp. Enter ~:q~ to quit.]^";
+	LispLoop();
+	print "[Goodbye.]^";
+	quit;
+];
+
+#include "zlisp-core.inf";
