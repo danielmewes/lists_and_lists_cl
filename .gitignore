@@ -1,0 +1,28 @@
+# Common Lisp compiled files
+*.fasl
+*.fas
+*.lib
+*.dx64fsl
+*.dx32fsl
+*.lx64fsl
+*.lx32fsl
+*.x86f
+*.ufasl
+*.dfsl
+*.cfsl
+*.wx64fsl
+*.wx32fsl
+
+# SBCL core files
+sbcl.core
+
+# Editor files
+*~
+*.bak
+*.swp
+.#*
+\#*\#
+
+# OS files
+.DS_Store
+Thumbs.db
