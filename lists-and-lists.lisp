@@ -1180,10 +1180,8 @@ keep working.")))
                       (if (symbolp handler)
                           (funcall (symbol-function handler) (first rest))
                           (funcall handler (first rest)))))
-                   ;; Try default action for unrecognized verbs
-                   (if rest
-                       (cmd-default-action (first rest))
-                       (format t "That's not a verb I recognise.~%"))))))))))))
+                   ;; Unrecognized verb
+                   (format t "That's not a verb I recognise.~%")))))))))))
 
 (defun split-string (string separator)
   "Simple string splitter"
