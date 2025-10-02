@@ -26,3 +26,7 @@ sbcl.core
 # OS files
 .DS_Store
 Thumbs.db
+
+# Save game files
+savegame.lisp
+*.sav

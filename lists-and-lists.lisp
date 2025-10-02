@@ -708,6 +708,12 @@ keep working.")))
             ((string-equal cmd "about")
              (cmd-about))
 
+            ((string-equal cmd "save")
+             (cmd-save (first rest)))
+
+            ((string-equal cmd "load")
+             (cmd-load (first rest)))
+
             (t
              (format t "That's not a verb I recognise.~%")))))))))
 
@@ -1096,6 +1102,105 @@ environment where it was created.\"~%"))))))
   (format t "It may be copied, distributed, and played freely.~%")
   (format t "~%Type 'help' for help with whatever you are currently stuck on.~%")
   (format t "~%This is a Common Lisp port of the original Z-machine version.~%"))
+
+;;; ============================================================================
+;;; SAVE/LOAD SYSTEM
+;;; ============================================================================
+
+(defun cmd-save (&optional filename)
+  "Save the current game state to a file"
+  (let ((save-file (or filename "savegame.lisp")))
+    (handler-case
+        (with-open-file (out save-file
+                             :direction :output
+                             :if-exists :supersede
+                             :if-does-not-exist :create)
+          (let ((*print-case* :downcase)
+                (*print-readably* t))
+            (format out ";;; Lists And Lists - Save Game~%")
+            (format out ";;; Saved: ~A~%~%" (get-universal-time))
+            (format out "(in-package :lists-and-lists)~%~%")
+            (prin1 `(setf *current-room* ',*current-room*) out)
+            (terpri out)
+            (prin1 `(setf *genie-state* ,*genie-state*) out)
+            (terpri out)
+            (prin1 `(setf *genie-waiting* ,*genie-waiting*) out)
+            (terpri out)
+            (prin1 `(setf *alarm-box-used* ,*alarm-box-used*) out)
+            (terpri out)
+            (prin1 `(setf *manual-available* ,*manual-available*) out)
+            (terpri out)
+            (prin1 `(setf *prize-won* ,*prize-won*) out)
+            (terpri out)
+            (prin1 `(setf *hint-problem* ,*hint-problem*) out)
+            (terpri out)
+            (prin1 `(setf *hint-level* ,*hint-level*) out)
+            (terpri out)
+            ;; Save user-defined environment bindings (excluding built-ins)
+            (prin1 `(setf *global-env* ,(save-user-env *global-env*)) out)
+            (terpri out))
+          (format t "Game saved to ~A~%" save-file))
+      (error (e)
+        (format t "Error saving game: ~A~%" e)))))
+
+(defun cmd-load (&optional filename)
+  "Load game state from a file"
+  (let ((save-file (or filename "savegame.lisp")))
+    (handler-case
+        (progn
+          (if (probe-file save-file)
+              (progn
+                (load save-file)
+                (format t "Game loaded from ~A~%" save-file)
+                (describe-room))
+              (format t "Save file ~A not found.~%" save-file)))
+      (error (e)
+        (format t "Error loading game: ~A~%" e)))))
+
+(defun save-user-env (env)
+  "Save user-defined bindings from environment, recreating it on load"
+  (let ((user-bindings (collect-user-bindings env)))
+    `(let ((new-env (init-global-env)))
+       ,@(loop for (sym . val) in user-bindings
+               collect `(env-define ',sym ,(serialize-scheme-value val) new-env))
+       new-env)))
+
+(defun collect-user-bindings (env)
+  "Collect user-defined bindings (non-builtin) from environment"
+  (if (or (null env) (not (eq (car env) 'env)))
+      nil
+      (let ((parent-bindings (collect-user-bindings (env-parent env)))
+            (local-bindings (loop for (sym . val) in (cddr env)
+                                  unless (or (scheme-builtin-p val)
+                                           (scheme-syntax-p val))
+                                  collect (cons sym val))))
+        (append local-bindings parent-bindings))))
+
+(defun serialize-scheme-value (val)
+  "Convert a Scheme value to a serializable form"
+  (cond
+    ((null val) nil)
+    ((numberp val) val)
+    ((eq val t) t)
+    ((scheme-atom-p val) `(make-scheme-atom :name ',(scheme-atom-name val)))
+    ((scheme-cons-p val)
+     `(make-scheme-cons :car ,(serialize-scheme-value (scheme-cons-car val))
+                        :cdr ,(serialize-scheme-value (scheme-cons-cdr val))))
+    ((scheme-function-p val)
+     `(make-scheme-function :params ,(serialize-scheme-value (scheme-function-params val))
+                           :body ,(serialize-scheme-value (scheme-function-body val))
+                           :env ,(serialize-scheme-env (scheme-function-env val))))
+    (t `',val)))
+
+(defun serialize-scheme-env (env)
+  "Serialize a Scheme environment, preserving user bindings"
+  (if (or (null env) (not (eq (car env) 'env)))
+      '*global-env*
+      (let ((bindings (collect-user-bindings env)))
+        `(let ((new-env (make-env *global-env*)))
+           ,@(loop for (sym . val) in bindings
+                   collect `(env-define ',sym ,(serialize-scheme-value val) new-env))
+           new-env))))
 
 ;;; ============================================================================
 ;;; MANUAL SYSTEM
