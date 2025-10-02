@@ -1064,7 +1064,7 @@
   (lambda ()
     (reset-game-state)
     (set-room 'lab)
-    (let ((output (simulate-command #'cmd-turn '("on" "computer"))))
+    (let ((output (simulate-command-with-input ":q~%" #'cmd-turn '("on" "computer"))))
       (assert-output-contains output "computer comes to life" "Should turn on computer"))))
 
 ;; Test entry room scenery
