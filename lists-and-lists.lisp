@@ -717,6 +717,18 @@ keep working.")))
             ((string-equal cmd "load")
              (cmd-load (first rest)))
 
+            ((member cmd '("wake" "wakeup") :test #'string-equal)
+             (cmd-wake (first rest)))
+
+            ((member cmd '("shout" "yell" "scream") :test #'string-equal)
+             (cmd-shout (first rest)))
+
+            ((member cmd '("attack" "hit" "kick" "punch") :test #'string-equal)
+             (cmd-attack (first rest)))
+
+            ((member cmd '("kiss" "hug") :test #'string-equal)
+             (cmd-kiss (first rest)))
+
             (t
              (format t "That's not a verb I recognise.~%")))))))))
 
@@ -1116,6 +1128,88 @@ environment where it was created.\"~%"))))))
   (format t "It may be copied, distributed, and played freely.~%")
   (format t "~%Type 'help' for help with whatever you are currently stuck on.~%")
   (format t "~%This is a Common Lisp port of the original Z-machine version.~%"))
+
+(defun cmd-wake (what)
+  "Handle WAKE verb"
+  (cond
+    ((null what)
+     (format t "What do you want to wake?~%"))
+    ((member what '("genie") :test #'string-equal)
+     (if (not (eq *current-room* 'lab))
+         (format t "You don't see that here.~%")
+         (if (= *genie-state* 0)
+             ;; Genie is asleep - show one of three random responses
+             (case (random 3)
+               (0 (format t "The genie rolls over.~%"))
+               (1 (format t "The genie snorts. \"'z a louse,\" he mumbles.~%"))
+               (2 (format t "The genie mumbles, \"M'm awake, mmf,\" and throws an arm over his ear.~%")))
+             ;; Genie is awake
+             (format t "The genie glances up at you. \"I'm not about to fall asleep, not with you muttering to yourself and scribbling all those notes.\"~%"))))
+    (t
+     (format t "That's not something you can wake.~%"))))
+
+(defun cmd-shout (what)
+  "Handle SHOUT verb"
+  (cond
+    ((null what)
+     (format t "You shout, but nothing happens.~%"))
+    ((member what '("genie" "at") :test #'string-equal)
+     (if (not (eq *current-room* 'lab))
+         (format t "You don't see that here.~%")
+         (if (= *genie-state* 0)
+             (format t "(to the genie)~%The genie, unconscious, quite ignores you.~%")
+             (format t "The genie looks at you quizzically. \"No need to shout.\"~%"))))
+    (t
+     (format t "You shout at ~A, but nothing happens.~%" what))))
+
+(defun cmd-attack (what)
+  "Handle ATTACK/HIT/KICK/PUNCH verb"
+  (cond
+    ((null what)
+     (format t "What do you want to attack?~%"))
+    ((member what '("box" "glass" "alarm") :test #'string-equal)
+     (if (and (eq *current-room* 'entry)
+              (not *alarm-box-used*))
+         (cmd-break what)
+         (format t "You don't see that here.~%")))
+    ((member what '("genie") :test #'string-equal)
+     (if (not (eq *current-room* 'lab))
+         (format t "You don't see that here.~%")
+         (if (= *genie-state* 0)
+             ;; Attacking the sleeping genie wakes him (like Kiss)
+             (progn
+               (setf *alarm-box-used* t)
+               (setf *genie-state* 1)
+               (setf *genie-waiting* t)
+               (format t "~%A gleaming hand catches your fist. The genie gently -- very gently -- stops your attack.~%")
+               (format t "~%The genie looks you over, squinching his face in a manner to which mere mortals cannot aspire. \"Okay, okay,\" he rumbles. \"Welcome to Hell. Might as well get to work.\"~%~%")
+               (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
+               (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
+             (format t "Violence is not the answer. The genie frowns at you.~%"))))
+    (t
+     (format t "That's not something you want to attack.~%"))))
+
+(defun cmd-kiss (what)
+  "Handle KISS/HUG verb"
+  (cond
+    ((null what)
+     (format t "What do you want to kiss?~%"))
+    ((member what '("genie") :test #'string-equal)
+     (if (not (eq *current-room* 'lab))
+         (format t "You don't see that here.~%")
+         (if (= *genie-state* 0)
+             ;; Kissing the sleeping genie wakes him (same as breaking the alarm box)
+             (progn
+               (setf *alarm-box-used* t)
+               (setf *genie-state* 1)
+               (setf *genie-waiting* t)
+               (format t "~%A gleaming hand catches your wrist. The genie gently -- very gently -- pushes you away.~%")
+               (format t "~%The genie looks you over, squinching his face in a manner to which mere mortals cannot aspire. \"Okay, okay,\" he rumbles. \"Welcome to Hell. Might as well get to work.\"~%~%")
+               (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
+               (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
+             (format t "The genie looks at you with amusement. \"Let's keep this professional.\"~%"))))
+    (t
+     (format t "That's not something you want to kiss.~%"))))
 
 ;;; ============================================================================
 ;;; SAVE/LOAD SYSTEM
