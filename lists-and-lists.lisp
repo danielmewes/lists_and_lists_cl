@@ -435,6 +435,36 @@
   "Print 'What do you want to [verb]?' message"
   (format t "What do you want to ~A?~%" verb))
 
+;;; Genie response helpers
+(defun respond-genie-asleep ()
+  "Respond when player interacts with sleeping genie"
+  (format t "The genie, unconscious, quite ignores you.~%"))
+
+(defun respond-genie-asleep-shout ()
+  "Respond when player shouts at sleeping genie"
+  (format t "(to the genie)~%The genie, unconscious, quite ignores you.~%"))
+
+(defun respond-genie-no-shout ()
+  "Respond when player shouts at awake genie"
+  (format t "The genie looks at you quizzically. \"No need to shout.\"~%"))
+
+(defun respond-genie-confused ()
+  "Respond when genie doesn't understand"
+  (format t "\"What?\"~%"))
+
+;;; System message helpers
+(defun print-goodbye ()
+  "Print game ending message"
+  (format t "~%Thanks for playing!~%"))
+
+(defun print-cant-see-object ()
+  "Print message for objects not visible in interpreter context"
+  (format t "You can't see any such thing.~%"))
+
+(defun print-what-problem ()
+  "Print genie's response when no problem is active"
+  (format t "\"What problem?\"~%"))
+
 ;;; Wake genie sequence
 (defun wake-genie (initial-action-msg)
   "Handle the sequence of waking the genie with a specific action message"
@@ -446,36 +476,56 @@
   (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
   (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
 
-;;; Object registry and visibility
+;;; Object registry - central definitions for all object names
+(defparameter *object-names*
+  '((genie "genie")
+    (alarm-box "box" "glass" "alarm")
+    (computer "computer" "machine")
+    (book "book" "manual")
+    (plaque "plaque")
+    (green-button "green" "run")
+    (yellow-button "yellow" "reset")
+    (door "door"))
+  "Map of object types to their recognized names")
+
+(defun object-is-p (object-name object-type)
+  "Check if OBJECT-NAME refers to OBJECT-TYPE using the central registry"
+  (let ((names (cdr (assoc object-type *object-names*))))
+    (apply #'cmd-matches-p object-name names)))
+
 (defun object-visible-p (object-name)
   "Check if an object is visible in the current room"
   (cond
     ;; Genie - visible in lab when not finished
-    ((cmd-matches-p object-name "genie")
+    ((object-is-p object-name 'genie)
      (and (in-lab-p) (not (genie-finished-p))))
 
     ;; Alarm box - visible in lab when genie is asleep and not used
-    ((cmd-matches-p object-name "box" "glass" "alarm")
+    ((object-is-p object-name 'alarm-box)
      (and (in-lab-p) (genie-asleep-p) (not *alarm-box-used*)))
 
     ;; Computer/machine - always visible in lab
-    ((cmd-matches-p object-name "computer" "machine")
+    ((object-is-p object-name 'computer)
      (in-lab-p))
 
     ;; Book/manual - visible in lab when available
-    ((cmd-matches-p object-name "book" "manual")
+    ((object-is-p object-name 'book)
      (and (in-lab-p) *manual-available*))
 
     ;; Plaque - visible in lab when prize is won
-    ((cmd-matches-p object-name "plaque")
+    ((object-is-p object-name 'plaque)
      (and (in-lab-p) *prize-won*))
 
-    ;; Green/run and yellow/reset buttons - visible in lab
-    ((cmd-matches-p object-name "green" "run" "yellow" "reset")
+    ;; Green/run button - visible in lab
+    ((object-is-p object-name 'green-button)
+     (in-lab-p))
+
+    ;; Yellow/reset button - visible in lab
+    ((object-is-p object-name 'yellow-button)
      (in-lab-p))
 
     ;; Door - visible in entry room
-    ((cmd-matches-p object-name "door")
+    ((object-is-p object-name 'door)
      (eq *current-room* 'entry))
 
     (t nil)))
@@ -759,7 +809,7 @@ keep working.")))
                (rest (rest words)))
            (cond
             ((cmd-matches-p cmd "quit" "q")
-             (format t "~%Thanks for playing!~%")
+             (print-goodbye)
              (return))
 
             ((cmd-matches-p cmd "look" "l")
@@ -855,7 +905,7 @@ keep working.")))
           (progn
             (format t "~%You step back through the door...~%")
             (format t "~%*** You have won ***~%")
-            (format t "~%Thanks for playing!~%")
+            (print-goodbye)
             (return-from cmd-go-south t))
           (format t "Leaving so soon?~%"))
       (format t "You ARE outside.~%")))
@@ -864,22 +914,22 @@ keep working.")))
   (cond
     ((null what)
      (print-what-verb "examine"))
-    ((cmd-matches-p what "door")
+    ((object-is-p what 'door)
      (format t "The door to the north is ancient, stained, knotted wood.~%"))
-    ((cmd-matches-p what "genie")
+    ((object-is-p what 'genie)
      (if (require-object what)
          (cmd-examine-genie)))
-    ((cmd-matches-p what "computer" "machine")
+    ((object-is-p what 'computer)
      (if (require-object what)
          (format t "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button.~%")))
-    ((cmd-matches-p what "box" "glass")
+    ((object-is-p what 'alarm-box)
      (if (require-object what)
          (format t "It's a small cube of frosted glass. Neatly etched on one side are the words
 \"Break glass to wake owner.\" Something turns slowly inside the box...~%")))
-    ((cmd-matches-p what "book" "manual")
+    ((object-is-p what 'book)
      (if (require-object what)
          (cmd-manual)))
-    ((cmd-matches-p what "plaque")
+    ((object-is-p what 'plaque)
      (if (require-object what)
          (format t "It's a plate of thin gold, engraved with angular designs. In the center
 you see the words \"*** You have won ***\"~%")))
@@ -903,14 +953,14 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~
   (cond
     ((null what)
      (print-what-verb "read"))
-    ((cmd-matches-p what "book" "manual")
+    ((object-is-p what 'book)
      (if (require-object what)
          (cmd-manual)))
     (t
      (format t "You can't read that.~%"))))
 
 (defun cmd-break (what)
-  (if (and (cmd-matches-p what "box" "glass")
+  (if (and (object-is-p what 'alarm-box)
            (object-visible-p what))
       (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
 
@@ -921,10 +971,10 @@ removes the box from your grasp, and tucks it carefully away into nothing.")
 
 (defun cmd-push (what)
   (cond
-    ((cmd-matches-p what "green" "run")
+    ((object-is-p what 'green-button)
      (if (require-object what)
          (cmd-run-interpreter)))
-    ((cmd-matches-p what "yellow" "reset")
+    ((object-is-p what 'yellow-button)
      (if (require-object what)
          (cmd-reset-interpreter)))
     (t
@@ -932,7 +982,7 @@ removes the box from your grasp, and tucks it carefully away into nothing.")
 
 (defun cmd-run-interpreter ()
   (if (not (in-lab-p))
-      (format t "You can't see any such thing.~%")
+      (print-cant-see-object)
       (progn
         (when (null *global-env*)
           (init-global-env))
@@ -951,7 +1001,7 @@ or :? for a list of other : commands.]~%")
 
 (defun cmd-reset-interpreter ()
   (if (not (in-lab-p))
-      (format t "You can't see any such thing.~%")
+      (print-cant-see-object)
       (progn
         (setf *global-env* nil)
         (format t "~%[Interpreter reset.]~%"))))
@@ -1032,7 +1082,7 @@ or :? for a list of other : commands.]~%")
       (format t "Yes to what?~%")
       (cond
         ((genie-asleep-p)
-         (format t "The genie, unconscious, quite ignores you.~%"))
+         (respond-genie-asleep))
 
         ((= *genie-state* 1)
          (setf *genie-state* 2)
@@ -1064,17 +1114,17 @@ I,\" he adds with sudden intensity, \"am going to return to my nap.\"~%")
 the couch follows.~%"))
                          (format t "~%~a~%" (problem-text *genie-state*))))
                    (format t "~%(Try again!)~%")))
-             (format t "\"What?\"~%")))
+             (respond-genie-confused)))
 
         (t
-         (format t "\"What?\"~%")))))
+         (respond-genie-confused)))))
 
 (defun cmd-no ()
   (if (not (in-lab-p))
       (format t "No to what?~%")
       (cond
         ((genie-asleep-p)
-         (format t "The genie, unconscious, quite ignores you.~%"))
+         (respond-genie-asleep))
 
         ((= *genie-state* 1)
          (setf *genie-state* 0)
@@ -1088,7 +1138,7 @@ snoring. Thunderously.~%"))
          (format t "\"Tell me when you're ready, then.\"~%"))
 
         (t
-         (format t "\"What?\"~%")))))
+         (respond-genie-confused)))))
 
 (defun cmd-check ()
   (if (not (in-lab-p))
@@ -1105,7 +1155,7 @@ snoring. Thunderously.~%"))
           (if (= *genie-state* 1)
               (format t "\"I thought the question was simple enough. Are you interested in learning
 what I have to teach? Yes or no will do.\"~%")
-              (format t "\"What problem?\"~%")))))
+              (print-what-problem)))))
 
 (defun cmd-help ()
   (cond
@@ -1210,7 +1260,7 @@ environment where it was created.\"~%"))))))
   (cond
     ((null what)
      (print-what-verb "wake"))
-    ((cmd-matches-p what "genie")
+    ((object-is-p what 'genie)
      (if (require-object what)
          (if (genie-asleep-p)
              ;; Genie is asleep - show one of three random responses
@@ -1228,11 +1278,18 @@ environment where it was created.\"~%"))))))
   (cond
     ((null what)
      (format t "You shout, but nothing happens.~%"))
-    ((cmd-matches-p what "genie" "at")
-     (if (require-object "genie")
+    ((object-is-p what 'genie)
+     (if (require-object what)
          (if (genie-asleep-p)
-             (format t "(to the genie)~%The genie, unconscious, quite ignores you.~%")
-             (format t "The genie looks at you quizzically. \"No need to shout.\"~%"))))
+             (respond-genie-asleep-shout)
+             (respond-genie-no-shout))))
+    ;; Special case: "shout at" without object means shout at genie
+    ((cmd-matches-p what "at")
+     (if (object-visible-p "genie")
+         (if (genie-asleep-p)
+             (respond-genie-asleep-shout)
+             (respond-genie-no-shout))
+         (print-not-here)))
     (t
      (format t "You shout at ~A, but nothing happens.~%" what))))
 
@@ -1241,11 +1298,11 @@ environment where it was created.\"~%"))))))
   (cond
     ((null what)
      (print-what-verb "attack"))
-    ((cmd-matches-p what "box" "glass" "alarm")
+    ((object-is-p what 'alarm-box)
      (if (object-visible-p what)
          (cmd-break what)
          (print-not-here)))
-    ((cmd-matches-p what "genie")
+    ((object-is-p what 'genie)
      (if (require-object what)
          (if (genie-asleep-p)
              ;; Attacking the sleeping genie wakes him
@@ -1259,7 +1316,7 @@ environment where it was created.\"~%"))))))
   (cond
     ((null what)
      (print-what-verb "kiss"))
-    ((cmd-matches-p what "genie")
+    ((object-is-p what 'genie)
      (if (require-object what)
          (if (genie-asleep-p)
              ;; Kissing the sleeping genie wakes him
