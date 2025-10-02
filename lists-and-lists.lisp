@@ -387,6 +387,7 @@
 ;;; ============================================================================
 
 (defvar *current-room* 'entry)
+(defvar *door-open* nil) ; t if the entry door is open
 (defvar *genie-state* 0) ; 0=asleep, 1=awake, 2-9=tutorial problems
 (defvar *genie-waiting* nil) ; t if genie asked a question
 (defvar *alarm-box-used* nil)
@@ -485,7 +486,13 @@
     (plaque "plaque")
     (green-button "green" "run")
     (yellow-button "yellow" "reset")
-    (door "door"))
+    (door "door")
+    (couch "couch")
+    (desk "desk")
+    (bookshelves "bookshelves" "shelves" "bookshelf" "books")
+    (toys "toys" "toy" "puzzles" "puzzle")
+    (genie-possessions "magazine" "turkish" "delight" "yo-yo" "yo" "cigar" "laptop" "berrocal" "sculpture")
+    (stuff "stuff" "things" "thing" "wall" "everything"))
   "Map of object types to their recognized names")
 
 (defun object-is-p (object-name object-type)
@@ -524,8 +531,32 @@
     ((object-is-p object-name 'yellow-button)
      (in-lab-p))
 
-    ;; Door - visible in entry room
+    ;; Door - visible in entry room or as inner door in lab
     ((object-is-p object-name 'door)
+     (or (eq *current-room* 'entry) (in-lab-p)))
+
+    ;; Couch - visible in lab when genie not finished
+    ((object-is-p object-name 'couch)
+     (and (in-lab-p) (not (genie-finished-p))))
+
+    ;; Desk - visible in lab
+    ((object-is-p object-name 'desk)
+     (in-lab-p))
+
+    ;; Bookshelves - visible in lab
+    ((object-is-p object-name 'bookshelves)
+     (in-lab-p))
+
+    ;; Toys - visible in lab
+    ((object-is-p object-name 'toys)
+     (in-lab-p))
+
+    ;; Genie possessions - visible in lab when genie present
+    ((object-is-p object-name 'genie-possessions)
+     (and (in-lab-p) (not (genie-finished-p))))
+
+    ;; Entry room stuff - visible in entry
+    ((object-is-p object-name 'stuff)
      (eq *current-room* 'entry))
 
     (t nil)))
@@ -813,7 +844,9 @@ keep working.")))
              (return))
 
             ((cmd-matches-p cmd "look" "l")
-             (describe-room))
+             (if (and rest (cmd-matches-p (first rest) "under"))
+                 (cmd-look-under (second rest))
+                 (describe-room)))
 
             ((cmd-matches-p cmd "north" "n")
              (cmd-go-north))
@@ -872,6 +905,36 @@ keep working.")))
             ((cmd-matches-p cmd "kiss" "hug")
              (cmd-kiss (first rest)))
 
+            ((cmd-matches-p cmd "open")
+             (cmd-open (first rest)))
+
+            ((cmd-matches-p cmd "close")
+             (cmd-close (first rest)))
+
+            ((cmd-matches-p cmd "go")
+             (cmd-go (first rest)))
+
+            ((cmd-matches-p cmd "enter")
+             (cmd-enter (first rest)))
+
+            ((cmd-matches-p cmd "in")
+             (cmd-in))
+
+            ((cmd-matches-p cmd "out")
+             (cmd-out))
+
+            ((cmd-matches-p cmd "search")
+             (cmd-search (first rest)))
+
+            ((cmd-matches-p cmd "sit")
+             (cmd-sit (first rest)))
+
+            ((cmd-matches-p cmd "put")
+             (cmd-put rest))
+
+            ((cmd-matches-p cmd "turn" "switch")
+             (cmd-turn rest))
+
             (t
              (format t "That's not a verb I recognise.~%")))))))))
 
@@ -895,6 +958,9 @@ keep working.")))
 (defun cmd-go-north ()
   (if (eq *current-room* 'entry)
       (progn
+        (unless *door-open*
+          (format t "You push the door open. It doesn't creak at all.~%")
+          (setf *door-open* t))
         (setf *current-room* 'lab)
         (describe-room))
       (format t "You can't go that way.~%")))
@@ -915,7 +981,11 @@ keep working.")))
     ((null what)
      (print-what-verb "examine"))
     ((object-is-p what 'door)
-     (format t "The door to the north is ancient, stained, knotted wood.~%"))
+     (if (eq *current-room* 'entry)
+         (progn
+           (format t "The door to the north is ancient, stained, knotted wood. It looks terribly out of place here. In fact, it IS out of place here. The door ~A.~%"
+                   (if *door-open* "stands open" "is closed")))
+         (format t "The door isn't nearly so interesting from the inside.~%")))
     ((object-is-p what 'genie)
      (if (require-object what)
          (cmd-examine-genie)))
@@ -933,6 +1003,20 @@ keep working.")))
      (if (require-object what)
          (format t "It's a plate of thin gold, engraved with angular designs. In the center
 you see the words \"*** You have won ***\"~%")))
+    ((object-is-p what 'couch)
+     (if (require-object what)
+         (format t "The couch has that peculiar slump of cushion that says that this couch has seen much service, mostly to a single vast rear end. Indeed, the depression is perfectly molded to the tuchus that occupies it at this very moment.~%")))
+    ((object-is-p what 'desk)
+     (if (require-object what)
+         (format t "The desk is obviously from that school of design that says that furniture should be clean, efficient, unadorned, and capable of being disassembled with allen wrenches and put into a box six feet by three feet by two inches high.~%")))
+    ((object-is-p what 'bookshelves)
+     (if (require-object what)
+         (format t "Clearly a geek's collection. Fantasy and science fiction on one side, puzzle books and loony philosophy on the other, and several shelves of little toys and puzzles in the middle.~%")))
+    ((object-is-p what 'toys)
+     (if (require-object what)
+         (format t "You expected puzzle-less IF?~%")))
+    ((or (object-is-p what 'genie-possessions) (object-is-p what 'stuff))
+     nil) ; These will be handled in cmd-default-action
     (t
      (print-not-here))))
 
@@ -1325,6 +1409,193 @@ environment where it was created.\"~%"))))))
     (t
      (format t "That's not something you want to kiss.~%"))))
 
+(defun cmd-open (what)
+  "Handle OPEN verb"
+  (cond
+    ((null what)
+     (print-what-verb "open"))
+    ((object-is-p what 'door)
+     (if (eq *current-room* 'entry)
+         (if *door-open*
+             (format t "It's already open.~%")
+             (progn
+               (format t "You push the door open. It doesn't creak at all.~%")
+               (setf *door-open* t)))
+         (format t "Leave it alone. It's done its job.~%")))
+    ((object-is-p what 'book)
+     (if (require-object what)
+         (cmd-manual)))
+    ((object-is-p what 'desk)
+     (if (require-object what)
+         (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%")))
+    ((object-is-p what 'alarm-box)
+     (if (require-object what)
+         (format t "The translucent glass is seamless.~%")))
+    (t
+     (format t "You can't open that.~%"))))
+
+(defun cmd-close (what)
+  "Handle CLOSE verb"
+  (cond
+    ((null what)
+     (print-what-verb "close"))
+    ((object-is-p what 'door)
+     (if (eq *current-room* 'entry)
+         (if *door-open*
+             (progn
+               (format t "Closed.~%")
+               (setf *door-open* nil))
+             (format t "It's already closed.~%"))
+         (format t "Leave it alone. It's done its job.~%")))
+    ((object-is-p what 'desk)
+     (if (require-object what)
+         (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%")))
+    (t
+     (format t "You can't close that.~%"))))
+
+(defun cmd-go (direction)
+  "Handle GO <direction> verb"
+  (cond
+    ((null direction)
+     (format t "Go where?~%"))
+    ((cmd-matches-p direction "north" "n")
+     (cmd-go-north))
+    ((cmd-matches-p direction "south" "s")
+     (cmd-go-south))
+    ((cmd-matches-p direction "in")
+     (cmd-in))
+    ((cmd-matches-p direction "out")
+     (cmd-out))
+    ((or (cmd-matches-p direction "through") (cmd-matches-p direction "door"))
+     ;; Handle "go through" or "go door" as entering the door
+     (cmd-enter "door"))
+    (t
+     (format t "You can't go that way.~%"))))
+
+(defun cmd-enter (what)
+  "Handle ENTER verb"
+  (cond
+    ((null what)
+     (print-what-verb "enter"))
+    ((object-is-p what 'door)
+     (if (eq *current-room* 'entry)
+         (cmd-go-north)
+         (cmd-go-south)))
+    ((object-is-p what 'couch)
+     (if (require-object what)
+         (format t "The couch is occupied.~%")))
+    (t
+     (format t "You can't enter that.~%"))))
+
+(defun cmd-in ()
+  "Handle IN direction"
+  (if (eq *current-room* 'entry)
+      (cmd-go-north)
+      (format t "You can't go that way.~%")))
+
+(defun cmd-out ()
+  "Handle OUT direction"
+  (if (eq *current-room* 'entry)
+      (format t "You ARE outside.~%")
+      (cmd-go-south)))
+
+(defun cmd-search (what)
+  "Handle SEARCH verb"
+  (cond
+    ((null what)
+     (print-what-verb "search"))
+    ((object-is-p what 'door)
+     (if (eq *current-room* 'entry)
+         (if *door-open*
+             (format t "I refuse to ruin the suspense.~%")
+             (format t "The door is closed.~%"))
+         (format t "Leave it alone. It's done its job.~%")))
+    ((object-is-p what 'couch)
+     (if (require-object what)
+         (format t "The couch is occupied by a genie.~%")))
+    ((object-is-p what 'alarm-box)
+     (if (require-object what)
+         (format t "You can't make out what's inside the translucent box.~%")))
+    ((object-is-p what 'book)
+     (if (require-object what)
+         (cmd-manual)))
+    (t
+     (format t "You find nothing of interest.~%"))))
+
+(defun cmd-look-under (what)
+  "Handle LOOK UNDER verb"
+  (cond
+    ((null what)
+     (format t "Look under what?~%"))
+    ((or (object-is-p what 'desk) (object-is-p what 'couch))
+     (if (require-object what)
+         (format t "This is not that sort of game.~%")))
+    (t
+     (format t "You find nothing of interest.~%"))))
+
+(defun cmd-sit (what)
+  "Handle SIT verb"
+  (cond
+    ((or (null what) (cmd-matches-p what "on"))
+     (format t "Sit on what?~%"))
+    ((object-is-p what 'couch)
+     (if (require-object what)
+         (format t "The couch is occupied.~%")))
+    (t
+     (format t "You can't sit on that.~%"))))
+
+(defun cmd-put (args)
+  "Handle PUT verb"
+  (cond
+    ((null args)
+     (format t "Put what where?~%"))
+    ((< (length args) 3)
+     (format t "Put what where?~%"))
+    (t
+     (let ((what (first args))
+           (on-in (second args))
+           (where (third args)))
+       (cond
+         ((and (cmd-matches-p on-in "on" "in") (object-is-p where 'couch))
+          (if (require-object where)
+              (format t "The couch is occupied.~%")))
+         (t
+          (format t "You can't do that.~%")))))))
+
+(defun cmd-turn (args)
+  "Handle TURN/SWITCH verb"
+  (cond
+    ((null args)
+     (format t "Turn what?~%"))
+    ((< (length args) 2)
+     (format t "Turn what?~%"))
+    (t
+     (let ((on-off (first args))
+           (what (second args)))
+       (cond
+         ((and (cmd-matches-p on-off "on") (object-is-p what 'computer))
+          (if (require-object what)
+              (cmd-run-interpreter)))
+         (t
+          (format t "You can't do that.~%")))))))
+
+(defun cmd-default-action (what)
+  "Handle default actions on scenery objects"
+  (cond
+    ((object-is-p what 'bookshelves)
+     (if (require-object what)
+         (format t "You decide that the stuff on the shelves is not what you're in here for.~%")))
+    ((object-is-p what 'toys)
+     (if (require-object what)
+         (format t "You decide that the stuff on the shelves is not what you're in here for.~%")))
+    ((object-is-p what 'genie-possessions)
+     (if (require-object what)
+         (format t "The genie's possessions are not important.~%")))
+    ((object-is-p what 'stuff)
+     (if (require-object what)
+         (format t "Leave that alone; there's nothing new about it.~%")))
+    (t nil)))
+
 ;;; ============================================================================
 ;;; SAVE/LOAD SYSTEM
 ;;; ============================================================================
@@ -1343,6 +1614,8 @@ environment where it was created.\"~%"))))))
             (format out ";;; Saved: ~A~%~%" (get-universal-time))
             (format out "(in-package :lists-and-lists)~%~%")
             (prin1 `(setf *current-room* ',*current-room*) out)
+            (terpri out)
+            (prin1 `(setf *door-open* ,*door-open*) out)
             (terpri out)
             (prin1 `(setf *genie-state* ,*genie-state*) out)
             (terpri out)
