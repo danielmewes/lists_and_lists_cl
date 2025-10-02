@@ -36,7 +36,7 @@
 (defun assert-equal (actual expected &optional description)
   "Assert that actual equals expected. Returns t on success, nil on failure.
    Prints detailed comparison on failure."
-  (let ((passed (equal actual expected)))
+  (let ((passed (equalp actual expected)))
     (when description
       (format t "~a~%" description))
     (if passed
@@ -183,7 +183,7 @@
   (lambda ()
     (let* ((*eval-fuel* 1000)
            (result (scheme-eval '(car (quote (a b c))) *global-env*)))
-      (assert-equal result 'a "Testing: (car '(a b c))"))))
+      (assert-equal result (make-scheme-atom :name 'a) "Testing: (car '(a b c))"))))
 
 (run-test "Lambda application"
   (lambda ()
