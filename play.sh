@@ -2,9 +2,9 @@
 # Launcher script for Lists and Lists
 
 if command -v sbcl &> /dev/null; then
-    sbcl --noinform --load lists-and-lists.lisp --eval "(lists-and-lists:play-game)" --quit
+    sbcl --noinform --load lists-and-lists.lisp --eval "(lists-and-lists:play-game)"
 elif command -v ccl &> /dev/null; then
-    ccl --load lists-and-lists.lisp --eval "(lists-and-lists:play-game)" --eval "(quit)"
+    ccl --load lists-and-lists.lisp --eval "(lists-and-lists:play-game)"
 elif command -v clisp &> /dev/null; then
     clisp -q -i lists-and-lists.lisp -x "(lists-and-lists:play-game)"
 else

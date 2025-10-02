@@ -767,6 +767,28 @@ or :? for a list of other : commands.]~%")
   (setf *global-env* nil)
   (format t "~%[Interpreter reset.]~%"))
 
+(defun display-environment (env &optional (indent 0))
+  "Display all bindings in the environment"
+  (when env
+    (when (eq (car env) 'env)
+      (let ((parent (cadr env))
+            (bindings (cddr env)))
+        ;; Display bindings in this frame
+        (when bindings
+          (if (= indent 0)
+              (format t "[Current environment:]~%")
+              (format t "[Parent environment ~d:]~%" indent))
+          (dolist (binding bindings)
+            (let ((sym (car binding))
+                  (val (cdr binding)))
+              (format t "  ~a = " sym)
+              (scheme-print val)
+              (terpri)))
+          (terpri))
+        ;; Recursively display parent
+        (when parent
+          (display-environment parent (1+ indent)))))))
+
 (defun run-interpreter ()
   (loop
     (format t "~%>> ")
@@ -800,11 +822,12 @@ or :? for a list of other : commands.]~%")
          (format t "[Cancelled.]~%"))
 
         ((string= line ":e")
-         (format t "[Environment display not implemented]~%"))
+         (display-environment *global-env*))
 
         (t
          (handler-case
-             (let* ((expr (read-from-string line nil))
+             (let* ((*package* (find-package :lists-and-lists))
+                    (expr (read-from-string line nil))
                     (*eval-fuel* 1000)
                     (result (scheme-eval expr *global-env*)))
                (format t " ")
