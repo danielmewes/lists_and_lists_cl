@@ -681,6 +681,9 @@ keep working.")))
             ((member cmd '("examine" "x") :test #'string-equal)
              (cmd-examine (first rest)))
 
+            ((member cmd '("read") :test #'string-equal)
+             (cmd-read (first rest)))
+
             ((member cmd '("take" "get") :test #'string-equal)
              (cmd-take (first rest)))
 
@@ -791,6 +794,17 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~
 
 (defun cmd-take (what)
   (format t "That's not important right now.~%"))
+
+(defun cmd-read (what)
+  (cond
+    ((null what)
+     (format t "Read what?~%"))
+    ((member what '("book" "manual") :test #'string-equal)
+     (if (and (eq *current-room* 'lab) *manual-available*)
+         (cmd-manual)
+         (format t "You don't see that here.~%")))
+    (t
+     (format t "You can't read that.~%"))))
 
 (defun cmd-break (what)
   (if (and (member what '("box" "glass") :test #'string-equal)
