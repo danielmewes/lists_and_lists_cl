@@ -431,7 +431,9 @@
   (setf *genie-waiting* nil)
   (setf *manual-available* nil)
   (setf *prize-won* nil)
-  (setf *global-env* nil))
+  (setf *global-env* nil)
+  ;; Initialize game objects
+  (init-game-objects))
 
 (defun set-room (room)
   "Set current room"
@@ -1049,7 +1051,7 @@
     (setf *manual-available* t)
     ;; Just verify the book is visible and the command doesn't crash
     ;; We can't test the full manual interaction without mocking stdin
-    (object-visible-p "book")))
+    (object-visible-p-by-name "book")))
 
 (run-test "Book: Search book (routing check)"
   (lambda ()
@@ -1057,7 +1059,7 @@
     (set-room 'lab)
     (setf *manual-available* t)
     ;; Just verify the book is visible and the command routing works
-    (object-visible-p "book")))
+    (object-visible-p-by-name "book")))
 
 ;; Test computer turn on
 (run-test "Computer: Turn on computer"

@@ -477,93 +477,402 @@
   (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
   (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
 
-;;; Object registry - central definitions for all object names
-(defparameter *object-names*
-  '((genie "genie")
-    (alarm-box "box" "glass" "alarm")
-    (computer "computer" "machine")
-    (book "book" "manual")
-    (plaque "plaque")
-    (green-button "green" "run")
-    (yellow-button "yellow" "reset")
-    (door "door")
-    (couch "couch")
-    (desk "desk")
-    (bookshelves "bookshelves" "shelves" "bookshelf" "books")
-    (toys "toys" "toy" "puzzles" "puzzle")
-    (genie-possessions "magazine" "turkish" "delight" "yo-yo" "yo" "cigar" "laptop" "berrocal" "sculpture")
-    (stuff "stuff" "things" "thing" "wall" "everything"))
-  "Map of object types to their recognized names")
+;;; Command dispatch table
+(defvar *command-table* nil
+  "Hash table mapping command names to handler functions")
+
+(defvar *command-table-initialized* nil
+  "Whether the command table has been initialized")
+
+(defun register-command (handler &rest names)
+  "Register a command handler for multiple command names"
+  (dolist (name names)
+    (setf (gethash (string-downcase name) *command-table*) handler)))
+
+(defun init-command-table ()
+  "Initialize the command dispatch table"
+  (unless *command-table-initialized*
+    (setf *command-table* (make-hash-table :test 'equal))
+    (register-command 'cmd-examine "examine" "x")
+    (register-command 'cmd-read "read")
+    (register-command 'cmd-take "take" "get")
+    (register-command 'cmd-break "break")
+    (register-command 'cmd-push "push" "press")
+    (register-command 'cmd-yes "yes" "y")
+    (register-command 'cmd-no "no")
+    (register-command 'cmd-check "check")
+    (register-command 'cmd-repeat "repeat" "problem")
+    (register-command 'cmd-help "help" "hint")
+    (register-command 'cmd-about "about")
+    (register-command 'cmd-save "save")
+    (register-command 'cmd-load "load")
+    (register-command 'cmd-wake "wake" "wakeup")
+    (register-command 'cmd-shout "shout" "yell" "scream")
+    (register-command 'cmd-attack "attack" "hit" "kick" "punch")
+    (register-command 'cmd-kiss "kiss" "hug")
+    (register-command 'cmd-open "open")
+    (register-command 'cmd-close "close")
+    (register-command 'cmd-go "go")
+    (register-command 'cmd-enter "enter")
+    (register-command 'cmd-in "in")
+    (register-command 'cmd-out "out")
+    (register-command 'cmd-search "search")
+    (register-command 'cmd-sit "sit")
+    (register-command 'cmd-put "put")
+    (register-command 'cmd-turn "turn" "switch")
+    ;; Direction commands
+    (register-command (lambda (&rest args) (declare (ignore args)) (cmd-go "north")) "north" "n")
+    (register-command (lambda (&rest args) (declare (ignore args)) (cmd-go "south")) "south" "s")
+    (setf *command-table-initialized* t)))
+
+(defun find-command (cmd-string)
+  "Find a command handler by command string"
+  (unless *command-table-initialized*
+    (init-command-table))
+  (gethash (string-downcase cmd-string) *command-table*))
+
+;;; ============================================================================
+;;; OBJECT-ORIENTED GAME OBJECT SYSTEM
+;;; ============================================================================
+
+;;; Base class for all game objects
+(defclass game-object ()
+  ((type-name
+    :initarg :type-name
+    :accessor object-type-name
+    :documentation "Symbol identifying the object type")
+   (names
+    :initarg :names
+    :accessor object-names
+    :documentation "List of recognized names for this object")
+   (location
+    :initarg :location
+    :initform nil
+    :accessor object-location
+    :documentation "Room where this object is located (or NIL for special)")
+   (description
+    :initarg :description
+    :initform ""
+    :accessor object-description
+    :documentation "Description text for this object"))
+  (:documentation "Base class for all game objects"))
+
+;;; Generic function for checking if object matches a name
+(defgeneric object-matches-name-p (object name)
+  (:documentation "Check if OBJECT matches the given NAME"))
+
+(defmethod object-matches-name-p ((obj game-object) name)
+  "Default implementation checks against the object's names list"
+  (apply #'cmd-matches-p name (object-names obj)))
+
+;;; Generic function for checking visibility
+(defgeneric object-visible-p (object)
+  (:documentation "Check if OBJECT is currently visible"))
+
+(defmethod object-visible-p ((obj game-object))
+  "Default implementation checks if object's location matches current room"
+  (eq (object-location obj) *current-room*))
+
+;;; Generic functions for object actions
+
+(defgeneric examine-object (object)
+  (:documentation "Examine an object and print its description"))
+
+(defmethod examine-object ((obj game-object))
+  "Default examine behavior - print the object's description"
+  (format t "~A~%" (object-description obj)))
+
+(defgeneric open-object (object)
+  (:documentation "Attempt to open an object"))
+
+(defmethod open-object ((obj game-object))
+  "Default open behavior - can't open"
+  (format t "You can't open that.~%"))
+
+(defgeneric close-object (object)
+  (:documentation "Attempt to close an object"))
+
+(defmethod close-object ((obj game-object))
+  "Default close behavior - can't close"
+  (format t "You can't close that.~%"))
+
+(defgeneric search-object (object)
+  (:documentation "Search an object"))
+
+(defmethod search-object ((obj game-object))
+  "Default search behavior - nothing found"
+  (format t "You find nothing of interest.~%"))
+
+(defgeneric default-action-object (object)
+  (:documentation "Default action for scenery objects"))
+
+(defmethod default-action-object ((obj game-object))
+  "Default behavior for default action - do nothing"
+  nil)
+
+;;; Define all game object classes
+
+(defclass genie-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'genie
+   :names '("genie")
+   :location 'lab
+   :description "You always thought genies were folklore, but now that you've encountered one
+you find you really can't mistake it. He's eight feet tall, bright shimmering bronze,
+absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone."))
+
+(defmethod object-visible-p ((obj genie-object))
+  "Genie is visible in lab when not finished"
+  (and (in-lab-p) (not (genie-finished-p))))
+
+(defmethod examine-object ((obj genie-object))
+  "Examine the genie with state-dependent text"
+  (if (not (genie-finished-p))
+      (progn
+        (format t "You always thought genies were folklore, but now that you've encountered one
+you find you really can't mistake it. He's eight feet tall, bright shimmering bronze,
+absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~%")
+        (when (genie-asleep-p)
+          (format t "He's also quite dead to the world, snoring like mad on the lumpy couch.~%")))
+      (format t "The genie has departed.~%")))
+
+(defclass alarm-box-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'alarm-box
+   :names '("box" "glass" "alarm")
+   :location 'lab
+   :description "It's a small cube of frosted glass. Neatly etched on one side are the words
+\"Break glass to wake owner.\" Something turns slowly inside the box..."))
+
+(defmethod object-visible-p ((obj alarm-box-object))
+  "Alarm box is visible in lab when genie is asleep and not used"
+  (and (in-lab-p) (genie-asleep-p) (not *alarm-box-used*)))
+
+(defmethod open-object ((obj alarm-box-object))
+  (format t "The translucent glass is seamless.~%"))
+
+(defmethod search-object ((obj alarm-box-object))
+  (format t "You can't make out what's inside the translucent box.~%"))
+
+(defclass computer-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'computer
+   :names '("computer" "machine")
+   :location 'lab
+   :description "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button."))
+
+(defclass book-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'book
+   :names '("book" "manual")
+   :location 'lab))
+
+(defmethod object-visible-p ((obj book-object))
+  "Book is visible in lab when available"
+  (and (in-lab-p) *manual-available*))
+
+(defmethod examine-object ((obj book-object))
+  (cmd-manual))
+
+(defmethod open-object ((obj book-object))
+  (cmd-manual))
+
+(defmethod search-object ((obj book-object))
+  (cmd-manual))
+
+(defclass plaque-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'plaque
+   :names '("plaque")
+   :location 'lab
+   :description "It's a plate of thin gold, engraved with angular designs. In the center
+you see the words \"*** You have won ***\""))
+
+(defmethod object-visible-p ((obj plaque-object))
+  "Plaque is visible in lab when prize is won"
+  (and (in-lab-p) *prize-won*))
+
+(defclass green-button-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'green-button
+   :names '("green" "run")
+   :location 'lab))
+
+(defclass yellow-button-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'yellow-button
+   :names '("yellow" "reset")
+   :location 'lab))
+
+(defclass door-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'door
+   :names '("door")))
+
+(defmethod object-visible-p ((obj door-object))
+  "Door is visible in entry room or as inner door in lab"
+  (or (eq *current-room* 'entry) (in-lab-p)))
+
+(defmethod examine-object ((obj door-object))
+  (if (eq *current-room* 'entry)
+      (format t "The door to the north is ancient, stained, knotted wood. It looks terribly out of place here. In fact, it IS out of place here. The door ~A.~%"
+              (if *door-open* "stands open" "is closed"))
+      (format t "The door isn't nearly so interesting from the inside.~%")))
+
+(defmethod open-object ((obj door-object))
+  (if (eq *current-room* 'entry)
+      (if *door-open*
+          (format t "It's already open.~%")
+          (progn
+            (format t "You push the door open. It doesn't creak at all.~%")
+            (setf *door-open* t)))
+      (format t "Leave it alone. It's done its job.~%")))
+
+(defmethod close-object ((obj door-object))
+  (if (eq *current-room* 'entry)
+      (if *door-open*
+          (progn
+            (format t "Closed.~%")
+            (setf *door-open* nil))
+          (format t "It's already closed.~%"))
+      (format t "Leave it alone. It's done its job.~%")))
+
+(defmethod search-object ((obj door-object))
+  (if (eq *current-room* 'entry)
+      (if *door-open*
+          (format t "I refuse to ruin the suspense.~%")
+          (format t "The door is closed.~%"))
+      (format t "Leave it alone. It's done its job.~%")))
+
+(defclass couch-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'couch
+   :names '("couch")
+   :location 'lab
+   :description "The couch has that peculiar slump of cushion that says that this couch has seen much service, mostly to a single vast rear end. Indeed, the depression is perfectly molded to the tuchus that occupies it at this very moment."))
+
+(defmethod object-visible-p ((obj couch-object))
+  "Couch is visible in lab when genie not finished"
+  (and (in-lab-p) (not (genie-finished-p))))
+
+(defmethod search-object ((obj couch-object))
+  (format t "The couch is occupied by a genie.~%"))
+
+(defclass desk-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'desk
+   :names '("desk")
+   :location 'lab
+   :description "The desk is obviously from that school of design that says that furniture should be clean, efficient, unadorned, and capable of being disassembled with allen wrenches and put into a box six feet by three feet by two inches high."))
+
+(defmethod open-object ((obj desk-object))
+  (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%"))
+
+(defmethod close-object ((obj desk-object))
+  (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%"))
+
+(defclass bookshelves-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'bookshelves
+   :names '("bookshelves" "shelves" "bookshelf" "books")
+   :location 'lab
+   :description "Clearly a geek's collection. Fantasy and science fiction on one side, puzzle books and loony philosophy on the other, and several shelves of little toys and puzzles in the middle."))
+
+(defmethod default-action-object ((obj bookshelves-object))
+  (format t "You decide that the stuff on the shelves is not what you're in here for.~%"))
+
+(defclass toys-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'toys
+   :names '("toys" "toy" "puzzles" "puzzle")
+   :location 'lab
+   :description "You expected puzzle-less IF?"))
+
+(defmethod default-action-object ((obj toys-object))
+  (format t "You decide that the stuff on the shelves is not what you're in here for.~%"))
+
+(defclass genie-possessions-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'genie-possessions
+   :names '("magazine" "turkish" "delight" "yo-yo" "yo" "cigar" "laptop" "berrocal" "sculpture")
+   :location 'lab))
+
+(defmethod object-visible-p ((obj genie-possessions-object))
+  "Genie possessions are visible in lab when genie present"
+  (and (in-lab-p) (not (genie-finished-p))))
+
+(defmethod default-action-object ((obj genie-possessions-object))
+  (format t "The genie's possessions are not important.~%"))
+
+(defclass stuff-object (game-object)
+  ()
+  (:default-initargs
+   :type-name 'stuff
+   :names '("stuff" "things" "thing" "wall" "everything")
+   :location 'entry))
+
+(defmethod default-action-object ((obj stuff-object))
+  (format t "Leave that alone; there's nothing new about it.~%"))
+
+;;; Registry of all game objects
+(defvar *game-objects* nil
+  "List of all game object instances")
+
+(defun init-game-objects ()
+  "Initialize all game objects"
+  (setf *game-objects*
+        (list (make-instance 'genie-object)
+              (make-instance 'alarm-box-object)
+              (make-instance 'computer-object)
+              (make-instance 'book-object)
+              (make-instance 'plaque-object)
+              (make-instance 'green-button-object)
+              (make-instance 'yellow-button-object)
+              (make-instance 'door-object)
+              (make-instance 'couch-object)
+              (make-instance 'desk-object)
+              (make-instance 'bookshelves-object)
+              (make-instance 'toys-object)
+              (make-instance 'genie-possessions-object)
+              (make-instance 'stuff-object))))
+
+;;; Helper functions that use the object system
+
+(defun find-object-by-name (name)
+  "Find a game object by name, return NIL if not found"
+  (find-if (lambda (obj) (object-matches-name-p obj name))
+           *game-objects*))
+
+(defun find-object-by-type (type-name)
+  "Find a game object by type-name"
+  (find type-name *game-objects* :key #'object-type-name))
 
 (defun object-is-p (object-name object-type)
-  "Check if OBJECT-NAME refers to OBJECT-TYPE using the central registry"
-  (let ((names (cdr (assoc object-type *object-names*))))
-    (apply #'cmd-matches-p object-name names)))
+  "Check if OBJECT-NAME refers to OBJECT-TYPE"
+  (let ((obj (find-object-by-type object-type)))
+    (and obj (object-matches-name-p obj object-name))))
 
-(defun object-visible-p (object-name)
-  "Check if an object is visible in the current room"
-  (cond
-    ;; Genie - visible in lab when not finished
-    ((object-is-p object-name 'genie)
-     (and (in-lab-p) (not (genie-finished-p))))
-
-    ;; Alarm box - visible in lab when genie is asleep and not used
-    ((object-is-p object-name 'alarm-box)
-     (and (in-lab-p) (genie-asleep-p) (not *alarm-box-used*)))
-
-    ;; Computer/machine - always visible in lab
-    ((object-is-p object-name 'computer)
-     (in-lab-p))
-
-    ;; Book/manual - visible in lab when available
-    ((object-is-p object-name 'book)
-     (and (in-lab-p) *manual-available*))
-
-    ;; Plaque - visible in lab when prize is won
-    ((object-is-p object-name 'plaque)
-     (and (in-lab-p) *prize-won*))
-
-    ;; Green/run button - visible in lab
-    ((object-is-p object-name 'green-button)
-     (in-lab-p))
-
-    ;; Yellow/reset button - visible in lab
-    ((object-is-p object-name 'yellow-button)
-     (in-lab-p))
-
-    ;; Door - visible in entry room or as inner door in lab
-    ((object-is-p object-name 'door)
-     (or (eq *current-room* 'entry) (in-lab-p)))
-
-    ;; Couch - visible in lab when genie not finished
-    ((object-is-p object-name 'couch)
-     (and (in-lab-p) (not (genie-finished-p))))
-
-    ;; Desk - visible in lab
-    ((object-is-p object-name 'desk)
-     (in-lab-p))
-
-    ;; Bookshelves - visible in lab
-    ((object-is-p object-name 'bookshelves)
-     (in-lab-p))
-
-    ;; Toys - visible in lab
-    ((object-is-p object-name 'toys)
-     (in-lab-p))
-
-    ;; Genie possessions - visible in lab when genie present
-    ((object-is-p object-name 'genie-possessions)
-     (and (in-lab-p) (not (genie-finished-p))))
-
-    ;; Entry room stuff - visible in entry
-    ((object-is-p object-name 'stuff)
-     (eq *current-room* 'entry))
-
-    (t nil)))
+(defun object-visible-p-by-name (object-name)
+  "Check if an object is visible by its name"
+  (let ((obj (find-object-by-name object-name)))
+    (and obj (object-visible-p obj))))
 
 (defun require-object (object-name)
   "Check if object is visible, print error if not. Return T if visible, NIL otherwise."
-  (if (object-visible-p object-name)
+  (if (object-visible-p-by-name object-name)
       t
       (progn
         (print-not-here)
@@ -839,6 +1148,7 @@ keep working.")))
          (let ((cmd (first words))
                (rest (rest words)))
            (cond
+            ;; Special cases that need custom handling
             ((cmd-matches-p cmd "quit" "q")
              (print-goodbye)
              (return))
@@ -848,95 +1158,32 @@ keep working.")))
                  (cmd-look-under (second rest))
                  (describe-room)))
 
-            ((cmd-matches-p cmd "north" "n")
-             (cmd-go-north))
-
-            ((cmd-matches-p cmd "south" "s")
-             (cmd-go-south))
-
-            ((cmd-matches-p cmd "examine" "x")
-             (cmd-examine (first rest)))
-
-            ((cmd-matches-p cmd "read")
-             (cmd-read (first rest)))
-
-            ((cmd-matches-p cmd "take" "get")
-             (cmd-take (first rest)))
-
-            ((cmd-matches-p cmd "break")
-             (cmd-break (first rest)))
-
-            ((cmd-matches-p cmd "push" "press")
-             (cmd-push (first rest)))
-
-            ((cmd-matches-p cmd "yes" "y")
-             (cmd-yes))
-
-            ((cmd-matches-p cmd "no" "n")
-             (cmd-no))
-
-            ((cmd-matches-p cmd "check")
-             (cmd-check))
-
-            ((cmd-matches-p cmd "repeat" "problem")
-             (cmd-repeat))
-
-            ((cmd-matches-p cmd "help" "hint")
-             (cmd-help))
-
-            ((cmd-matches-p cmd "about")
-             (cmd-about))
-
-            ((cmd-matches-p cmd "save")
-             (cmd-save (first rest)))
-
-            ((cmd-matches-p cmd "load")
-             (cmd-load (first rest)))
-
-            ((cmd-matches-p cmd "wake" "wakeup")
-             (cmd-wake (first rest)))
-
-            ((cmd-matches-p cmd "shout" "yell" "scream")
-             (cmd-shout (first rest)))
-
-            ((cmd-matches-p cmd "attack" "hit" "kick" "punch")
-             (cmd-attack (first rest)))
-
-            ((cmd-matches-p cmd "kiss" "hug")
-             (cmd-kiss (first rest)))
-
-            ((cmd-matches-p cmd "open")
-             (cmd-open (first rest)))
-
-            ((cmd-matches-p cmd "close")
-             (cmd-close (first rest)))
-
-            ((cmd-matches-p cmd "go")
-             (cmd-go (first rest)))
-
-            ((cmd-matches-p cmd "enter")
-             (cmd-enter (first rest)))
-
-            ((cmd-matches-p cmd "in")
-             (cmd-in))
-
-            ((cmd-matches-p cmd "out")
-             (cmd-out))
-
-            ((cmd-matches-p cmd "search")
-             (cmd-search (first rest)))
-
-            ((cmd-matches-p cmd "sit")
-             (cmd-sit (first rest)))
-
-            ((cmd-matches-p cmd "put")
-             (cmd-put rest))
-
-            ((cmd-matches-p cmd "turn" "switch")
-             (cmd-turn rest))
-
+            ;; Try hash table dispatch
             (t
-             (format t "That's not a verb I recognise.~%")))))))))
+             (let ((handler (find-command cmd)))
+               (if handler
+                   (cond
+                     ;; Commands that take no arguments
+                     ((member (string-downcase cmd) '("yes" "y" "no" "check" "repeat" "problem"
+                                                       "help" "hint" "about" "in" "out" "north" "n" "south" "s")
+                              :test #'string=)
+                      (if (symbolp handler)
+                          (funcall (symbol-function handler))
+                          (funcall handler)))
+                     ;; Commands that take rest as list (put, turn)
+                     ((member (string-downcase cmd) '("put" "turn" "switch") :test #'string=)
+                      (if (symbolp handler)
+                          (funcall (symbol-function handler) rest)
+                          (funcall handler rest)))
+                     ;; Commands that take first arg
+                     (t
+                      (if (symbolp handler)
+                          (funcall (symbol-function handler) (first rest))
+                          (funcall handler (first rest)))))
+                   ;; Try default action for unrecognized verbs
+                   (if rest
+                       (cmd-default-action (first rest))
+                       (format t "That's not a verb I recognise.~%"))))))))))))
 
 (defun split-string (string separator)
   "Simple string splitter"
@@ -955,80 +1202,19 @@ keep working.")))
   (let ((words (split-string (string-trim " " str) #\Space)))
     (remove-if (lambda (s) (string= s "")) words)))
 
-(defun cmd-go-north ()
-  (if (eq *current-room* 'entry)
-      (progn
-        (unless *door-open*
-          (format t "You push the door open. It doesn't creak at all.~%")
-          (setf *door-open* t))
-        (setf *current-room* 'lab)
-        (describe-room))
-      (format t "You can't go that way.~%")))
-
-(defun cmd-go-south ()
-  (if (in-lab-p)
-      (if (genie-finished-p)
-          (progn
-            (format t "~%You step back through the door...~%")
-            (format t "~%*** You have won ***~%")
-            (print-goodbye)
-            (return-from cmd-go-south t))
-          (format t "Leaving so soon?~%"))
-      (format t "You ARE outside.~%")))
-
 (defun cmd-examine (what)
   (cond
     ((null what)
      (print-what-verb "examine"))
-    ((object-is-p what 'door)
-     (if (eq *current-room* 'entry)
-         (progn
-           (format t "The door to the north is ancient, stained, knotted wood. It looks terribly out of place here. In fact, it IS out of place here. The door ~A.~%"
-                   (if *door-open* "stands open" "is closed")))
-         (format t "The door isn't nearly so interesting from the inside.~%")))
-    ((object-is-p what 'genie)
-     (if (require-object what)
-         (cmd-examine-genie)))
-    ((object-is-p what 'computer)
-     (if (require-object what)
-         (format t "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button.~%")))
-    ((object-is-p what 'alarm-box)
-     (if (require-object what)
-         (format t "It's a small cube of frosted glass. Neatly etched on one side are the words
-\"Break glass to wake owner.\" Something turns slowly inside the box...~%")))
-    ((object-is-p what 'book)
-     (if (require-object what)
-         (cmd-manual)))
-    ((object-is-p what 'plaque)
-     (if (require-object what)
-         (format t "It's a plate of thin gold, engraved with angular designs. In the center
-you see the words \"*** You have won ***\"~%")))
-    ((object-is-p what 'couch)
-     (if (require-object what)
-         (format t "The couch has that peculiar slump of cushion that says that this couch has seen much service, mostly to a single vast rear end. Indeed, the depression is perfectly molded to the tuchus that occupies it at this very moment.~%")))
-    ((object-is-p what 'desk)
-     (if (require-object what)
-         (format t "The desk is obviously from that school of design that says that furniture should be clean, efficient, unadorned, and capable of being disassembled with allen wrenches and put into a box six feet by three feet by two inches high.~%")))
-    ((object-is-p what 'bookshelves)
-     (if (require-object what)
-         (format t "Clearly a geek's collection. Fantasy and science fiction on one side, puzzle books and loony philosophy on the other, and several shelves of little toys and puzzles in the middle.~%")))
-    ((object-is-p what 'toys)
-     (if (require-object what)
-         (format t "You expected puzzle-less IF?~%")))
-    ((or (object-is-p what 'genie-possessions) (object-is-p what 'stuff))
-     nil) ; These will be handled in cmd-default-action
     (t
-     (print-not-here))))
-
-(defun cmd-examine-genie ()
-  (if (not (genie-finished-p))
-      (progn
-        (format t "You always thought genies were folklore, but now that you've encountered one
-you find you really can't mistake it. He's eight feet tall, bright shimmering bronze,
-absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~%")
-        (when (genie-asleep-p)
-          (format t "He's also quite dead to the world, snoring like mad on the lumpy couch.~%")))
-      (format t "The genie has departed.~%")))
+     (let ((obj (find-object-by-name what)))
+       (cond
+         ((and obj (object-visible-p obj))
+          (examine-object obj))
+         (obj
+          (print-not-here))
+         (t
+          (print-not-here)))))))
 
 (defun cmd-take (what)
   (format t "That's not important right now.~%"))
@@ -1045,7 +1231,7 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~
 
 (defun cmd-break (what)
   (if (and (object-is-p what 'alarm-box)
-           (object-visible-p what))
+           (object-visible-p-by-name what))
       (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
 
 \"No no don't break it I'm awake!\"
@@ -1369,7 +1555,7 @@ environment where it was created.\"~%"))))))
              (respond-genie-no-shout))))
     ;; Special case: "shout at" without object means shout at genie
     ((cmd-matches-p what "at")
-     (if (object-visible-p "genie")
+     (if (object-visible-p-by-name "genie")
          (if (genie-asleep-p)
              (respond-genie-asleep-shout)
              (respond-genie-no-shout))
@@ -1383,7 +1569,7 @@ environment where it was created.\"~%"))))))
     ((null what)
      (print-what-verb "attack"))
     ((object-is-p what 'alarm-box)
-     (if (object-visible-p what)
+     (if (object-visible-p-by-name what)
          (cmd-break what)
          (print-not-here)))
     ((object-is-p what 'genie)
@@ -1414,44 +1600,38 @@ environment where it was created.\"~%"))))))
   (cond
     ((null what)
      (print-what-verb "open"))
-    ((object-is-p what 'door)
-     (if (eq *current-room* 'entry)
-         (if *door-open*
-             (format t "It's already open.~%")
-             (progn
-               (format t "You push the door open. It doesn't creak at all.~%")
-               (setf *door-open* t)))
-         (format t "Leave it alone. It's done its job.~%")))
-    ((object-is-p what 'book)
-     (if (require-object what)
-         (cmd-manual)))
-    ((object-is-p what 'desk)
-     (if (require-object what)
-         (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%")))
-    ((object-is-p what 'alarm-box)
-     (if (require-object what)
-         (format t "The translucent glass is seamless.~%")))
     (t
-     (format t "You can't open that.~%"))))
+     (let ((obj (find-object-by-name what)))
+       (cond
+         ((and obj (object-visible-p obj))
+          (open-object obj))
+         (obj
+          (print-not-here))
+         (t
+          (format t "You can't open that.~%")))))))
 
 (defun cmd-close (what)
   "Handle CLOSE verb"
   (cond
     ((null what)
      (print-what-verb "close"))
-    ((object-is-p what 'door)
-     (if (eq *current-room* 'entry)
-         (if *door-open*
-             (progn
-               (format t "Closed.~%")
-               (setf *door-open* nil))
-             (format t "It's already closed.~%"))
-         (format t "Leave it alone. It's done its job.~%")))
-    ((object-is-p what 'desk)
-     (if (require-object what)
-         (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%")))
     (t
-     (format t "You can't close that.~%"))))
+     (let ((obj (find-object-by-name what)))
+       (cond
+         ((and obj (object-visible-p obj))
+          (close-object obj))
+         (obj
+          (print-not-here))
+         (t
+          (format t "You can't close that.~%")))))))
+
+(defun cmd-go-north ()
+  "Go north direction - for backward compatibility with tests"
+  (cmd-go "north"))
+
+(defun cmd-go-south ()
+  "Go south direction - for backward compatibility with tests"
+  (cmd-go "south"))
 
 (defun cmd-go (direction)
   "Handle GO <direction> verb"
@@ -1459,9 +1639,27 @@ environment where it was created.\"~%"))))))
     ((null direction)
      (format t "Go where?~%"))
     ((cmd-matches-p direction "north" "n")
-     (cmd-go-north))
+     ;; Go north - from entry to lab
+     (if (eq *current-room* 'entry)
+         (progn
+           (unless *door-open*
+             (format t "You push the door open. It doesn't creak at all.~%")
+             (setf *door-open* t))
+           (setf *current-room* 'lab)
+           (describe-room)
+           (return-from cmd-go t))
+         (format t "You can't go that way.~%")))
     ((cmd-matches-p direction "south" "s")
-     (cmd-go-south))
+     ;; Go south - from lab to entry or leave game
+     (if (in-lab-p)
+         (if (genie-finished-p)
+             (progn
+               (format t "~%You step back through the door...~%")
+               (format t "~%*** You have won ***~%")
+               (print-goodbye)
+               (return-from cmd-go t))
+             (format t "Leaving so soon?~%"))
+         (format t "You ARE outside.~%")))
     ((cmd-matches-p direction "in")
      (cmd-in))
     ((cmd-matches-p direction "out")
@@ -1479,8 +1677,8 @@ environment where it was created.\"~%"))))))
      (print-what-verb "enter"))
     ((object-is-p what 'door)
      (if (eq *current-room* 'entry)
-         (cmd-go-north)
-         (cmd-go-south)))
+         (cmd-go "north")
+         (cmd-go "south")))
     ((object-is-p what 'couch)
      (if (require-object what)
          (format t "The couch is occupied.~%")))
@@ -1490,37 +1688,27 @@ environment where it was created.\"~%"))))))
 (defun cmd-in ()
   "Handle IN direction"
   (if (eq *current-room* 'entry)
-      (cmd-go-north)
+      (cmd-go "north")
       (format t "You can't go that way.~%")))
 
 (defun cmd-out ()
   "Handle OUT direction"
   (if (eq *current-room* 'entry)
       (format t "You ARE outside.~%")
-      (cmd-go-south)))
+      (cmd-go "south")))
 
 (defun cmd-search (what)
   "Handle SEARCH verb"
   (cond
     ((null what)
      (print-what-verb "search"))
-    ((object-is-p what 'door)
-     (if (eq *current-room* 'entry)
-         (if *door-open*
-             (format t "I refuse to ruin the suspense.~%")
-             (format t "The door is closed.~%"))
-         (format t "Leave it alone. It's done its job.~%")))
-    ((object-is-p what 'couch)
-     (if (require-object what)
-         (format t "The couch is occupied by a genie.~%")))
-    ((object-is-p what 'alarm-box)
-     (if (require-object what)
-         (format t "You can't make out what's inside the translucent box.~%")))
-    ((object-is-p what 'book)
-     (if (require-object what)
-         (cmd-manual)))
     (t
-     (format t "You find nothing of interest.~%"))))
+     (let ((obj (find-object-by-name what)))
+       (cond
+         ((and obj (object-visible-p obj))
+          (search-object obj))
+         (t
+          (format t "You find nothing of interest.~%")))))))
 
 (defun cmd-look-under (what)
   "Handle LOOK UNDER verb"
@@ -1581,20 +1769,9 @@ environment where it was created.\"~%"))))))
 
 (defun cmd-default-action (what)
   "Handle default actions on scenery objects"
-  (cond
-    ((object-is-p what 'bookshelves)
-     (if (require-object what)
-         (format t "You decide that the stuff on the shelves is not what you're in here for.~%")))
-    ((object-is-p what 'toys)
-     (if (require-object what)
-         (format t "You decide that the stuff on the shelves is not what you're in here for.~%")))
-    ((object-is-p what 'genie-possessions)
-     (if (require-object what)
-         (format t "The genie's possessions are not important.~%")))
-    ((object-is-p what 'stuff)
-     (if (require-object what)
-         (format t "Leave that alone; there's nothing new about it.~%")))
-    (t nil)))
+  (let ((obj (find-object-by-name what)))
+    (when (and obj (object-visible-p obj))
+      (default-action-object obj))))
 
 ;;; ============================================================================
 ;;; SAVE/LOAD SYSTEM
@@ -2590,6 +2767,10 @@ environment where it was created.\"~%"))))))
   (setf *hint-problem* -1)
   (setf *hint-level* 0)
   (setf *global-env* nil)
+
+  ;; Initialize game systems
+  (init-game-objects)
+  (init-command-table)
 
   (game-loop))
 
