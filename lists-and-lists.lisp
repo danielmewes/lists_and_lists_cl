@@ -763,20 +763,26 @@ keep working.")))
     ((string-equal what "door")
      (format t "The door to the north is ancient, stained, knotted wood.~%"))
     ((member what '("genie") :test #'string-equal)
-     (cmd-examine-genie))
+     (if (eq *current-room* 'lab)
+         (cmd-examine-genie)
+         (format t "You don't see that here.~%")))
     ((member what '("computer" "machine") :test #'string-equal)
-     (format t "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button.~%"))
+     (if (eq *current-room* 'lab)
+         (format t "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button.~%")
+         (format t "You don't see that here.~%")))
     ((member what '("box" "glass") :test #'string-equal)
-     (if (and (= *genie-state* 0) (not *alarm-box-used*))
+     (if (and (eq *current-room* 'lab)
+              (= *genie-state* 0)
+              (not *alarm-box-used*))
          (format t "It's a small cube of frosted glass. Neatly etched on one side are the words
 \"Break glass to wake owner.\" Something turns slowly inside the box...~%")
          (format t "You don't see that here.~%")))
     ((member what '("book" "manual") :test #'string-equal)
-     (if *manual-available*
+     (if (and (eq *current-room* 'lab) *manual-available*)
          (cmd-manual)
          (format t "You don't see that here.~%")))
     ((member what '("plaque") :test #'string-equal)
-     (if *prize-won*
+     (if (and (eq *current-room* 'lab) *prize-won*)
          (format t "It's a plate of thin gold, engraved with angular designs. In the center
 you see the words \"*** You have won ***\"~%")
          (format t "You don't see that here.~%")))
@@ -798,6 +804,7 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~
 
 (defun cmd-break (what)
   (if (and (member what '("box" "glass") :test #'string-equal)
+           (eq *current-room* 'lab)
            (= *genie-state* 0)
            (not *alarm-box-used*))
       (progn
@@ -815,31 +822,41 @@ mortal flesh could not aspire. \"So. You're here to learn, are you?\"~%"))
 (defun cmd-push (what)
   (cond
     ((member what '("green" "run") :test #'string-equal)
-     (cmd-run-interpreter))
+     (if (eq *current-room* 'lab)
+         (cmd-run-interpreter)
+         (format t "You can't see any such thing.~%")))
     ((member what '("yellow" "reset") :test #'string-equal)
-     (cmd-reset-interpreter))
+     (if (eq *current-room* 'lab)
+         (cmd-reset-interpreter)
+         (format t "You can't see any such thing.~%")))
     (t
      (format t "Push what?~%"))))
 
 (defun cmd-run-interpreter ()
-  (when (null *global-env*)
-    (init-global-env))
+  (if (not (eq *current-room* 'lab))
+      (format t "You can't see any such thing.~%")
+      (progn
+        (when (null *global-env*)
+          (init-global-env))
 
-  (format t "~%The computer comes to life: whirr, feeple, feep! You settle yourself
+        (format t "~%The computer comes to life: whirr, feeple, feep! You settle yourself
 before the keyboard as text appears on the screen...~%")
-  (format t "~%[Welcome to the interpreter. Enter :q to exit, or :m for documentation,
+        (format t "~%[Welcome to the interpreter. Enter :q to exit, or :m for documentation,
 or :? for a list of other : commands.]~%")
 
-  (run-interpreter)
+        (run-interpreter)
 
-  (format t "~%[Suspending interpreter. Type 'run' to reactivate.]~%")
-  (when (and (>= *genie-state* 2) (<= *genie-state* 8))
-    (setf *genie-waiting* t)
-    (format t "~%You lean back. The genie glances over, and asks, \"Got it working yet?\"~%")))
+        (format t "~%[Suspending interpreter. Type 'run' to reactivate.]~%")
+        (when (and (>= *genie-state* 2) (<= *genie-state* 8))
+          (setf *genie-waiting* t)
+          (format t "~%You lean back. The genie glances over, and asks, \"Got it working yet?\"~%")))))
 
 (defun cmd-reset-interpreter ()
-  (setf *global-env* nil)
-  (format t "~%[Interpreter reset.]~%"))
+  (if (not (eq *current-room* 'lab))
+      (format t "You can't see any such thing.~%")
+      (progn
+        (setf *global-env* nil)
+        (format t "~%[Interpreter reset.]~%"))))
 
 (defun display-environment (env &optional (indent 0))
   "Display all bindings in the environment"
@@ -913,76 +930,84 @@ or :? for a list of other : commands.]~%")
              (format t "[Error: ~a]~%" e))))))))
 
 (defun cmd-yes ()
-  (cond
-    ((= *genie-state* 0)
-     (format t "The genie, unconscious, quite ignores you.~%"))
+  (if (not (eq *current-room* 'lab))
+      (format t "Yes to what?~%")
+      (cond
+        ((= *genie-state* 0)
+         (format t "The genie, unconscious, quite ignores you.~%"))
 
-    ((= *genie-state* 1)
-     (setf *genie-state* 2)
-     (setf *genie-waiting* nil)
-     (setf *manual-available* t)
-     (format t "~%The genie nods in satisfaction. \"Right. Let's see, let's see...\"~%")
-     (format t "He pulls a massive tome out of nowhere; opens it; pokes studiously at it;
+        ((= *genie-state* 1)
+         (setf *genie-state* 2)
+         (setf *genie-waiting* nil)
+         (setf *manual-available* t)
+         (format t "~%The genie nods in satisfaction. \"Right. Let's see, let's see...\"~%")
+         (format t "He pulls a massive tome out of nowhere; opens it; pokes studiously at it;
 turns a page; snorts. Then he arises from the couch to his full height, raises the book,
 and booms...~%")
-     (format t "~%\"HOW TO PROGRAM IN LISP!\"~%")
-     (format t "~%Then he plops back into the couch, and adds, \"...a self-paced course.\"
+         (format t "~%\"HOW TO PROGRAM IN LISP!\"~%")
+         (format t "~%Then he plops back into the couch, and adds, \"...a self-paced course.\"
 He hands you the book.~%")
-     (format t "~%~a~%" (problem-text 2)))
+         (format t "~%~a~%" (problem-text 2)))
 
-    ((and (>= *genie-state* 2) (<= *genie-state* 8))
-     (if *genie-waiting*
-         (progn
-           (setf *genie-waiting* nil)
-           (if (check-problem *genie-state*)
-               (progn
-                 (incf *genie-state*)
-                 (if (> *genie-state* 8)
-                     (progn
-                       (setf *prize-won* t)
-                       (format t "~%\"Congratulations,\" the genie booms. \"You are now an accredited
+        ((and (>= *genie-state* 2) (<= *genie-state* 8))
+         (if *genie-waiting*
+             (progn
+               (setf *genie-waiting* nil)
+               (if (check-problem *genie-state*)
+                   (progn
+                     (incf *genie-state*)
+                     (if (> *genie-state* 8)
+                         (progn
+                           (setf *prize-won* t)
+                           (format t "~%\"Congratulations,\" the genie booms. \"You are now an accredited
 hacker of Lisp.\" He hands you something. \"I'll let you keep playing with the machine.
 I,\" he adds with sudden intensity, \"am going to return to my nap.\"~%")
-                       (format t "~%The genie vanishes in a puff of silver smoke. A moment later,
+                           (format t "~%The genie vanishes in a puff of silver smoke. A moment later,
 the couch follows.~%"))
-                     (format t "~%~a~%" (problem-text *genie-state*))))
-               (format t "~%(Try again!)~%")))
-         (format t "\"What?\"~%")))
+                         (format t "~%~a~%" (problem-text *genie-state*))))
+                   (format t "~%(Try again!)~%")))
+             (format t "\"What?\"~%")))
 
-    (t
-     (format t "\"What?\"~%"))))
+        (t
+         (format t "\"What?\"~%")))))
 
 (defun cmd-no ()
-  (cond
-    ((= *genie-state* 0)
-     (format t "The genie, unconscious, quite ignores you.~%"))
+  (if (not (eq *current-room* 'lab))
+      (format t "No to what?~%")
+      (cond
+        ((= *genie-state* 0)
+         (format t "The genie, unconscious, quite ignores you.~%"))
 
-    ((= *genie-state* 1)
-     (setf *genie-state* 0)
-     (setf *genie-waiting* nil)
-     (format t "The genie frowns thunderously. \"Fine, go play around on your own. See where
+        ((= *genie-state* 1)
+         (setf *genie-state* 0)
+         (setf *genie-waiting* nil)
+         (format t "The genie frowns thunderously. \"Fine, go play around on your own. See where
 it gets you. Wake me when you're tired of wasting time.\" He turns over, and begins
 snoring. Thunderously.~%"))
 
-    ((and (>= *genie-state* 2) (<= *genie-state* 8) *genie-waiting*)
-     (setf *genie-waiting* nil)
-     (format t "\"Tell me when you're ready, then.\"~%"))
+        ((and (>= *genie-state* 2) (<= *genie-state* 8) *genie-waiting*)
+         (setf *genie-waiting* nil)
+         (format t "\"Tell me when you're ready, then.\"~%"))
 
-    (t
-     (format t "\"What?\"~%"))))
+        (t
+         (format t "\"What?\"~%")))))
 
 (defun cmd-check ()
-  (if (and (>= *genie-state* 2) (<= *genie-state* 8))
-      (cmd-yes)
-      (format t "Check what?~%")))
+  (if (not (eq *current-room* 'lab))
+      (format t "Check what?~%")
+      (if (and (>= *genie-state* 2) (<= *genie-state* 8))
+          (cmd-yes)
+          (format t "Check what?~%"))))
 
 (defun cmd-repeat ()
-  (if (and (>= *genie-state* 2) (<= *genie-state* 8))
-      (format t "~%~a~%" (problem-text *genie-state*))
-      (if (= *genie-state* 1)
-          (format t "\"I thought the question was simple enough. Are you interested in learning
+  (if (not (eq *current-room* 'lab))
+      (format t "Repeat what?~%")
+      (if (and (>= *genie-state* 2) (<= *genie-state* 8))
+          (format t "~%~a~%" (problem-text *genie-state*))
+          (if (= *genie-state* 1)
+              (format t "\"I thought the question was simple enough. Are you interested in learning
 what I have to teach? Yes or no will do.\"~%")
-          (format t "\"What problem?\"~%"))))
+              (format t "\"What problem?\"~%")))))
 
 (defun cmd-help ()
   (cond
