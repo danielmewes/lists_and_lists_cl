@@ -654,67 +654,72 @@ keep working.")))
     (finish-output)
     (let* ((input (read-line *standard-input* nil))
            (words (and input (parse-command input))))
-      (when (null words)
-        (return))
+      (cond
+        ((null input)
+         (return))
 
-      (let ((cmd (first words))
-            (rest (rest words)))
-        (cond
-          ((member cmd '("quit" "q") :test #'string-equal)
-           (format t "~%Thanks for playing!~%")
-           (return))
+        ((null words)
+         (format t "I beg your pardon?~%"))
 
-          ((member cmd '("look" "l") :test #'string-equal)
-           (describe-room))
+        (t
+         (let ((cmd (first words))
+               (rest (rest words)))
+           (cond
+            ((member cmd '("quit" "q") :test #'string-equal)
+             (format t "~%Thanks for playing!~%")
+             (return))
 
-          ((member cmd '("north" "n") :test #'string-equal)
-           (cmd-go-north))
+            ((member cmd '("look" "l") :test #'string-equal)
+             (describe-room))
 
-          ((member cmd '("south" "s") :test #'string-equal)
-           (cmd-go-south))
+            ((member cmd '("north" "n") :test #'string-equal)
+             (cmd-go-north))
 
-          ((member cmd '("examine" "x") :test #'string-equal)
-           (cmd-examine (first rest)))
+            ((member cmd '("south" "s") :test #'string-equal)
+             (cmd-go-south))
 
-          ((member cmd '("take" "get") :test #'string-equal)
-           (cmd-take (first rest)))
+            ((member cmd '("examine" "x") :test #'string-equal)
+             (cmd-examine (first rest)))
 
-          ((string-equal cmd "break")
-           (cmd-break (first rest)))
+            ((member cmd '("take" "get") :test #'string-equal)
+             (cmd-take (first rest)))
 
-          ((string-equal cmd "push")
-           (cmd-push (first rest)))
+            ((string-equal cmd "break")
+             (cmd-break (first rest)))
 
-          ((string-equal cmd "run")
-           (cmd-run-interpreter))
+            ((string-equal cmd "push")
+             (cmd-push (first rest)))
 
-          ((string-equal cmd "reset")
-           (cmd-reset-interpreter))
+            ((string-equal cmd "run")
+             (cmd-run-interpreter))
 
-          ((member cmd '("yes" "y") :test #'string-equal)
-           (cmd-yes))
+            ((string-equal cmd "reset")
+             (cmd-reset-interpreter))
 
-          ((member cmd '("no" "n") :test #'string-equal)
-           (cmd-no))
+            ((member cmd '("yes" "y") :test #'string-equal)
+             (cmd-yes))
 
-          ((member cmd '("check") :test #'string-equal)
-           (cmd-check))
+            ((member cmd '("no" "n") :test #'string-equal)
+             (cmd-no))
 
-          ((member cmd '("repeat" "problem") :test #'string-equal)
-           (cmd-repeat))
+            ((member cmd '("check") :test #'string-equal)
+             (cmd-check))
 
-          ((member cmd '("help" "hint") :test #'string-equal)
-           (cmd-help))
+            ((member cmd '("repeat" "problem") :test #'string-equal)
+             (cmd-repeat))
 
-          ((string-equal cmd "about")
-           (cmd-about))
+            ((member cmd '("help" "hint") :test #'string-equal)
+             (cmd-help))
 
-          ((string-equal cmd "manual")
-           (cmd-manual))
+            ((string-equal cmd "about")
+             (cmd-about))
 
-          (t
-           (format t "I don't understand that command.~%")
-           (format t "(Try: look, north, south, examine, push, run, check, help, quit)~%")))))))
+            ((string-equal cmd "manual")
+             (cmd-manual))
+
+            (t
+             (format t "I don't understand that command.~%")
+             (format t "(Try: look, north, south, examine, push, run, check, help, quit)~%")))))))))
 
 (defun split-string (string separator)
   "Simple string splitter"
