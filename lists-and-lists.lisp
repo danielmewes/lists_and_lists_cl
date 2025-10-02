@@ -396,6 +396,99 @@
 (defvar *hint-level* 0)
 
 ;;; ============================================================================
+;;; HELPER FUNCTIONS
+;;; ============================================================================
+
+;;; Command matching helper
+(defun cmd-matches-p (cmd &rest alternatives)
+  "Check if CMD matches any of the ALTERNATIVES (case-insensitive)"
+  (member cmd alternatives :test #'string-equal))
+
+;;; Genie state predicates
+(defun genie-asleep-p ()
+  "Return T if the genie is asleep"
+  (= *genie-state* 0))
+
+(defun genie-awake-p ()
+  "Return T if the genie is awake"
+  (>= *genie-state* 1))
+
+(defun genie-teaching-p ()
+  "Return T if the genie is in teaching mode (problems 2-8)"
+  (and (>= *genie-state* 2) (<= *genie-state* 8)))
+
+(defun genie-finished-p ()
+  "Return T if the genie has finished teaching"
+  (>= *genie-state* 9))
+
+;;; Room helpers
+(defun in-lab-p ()
+  "Return T if currently in the lab"
+  (eq *current-room* 'lab))
+
+;;; Error message helpers
+(defun print-not-here ()
+  "Print standard 'not here' message"
+  (format t "You don't see that here.~%"))
+
+(defun print-what-verb (verb)
+  "Print 'What do you want to [verb]?' message"
+  (format t "What do you want to ~A?~%" verb))
+
+;;; Wake genie sequence
+(defun wake-genie (initial-action-msg)
+  "Handle the sequence of waking the genie with a specific action message"
+  (setf *alarm-box-used* t)
+  (setf *genie-state* 1)
+  (setf *genie-waiting* t)
+  (format t "~%~A~%" initial-action-msg)
+  (format t "~%The genie looks you over, squinching his face in a manner to which mere mortals cannot aspire. \"Okay, okay,\" he rumbles. \"Welcome to Hell. Might as well get to work.\"~%~%")
+  (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
+  (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
+
+;;; Object registry and visibility
+(defun object-visible-p (object-name)
+  "Check if an object is visible in the current room"
+  (cond
+    ;; Genie - visible in lab when not finished
+    ((cmd-matches-p object-name "genie")
+     (and (in-lab-p) (not (genie-finished-p))))
+
+    ;; Alarm box - visible in lab when genie is asleep and not used
+    ((cmd-matches-p object-name "box" "glass" "alarm")
+     (and (in-lab-p) (genie-asleep-p) (not *alarm-box-used*)))
+
+    ;; Computer/machine - always visible in lab
+    ((cmd-matches-p object-name "computer" "machine")
+     (in-lab-p))
+
+    ;; Book/manual - visible in lab when available
+    ((cmd-matches-p object-name "book" "manual")
+     (and (in-lab-p) *manual-available*))
+
+    ;; Plaque - visible in lab when prize is won
+    ((cmd-matches-p object-name "plaque")
+     (and (in-lab-p) *prize-won*))
+
+    ;; Green/run and yellow/reset buttons - visible in lab
+    ((cmd-matches-p object-name "green" "run" "yellow" "reset")
+     (in-lab-p))
+
+    ;; Door - visible in entry room
+    ((cmd-matches-p object-name "door")
+     (eq *current-room* 'entry))
+
+    (t nil)))
+
+(defun require-object (object-name)
+  "Check if object is visible, print error if not. Return T if visible, NIL otherwise."
+  (if (object-visible-p object-name)
+      t
+      (progn
+        (print-not-here)
+        nil)))
+
+;;; ============================================================================
 ;;; GAME PROBLEMS
 ;;; ============================================================================
 
@@ -623,15 +716,15 @@ keep working.")))
      (format t "~%White Room~%")
      (format t "This is a comfortably cluttered room. Cluttered with bookshelves, mostly.~%")
      (format t "To one side is a large desk, on which a computer squats regally.~%")
-     (when (< *genie-state* 9)
+     (when (not (genie-finished-p))
        (format t "A lumpy couch is the only other furniture of note.~%"))
      (format t "~%You can see:~%")
-     (when (< *genie-state* 9)
-       (if (= *genie-state* 0)
+     (when (not (genie-finished-p))
+       (if (genie-asleep-p)
            (format t "  a huge genie (sleeping on the couch)~%")
            (format t "  a huge genie (on the couch)~%")))
      (format t "  a computer (with green and yellow buttons)~%")
-     (when (and (= *genie-state* 0) (not *alarm-box-used*))
+     (when (and (genie-asleep-p) (not *alarm-box-used*))
        (format t "  a small glass box~%"))
      (when *manual-available*
        (format t "  a massive book~%"))
@@ -665,68 +758,68 @@ keep working.")))
          (let ((cmd (first words))
                (rest (rest words)))
            (cond
-            ((member cmd '("quit" "q") :test #'string-equal)
+            ((cmd-matches-p cmd "quit" "q")
              (format t "~%Thanks for playing!~%")
              (return))
 
-            ((member cmd '("look" "l") :test #'string-equal)
+            ((cmd-matches-p cmd "look" "l")
              (describe-room))
 
-            ((member cmd '("north" "n") :test #'string-equal)
+            ((cmd-matches-p cmd "north" "n")
              (cmd-go-north))
 
-            ((member cmd '("south" "s") :test #'string-equal)
+            ((cmd-matches-p cmd "south" "s")
              (cmd-go-south))
 
-            ((member cmd '("examine" "x") :test #'string-equal)
+            ((cmd-matches-p cmd "examine" "x")
              (cmd-examine (first rest)))
 
-            ((member cmd '("read") :test #'string-equal)
+            ((cmd-matches-p cmd "read")
              (cmd-read (first rest)))
 
-            ((member cmd '("take" "get") :test #'string-equal)
+            ((cmd-matches-p cmd "take" "get")
              (cmd-take (first rest)))
 
-            ((string-equal cmd "break")
+            ((cmd-matches-p cmd "break")
              (cmd-break (first rest)))
 
-            ((member cmd '("push" "press") :test #'string-equal)
+            ((cmd-matches-p cmd "push" "press")
              (cmd-push (first rest)))
 
-            ((member cmd '("yes" "y") :test #'string-equal)
+            ((cmd-matches-p cmd "yes" "y")
              (cmd-yes))
 
-            ((member cmd '("no" "n") :test #'string-equal)
+            ((cmd-matches-p cmd "no" "n")
              (cmd-no))
 
-            ((member cmd '("check") :test #'string-equal)
+            ((cmd-matches-p cmd "check")
              (cmd-check))
 
-            ((member cmd '("repeat" "problem") :test #'string-equal)
+            ((cmd-matches-p cmd "repeat" "problem")
              (cmd-repeat))
 
-            ((member cmd '("help" "hint") :test #'string-equal)
+            ((cmd-matches-p cmd "help" "hint")
              (cmd-help))
 
-            ((string-equal cmd "about")
+            ((cmd-matches-p cmd "about")
              (cmd-about))
 
-            ((string-equal cmd "save")
+            ((cmd-matches-p cmd "save")
              (cmd-save (first rest)))
 
-            ((string-equal cmd "load")
+            ((cmd-matches-p cmd "load")
              (cmd-load (first rest)))
 
-            ((member cmd '("wake" "wakeup") :test #'string-equal)
+            ((cmd-matches-p cmd "wake" "wakeup")
              (cmd-wake (first rest)))
 
-            ((member cmd '("shout" "yell" "scream") :test #'string-equal)
+            ((cmd-matches-p cmd "shout" "yell" "scream")
              (cmd-shout (first rest)))
 
-            ((member cmd '("attack" "hit" "kick" "punch") :test #'string-equal)
+            ((cmd-matches-p cmd "attack" "hit" "kick" "punch")
              (cmd-attack (first rest)))
 
-            ((member cmd '("kiss" "hug") :test #'string-equal)
+            ((cmd-matches-p cmd "kiss" "hug")
              (cmd-kiss (first rest)))
 
             (t
@@ -757,8 +850,8 @@ keep working.")))
       (format t "You can't go that way.~%")))
 
 (defun cmd-go-south ()
-  (if (eq *current-room* 'lab)
-      (if (>= *genie-state* 9)
+  (if (in-lab-p)
+      (if (genie-finished-p)
           (progn
             (format t "~%You step back through the door...~%")
             (format t "~%*** You have won ***~%")
@@ -770,43 +863,36 @@ keep working.")))
 (defun cmd-examine (what)
   (cond
     ((null what)
-     (format t "Examine what?~%"))
-    ((string-equal what "door")
+     (print-what-verb "examine"))
+    ((cmd-matches-p what "door")
      (format t "The door to the north is ancient, stained, knotted wood.~%"))
-    ((member what '("genie") :test #'string-equal)
-     (if (eq *current-room* 'lab)
-         (cmd-examine-genie)
-         (format t "You don't see that here.~%")))
-    ((member what '("computer" "machine") :test #'string-equal)
-     (if (eq *current-room* 'lab)
-         (format t "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button.~%")
-         (format t "You don't see that here.~%")))
-    ((member what '("box" "glass") :test #'string-equal)
-     (if (and (eq *current-room* 'lab)
-              (= *genie-state* 0)
-              (not *alarm-box-used*))
+    ((cmd-matches-p what "genie")
+     (if (require-object what)
+         (cmd-examine-genie)))
+    ((cmd-matches-p what "computer" "machine")
+     (if (require-object what)
+         (format t "The computer has two buttons: a green \"run\" button and a yellow \"reset\" button.~%")))
+    ((cmd-matches-p what "box" "glass")
+     (if (require-object what)
          (format t "It's a small cube of frosted glass. Neatly etched on one side are the words
-\"Break glass to wake owner.\" Something turns slowly inside the box...~%")
-         (format t "You don't see that here.~%")))
-    ((member what '("book" "manual") :test #'string-equal)
-     (if (and (eq *current-room* 'lab) *manual-available*)
-         (cmd-manual)
-         (format t "You don't see that here.~%")))
-    ((member what '("plaque") :test #'string-equal)
-     (if (and (eq *current-room* 'lab) *prize-won*)
+\"Break glass to wake owner.\" Something turns slowly inside the box...~%")))
+    ((cmd-matches-p what "book" "manual")
+     (if (require-object what)
+         (cmd-manual)))
+    ((cmd-matches-p what "plaque")
+     (if (require-object what)
          (format t "It's a plate of thin gold, engraved with angular designs. In the center
-you see the words \"*** You have won ***\"~%")
-         (format t "You don't see that here.~%")))
+you see the words \"*** You have won ***\"~%")))
     (t
-     (format t "You don't see that here.~%"))))
+     (print-not-here))))
 
 (defun cmd-examine-genie ()
-  (if (< *genie-state* 9)
+  (if (not (genie-finished-p))
       (progn
         (format t "You always thought genies were folklore, but now that you've encountered one
 you find you really can't mistake it. He's eight feet tall, bright shimmering bronze,
 absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~%")
-        (when (= *genie-state* 0)
+        (when (genie-asleep-p)
           (format t "He's also quite dead to the world, snoring like mad on the lumpy couch.~%")))
       (format t "The genie has departed.~%")))
 
@@ -816,46 +902,36 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~
 (defun cmd-read (what)
   (cond
     ((null what)
-     (format t "Read what?~%"))
-    ((member what '("book" "manual") :test #'string-equal)
-     (if (and (eq *current-room* 'lab) *manual-available*)
-         (cmd-manual)
-         (format t "You don't see that here.~%")))
+     (print-what-verb "read"))
+    ((cmd-matches-p what "book" "manual")
+     (if (require-object what)
+         (cmd-manual)))
     (t
      (format t "You can't read that.~%"))))
 
 (defun cmd-break (what)
-  (if (and (member what '("box" "glass") :test #'string-equal)
-           (eq *current-room* 'lab)
-           (= *genie-state* 0)
-           (not *alarm-box-used*))
-      (progn
-        (setf *alarm-box-used* t)
-        (setf *genie-state* 1)
-        (setf *genie-waiting* t)
-        (format t "~%You turn the box over carefully, then shrug and swing it sharply...~%")
-        (format t "~%\"No no don't break it I'm awake!\"~%")
-        (format t "A gleaming hand catches your wrist. The genie gently -- very gently --
-removes the box from your grasp, and tucks it carefully away into nothing.~%")
-        (format t "~%The genie looks you over, squinching his face in a manner to which mere
-mortal flesh could not aspire. \"So. You're here to learn, are you?\"~%"))
-      (format t "Break what?~%")))
+  (if (and (cmd-matches-p what "box" "glass")
+           (object-visible-p what))
+      (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
+
+\"No no don't break it I'm awake!\"
+A gleaming hand catches your wrist. The genie gently -- very gently --
+removes the box from your grasp, and tucks it carefully away into nothing.")
+      (print-what-verb "break")))
 
 (defun cmd-push (what)
   (cond
-    ((member what '("green" "run") :test #'string-equal)
-     (if (eq *current-room* 'lab)
-         (cmd-run-interpreter)
-         (format t "You can't see any such thing.~%")))
-    ((member what '("yellow" "reset") :test #'string-equal)
-     (if (eq *current-room* 'lab)
-         (cmd-reset-interpreter)
-         (format t "You can't see any such thing.~%")))
+    ((cmd-matches-p what "green" "run")
+     (if (require-object what)
+         (cmd-run-interpreter)))
+    ((cmd-matches-p what "yellow" "reset")
+     (if (require-object what)
+         (cmd-reset-interpreter)))
     (t
-     (format t "Push what?~%"))))
+     (print-what-verb "push"))))
 
 (defun cmd-run-interpreter ()
-  (if (not (eq *current-room* 'lab))
+  (if (not (in-lab-p))
       (format t "You can't see any such thing.~%")
       (progn
         (when (null *global-env*)
@@ -869,12 +945,12 @@ or :? for a list of other : commands.]~%")
         (run-interpreter)
 
         (format t "~%[Suspending interpreter. Press green button to reactivate.]~%")
-        (when (and (>= *genie-state* 2) (<= *genie-state* 8))
+        (when (genie-teaching-p)
           (setf *genie-waiting* t)
           (format t "~%You lean back. The genie glances over, and asks, \"Got it working yet?\"~%")))))
 
 (defun cmd-reset-interpreter ()
-  (if (not (eq *current-room* 'lab))
+  (if (not (in-lab-p))
       (format t "You can't see any such thing.~%")
       (progn
         (setf *global-env* nil)
@@ -952,10 +1028,10 @@ or :? for a list of other : commands.]~%")
              (format t "[Error: ~a]~%" e))))))))
 
 (defun cmd-yes ()
-  (if (not (eq *current-room* 'lab))
+  (if (not (in-lab-p))
       (format t "Yes to what?~%")
       (cond
-        ((= *genie-state* 0)
+        ((genie-asleep-p)
          (format t "The genie, unconscious, quite ignores you.~%"))
 
         ((= *genie-state* 1)
@@ -971,14 +1047,14 @@ and booms...~%")
 He hands you the book.~%")
          (format t "~%~a~%" (problem-text 2)))
 
-        ((and (>= *genie-state* 2) (<= *genie-state* 8))
+        ((genie-teaching-p)
          (if *genie-waiting*
              (progn
                (setf *genie-waiting* nil)
                (if (check-problem *genie-state*)
                    (progn
                      (incf *genie-state*)
-                     (if (> *genie-state* 8)
+                     (if (genie-finished-p)
                          (progn
                            (setf *prize-won* t)
                            (format t "~%\"Congratulations,\" the genie booms. \"You are now an accredited
@@ -994,10 +1070,10 @@ the couch follows.~%"))
          (format t "\"What?\"~%")))))
 
 (defun cmd-no ()
-  (if (not (eq *current-room* 'lab))
+  (if (not (in-lab-p))
       (format t "No to what?~%")
       (cond
-        ((= *genie-state* 0)
+        ((genie-asleep-p)
          (format t "The genie, unconscious, quite ignores you.~%"))
 
         ((= *genie-state* 1)
@@ -1007,7 +1083,7 @@ the couch follows.~%"))
 it gets you. Wake me when you're tired of wasting time.\" He turns over, and begins
 snoring. Thunderously.~%"))
 
-        ((and (>= *genie-state* 2) (<= *genie-state* 8) *genie-waiting*)
+        ((and (genie-teaching-p) *genie-waiting*)
          (setf *genie-waiting* nil)
          (format t "\"Tell me when you're ready, then.\"~%"))
 
@@ -1015,16 +1091,16 @@ snoring. Thunderously.~%"))
          (format t "\"What?\"~%")))))
 
 (defun cmd-check ()
-  (if (not (eq *current-room* 'lab))
+  (if (not (in-lab-p))
       (format t "Check what?~%")
-      (if (and (>= *genie-state* 2) (<= *genie-state* 8))
+      (if (genie-teaching-p)
           (cmd-yes)
           (format t "Check what?~%"))))
 
 (defun cmd-repeat ()
-  (if (not (eq *current-room* 'lab))
+  (if (not (in-lab-p))
       (format t "Repeat what?~%")
-      (if (and (>= *genie-state* 2) (<= *genie-state* 8))
+      (if (genie-teaching-p)
           (format t "~%~a~%" (problem-text *genie-state*))
           (if (= *genie-state* 1)
               (format t "\"I thought the question was simple enough. Are you interested in learning
@@ -1036,18 +1112,18 @@ what I have to teach? Yes or no will do.\"~%")
     ((eq *current-room* 'entry)
      (format t "Consider going inside.~%"))
 
-    ((= *genie-state* 0)
+    ((genie-asleep-p)
      (if *alarm-box-used*
          (format t "Check out the box.~%")
          (format t "Check out the desk.~%")))
 
-    ((> *genie-state* 8)
+    ((genie-finished-p)
      (format t "Read the plaque.~%"))
 
     ((= *genie-state* 1)
      (format t "The genie is your guide.~%"))
 
-    ((and (>= *genie-state* 2) (<= *genie-state* 8))
+    ((genie-teaching-p)
      (give-hint *genie-state*))))
 
 (defun give-hint (problem)
@@ -1133,11 +1209,10 @@ environment where it was created.\"~%"))))))
   "Handle WAKE verb"
   (cond
     ((null what)
-     (format t "What do you want to wake?~%"))
-    ((member what '("genie") :test #'string-equal)
-     (if (not (eq *current-room* 'lab))
-         (format t "You don't see that here.~%")
-         (if (= *genie-state* 0)
+     (print-what-verb "wake"))
+    ((cmd-matches-p what "genie")
+     (if (require-object what)
+         (if (genie-asleep-p)
              ;; Genie is asleep - show one of three random responses
              (case (random 3)
                (0 (format t "The genie rolls over.~%"))
@@ -1153,10 +1228,9 @@ environment where it was created.\"~%"))))))
   (cond
     ((null what)
      (format t "You shout, but nothing happens.~%"))
-    ((member what '("genie" "at") :test #'string-equal)
-     (if (not (eq *current-room* 'lab))
-         (format t "You don't see that here.~%")
-         (if (= *genie-state* 0)
+    ((cmd-matches-p what "genie" "at")
+     (if (require-object "genie")
+         (if (genie-asleep-p)
              (format t "(to the genie)~%The genie, unconscious, quite ignores you.~%")
              (format t "The genie looks at you quizzically. \"No need to shout.\"~%"))))
     (t
@@ -1166,25 +1240,16 @@ environment where it was created.\"~%"))))))
   "Handle ATTACK/HIT/KICK/PUNCH verb"
   (cond
     ((null what)
-     (format t "What do you want to attack?~%"))
-    ((member what '("box" "glass" "alarm") :test #'string-equal)
-     (if (and (eq *current-room* 'entry)
-              (not *alarm-box-used*))
+     (print-what-verb "attack"))
+    ((cmd-matches-p what "box" "glass" "alarm")
+     (if (object-visible-p what)
          (cmd-break what)
-         (format t "You don't see that here.~%")))
-    ((member what '("genie") :test #'string-equal)
-     (if (not (eq *current-room* 'lab))
-         (format t "You don't see that here.~%")
-         (if (= *genie-state* 0)
-             ;; Attacking the sleeping genie wakes him (like Kiss)
-             (progn
-               (setf *alarm-box-used* t)
-               (setf *genie-state* 1)
-               (setf *genie-waiting* t)
-               (format t "~%A gleaming hand catches your fist. The genie gently -- very gently -- stops your attack.~%")
-               (format t "~%The genie looks you over, squinching his face in a manner to which mere mortals cannot aspire. \"Okay, okay,\" he rumbles. \"Welcome to Hell. Might as well get to work.\"~%~%")
-               (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
-               (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
+         (print-not-here)))
+    ((cmd-matches-p what "genie")
+     (if (require-object what)
+         (if (genie-asleep-p)
+             ;; Attacking the sleeping genie wakes him
+             (wake-genie "A gleaming hand catches your fist. The genie gently -- very gently -- stops your attack.")
              (format t "Violence is not the answer. The genie frowns at you.~%"))))
     (t
      (format t "That's not something you want to attack.~%"))))
@@ -1193,20 +1258,12 @@ environment where it was created.\"~%"))))))
   "Handle KISS/HUG verb"
   (cond
     ((null what)
-     (format t "What do you want to kiss?~%"))
-    ((member what '("genie") :test #'string-equal)
-     (if (not (eq *current-room* 'lab))
-         (format t "You don't see that here.~%")
-         (if (= *genie-state* 0)
-             ;; Kissing the sleeping genie wakes him (same as breaking the alarm box)
-             (progn
-               (setf *alarm-box-used* t)
-               (setf *genie-state* 1)
-               (setf *genie-waiting* t)
-               (format t "~%A gleaming hand catches your wrist. The genie gently -- very gently -- pushes you away.~%")
-               (format t "~%The genie looks you over, squinching his face in a manner to which mere mortals cannot aspire. \"Okay, okay,\" he rumbles. \"Welcome to Hell. Might as well get to work.\"~%~%")
-               (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
-               (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
+     (print-what-verb "kiss"))
+    ((cmd-matches-p what "genie")
+     (if (require-object what)
+         (if (genie-asleep-p)
+             ;; Kissing the sleeping genie wakes him
+             (wake-genie "A gleaming hand catches your wrist. The genie gently -- very gently -- pushes you away.")
              (format t "The genie looks at you with amusement. \"Let's keep this professional.\"~%"))))
     (t
      (format t "That's not something you want to kiss.~%"))))
