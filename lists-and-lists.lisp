@@ -642,7 +642,7 @@ keep working.")))
   (format t "~%Lists And Lists~%")
   (format t "An Interactive Tutorial~%")
   (format t "Copyright 1996 by Andrew Plotkin~%")
-  (format t "(Common Lisp port 2025)~%")
+  (format t "(Common Lisp port 2025 by Daniel Mewes)~%")
   (format t "~%(First-time players should type 'about')~%~%")
 
   (format t "Hey, that door wasn't there last time you walked by this spot. What the heck?~%")
