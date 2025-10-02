@@ -685,12 +685,6 @@ keep working.")))
           ((string-equal cmd "push")
            (cmd-push (first rest)))
 
-          ((string-equal cmd "run")
-           (cmd-run-interpreter))
-
-          ((string-equal cmd "reset")
-           (cmd-reset-interpreter))
-
           ((member cmd '("yes" "y") :test #'string-equal)
            (cmd-yes))
 
@@ -713,8 +707,7 @@ keep working.")))
            (cmd-manual))
 
           (t
-           (format t "I don't understand that command.~%")
-           (format t "(Try: look, north, south, examine, push, run, check, help, quit)~%")))))))
+           (format t "That's not a verb I recognise.~%")))))))
 
 (defun split-string (string separator)
   "Simple string splitter"
@@ -827,7 +820,7 @@ or :? for a list of other : commands.]~%")
 
   (run-interpreter)
 
-  (format t "~%[Suspending interpreter. Type 'run' to reactivate.]~%")
+  (format t "~%[Suspending interpreter. Press green button to reactivate.]~%")
   (when (and (>= *genie-state* 2) (<= *genie-state* 8))
     (setf *genie-waiting* t)
     (format t "~%You lean back. The genie glances over, and asks, \"Got it working yet?\"~%")))
