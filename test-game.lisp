@@ -73,6 +73,52 @@
                 (terpri)))
           nil))))
 
+(defun assert-function-result (function-name input-list result expected)
+  "Assert that a function application result matches expected value.
+   Returns t on success, nil on failure. Prints checkmark or X inline."
+  (format t "  (~a '~a) = ~a" function-name input-list result)
+  (if (and (numberp result) (= result expected))
+      (progn
+        (format t " ✓~%")
+        t)
+      (progn
+        (format t " ✗ (expected ~a)~%" expected)
+        nil)))
+
+(defun lookup-function (function-name env)
+  "Lookup a function in the environment, raising an error if not found."
+  (multiple-value-bind (val found) (env-lookup function-name env)
+    (if found
+        val
+        (error "~a not defined" (string-upcase (symbol-name function-name))))))
+
+(defun define-scheme-function (function-name definition)
+  "Define a Scheme function in the global environment with standard boilerplate."
+  (format t "Defining ~a function...~%" (string-upcase (symbol-name function-name)))
+  (let ((*eval-fuel* 1000))
+    (scheme-eval definition *global-env*)))
+
+(defun run-function-test-cases (function-name test-cases)
+  "Run multiple test cases for a Scheme function, returning t if all pass.
+   test-cases should be a list of (input expected) pairs."
+  (format t "Testing with multiple inputs...~%")
+  (let ((func (lookup-function function-name *global-env*))
+        (all-passed t))
+    (dolist (test test-cases)
+      (let* ((input-list (first test))
+             (expected (second test))
+             (quoted-input (scheme-read-quote input-list))
+             (*eval-fuel* 1000)
+             (result (scheme-apply func (list quoted-input))))
+        (unless (assert-function-result function-name input-list result expected)
+          (setf all-passed nil))))
+    all-passed))
+
+(defun check-problem-with-tests (problem-num test-results)
+  "Check problem using game's check-problem function, combining with test results."
+  (format t "Checking with game's check-problem function:~%")
+  (and test-results (check-problem problem-num)))
+
 (defun print-test-summary ()
   "Print summary of all test results, highlighting failures."
   (let* ((results (reverse *test-results*))
@@ -148,11 +194,8 @@
 ;; Test problem 2
 (run-test "Problem 2: TWENTYSEVEN"
   (lambda ()
-    (format t "Defining: (define twentyseven 27)~%")
-    (let ((*eval-fuel* 1000))
-      (scheme-eval '(define twentyseven 27) *global-env*))
-    (format t "Checking solution...~%")
-    (check-problem 2)))
+    (define-scheme-function 'twentyseven '(define twentyseven 27))
+    (check-problem-with-tests 2 t)))
 
 ;; Test problem 3
 (run-test "Problem 3: CAT and DOG (EQUAL? but not EQV?)"
@@ -162,182 +205,107 @@
       (scheme-eval '(define tail (quote (end))) *global-env*)
       (scheme-eval '(define cat (cons (quote head) tail)) *global-env*)
       (scheme-eval '(define dog (cons (quote head) tail)) *global-env*))
-    (format t "Checking solution...~%")
-    (check-problem 3)))
+    (check-problem-with-tests 3 t)))
 
 ;; Test problem 4
 (run-test "Problem 4: ABS (absolute value)"
   (lambda ()
-    (format t "Defining ABS function...~%")
-    (let ((*eval-fuel* 1000))
-      (scheme-eval '(define abs (lambda (val)
-                                  (cond
-                                    ((> val 0) val)
-                                    ((< val 0) (- 0 val))
-                                    (t 0))))
-                   *global-env*))
-    (format t "Checking solution...~%")
-    (check-problem 4)))
+    (define-scheme-function 'abs
+      '(define abs (lambda (val)
+                     (cond
+                       ((> val 0) val)
+                       ((< val 0) (- 0 val))
+                       (t 0)))))
+    (check-problem-with-tests 4 t)))
 
 ;; Test problem 5
 (run-test "Problem 5: SUM (recursive list sum)"
   (lambda ()
-    (format t "Defining SUM function...~%")
-    (let ((*eval-fuel* 1000))
-      (scheme-eval '(define sum (lambda (s)
-                                  (cond
-                                    ((null? s) 0)
-                                    (t (+ (car s) (sum (cdr s)))))))
-                   *global-env*))
-    (format t "Testing with multiple inputs...~%")
-    (let ((tests (list
-                  '((8 2 3) 13)
-                  '(() 0)
-                  '((5) 5)
-                  '((10 -5 7 -2) 10)
-                  '((1 1 1 1 1) 5)))
-          (all-passed t))
-      (dolist (test tests)
-        (let* ((input-list (first test))
-               (expected (second test))
-               (quoted-input (scheme-read-quote input-list))
-               (*eval-fuel* 1000)
-               (sum-fn (multiple-value-bind (val found) (env-lookup 'sum *global-env*)
-                         (if found val (error "SUM not defined"))))
-               (result (scheme-apply sum-fn (list quoted-input))))
-          (format t "  (SUM '~a) = ~a" input-list result)
-          (if (and (numberp result) (= result expected))
-              (format t " ✓~%")
-              (progn
-                (format t " ✗ (expected ~a)~%" expected)
-                (setf all-passed nil)))))
-      (format t "Checking with game's check-problem function:~%")
-      (and all-passed (check-problem 5)))))
+    (define-scheme-function 'sum
+      '(define sum (lambda (s)
+                     (cond
+                       ((null? s) 0)
+                       (t (+ (car s) (sum (cdr s))))))))
+    (let ((test-results (run-function-test-cases 'sum
+                          '(((8 2 3) 13)
+                            (() 0)
+                            ((5) 5)
+                            ((10 -5 7 -2) 10)
+                            ((1 1 1 1 1) 5)))))
+      (check-problem-with-tests 5 test-results))))
 
 ;; Test problem 6
 (run-test "Problem 6: MEGASUM (nested list sum)"
   (lambda ()
-    (format t "Defining MEGASUM function...~%")
-    (let ((*eval-fuel* 1000))
-      (scheme-eval '(define megasum (lambda (s)
-                                      (cond
-                                        ((null? s) 0)
-                                        ((list? (car s))
-                                          (+ (megasum (car s)) (megasum (cdr s))))
-                                        (t (+ (car s) (megasum (cdr s)))))))
-                   *global-env*))
-    (format t "Testing with multiple inputs...~%")
-    (let ((tests (list
-                  '(((8) 5 (2 () (9 1) 3)) 28)
-                  '((1 2 3) 6)
-                  '(((1 (2 (3)))) 6)
-                  '(() 0)
-                  '((10) 10)
-                  '((5 (10 (15))) 30)))
-          (all-passed t))
-      (dolist (test tests)
-        (let* ((input-list (first test))
-               (expected (second test))
-               (quoted-input (scheme-read-quote input-list))
-               (*eval-fuel* 1000)
-               (megasum-fn (multiple-value-bind (val found) (env-lookup 'megasum *global-env*)
-                             (if found val (error "MEGASUM not defined"))))
-               (result (scheme-apply megasum-fn (list quoted-input))))
-          (format t "  (MEGASUM '~a) = ~a" input-list result)
-          (if (and (numberp result) (= result expected))
-              (format t " ✓~%")
-              (progn
-                (format t " ✗ (expected ~a)~%" expected)
-                (setf all-passed nil)))))
-      (format t "Checking with game's check-problem function:~%")
-      (and all-passed (check-problem 6)))))
+    (define-scheme-function 'megasum
+      '(define megasum (lambda (s)
+                         (cond
+                           ((null? s) 0)
+                           ((list? (car s))
+                             (+ (megasum (car s)) (megasum (cdr s))))
+                           (t (+ (car s) (megasum (cdr s))))))))
+    (let ((test-results (run-function-test-cases 'megasum
+                          '((((8) 5 (2 () (9 1) 3)) 28)
+                            ((1 2 3) 6)
+                            (((1 (2 (3)))) 6)
+                            (() 0)
+                            ((10) 10)
+                            ((5 (10 (15))) 30)))))
+      (check-problem-with-tests 6 test-results))))
 
 ;; Test problem 7
 (run-test "Problem 7: MAX (find maximum in list)"
   (lambda ()
-    (format t "Defining MAX function...~%")
-    (let ((*eval-fuel* 1000))
-      (scheme-eval '(define max (lambda (s)
-                                  (cond
-                                    ((null? (cdr s)) (car s))
-                                    (t (let ((rest-max (max (cdr s))))
-                                         (cond
-                                           ((> (car s) rest-max) (car s))
-                                           (t rest-max)))))))
-                   *global-env*))
-    (format t "Testing with multiple inputs...~%")
-    (let ((tests (list
-                  '((5 14 -3) 14)
-                  '((42) 42)
-                  '((-10 -5 -20) -5)
-                  '((100 50 75 25) 100)
-                  '((1 1 1 1 1) 1)
-                  '((-100 -200) -100)))
-          (all-passed t))
-      (dolist (test tests)
-        (let* ((input-list (first test))
-               (expected (second test))
-               (quoted-input (scheme-read-quote input-list))
-               (*eval-fuel* 1000)
-               (max-fn (multiple-value-bind (val found) (env-lookup 'max *global-env*)
-                         (if found val (error "MAX not defined"))))
-               (result (scheme-apply max-fn (list quoted-input))))
-          (format t "  (MAX '~a) = ~a" input-list result)
-          (if (and (numberp result) (= result expected))
-              (format t " ✓~%")
-              (progn
-                (format t " ✗ (expected ~a)~%" expected)
-                (setf all-passed nil)))))
-      (format t "Checking with game's check-problem function:~%")
-      (and all-passed (check-problem 7)))))
+    (define-scheme-function 'max
+      '(define max (lambda (s)
+                     (cond
+                       ((null? (cdr s)) (car s))
+                       (t (let ((rest-max (max (cdr s))))
+                            (cond
+                              ((> (car s) rest-max) (car s))
+                              (t rest-max))))))))
+    (let ((test-results (run-function-test-cases 'max
+                          '(((5 14 -3) 14)
+                            ((42) 42)
+                            ((-10 -5 -20) -5)
+                            ((100 50 75 25) 100)
+                            ((1 1 1 1 1) 1)
+                            ((-100 -200) -100)))))
+      (check-problem-with-tests 7 test-results))))
 
 ;; Test problem 8
 (run-test "Problem 8: POCKET (closures with state)"
   (lambda ()
-    (format t "Defining POCKET function using LETREC...~%")
-    (let ((*eval-fuel* 1000))
-      (scheme-eval '(define pocket
-                      (letrec
-                        ((generator (lambda (x)
-                                      (lambda (y)
-                                        (cond
-                                          ((null? y) x)
-                                          (t (generator y)))))))
-                        (generator 8)))
-                   *global-env*))
+    (define-scheme-function 'pocket
+      '(define pocket
+         (letrec
+           ((generator (lambda (x)
+                         (lambda (y)
+                           (cond
+                             ((null? y) x)
+                             (t (generator y)))))))
+           (generator 8))))
     (format t "Testing closure state preservation...~%")
-    (multiple-value-bind (pocket-fn found) (env-lookup 'pocket *global-env*)
-      (unless found
-        (error "POCKET not defined"))
+    (let* ((pocket-fn (lookup-function 'pocket *global-env*))
+           (all-passed t)
+           (*eval-fuel* 1000)
+           (result1 (scheme-apply pocket-fn (list nil))))
 
-      (let ((all-passed t))
-        ;; Test 1: Initial pocket returns 8
-        (format t "  (POCKET NIL) = ")
-        (let* ((*eval-fuel* 1000)
-               (result (scheme-apply pocket-fn (list nil))))
-          (scheme-print result)
-          (if (and (numberp result) (= result 8))
-              (format t " ✓~%")
-              (progn
-                (format t " ✗ (expected 8)~%")
-                (setf all-passed nil))))
+      ;; Test 1: Initial pocket returns 8
+      (unless (assert-number-equal result1 8 "  (POCKET NIL)")
+        (setf all-passed nil))
 
-        ;; Test 2-7: Creating nested pockets
-        (let* ((*eval-fuel* 1000)
-               (newpocket (scheme-apply pocket-fn (list 12))))
-          (format t "  (POCKET 12) returns function: ")
-          (if (scheme-function-p newpocket)
-              (progn
-                (format t "✓~%")
-                (let* ((*eval-fuel* 1000)
-                       (val2 (scheme-apply newpocket (list nil))))
-                  (format t "  (NEWPOCKET NIL) = ")
-                  (scheme-print val2)
-                  (if (and (numberp val2) (= val2 12))
-                      (format t " ✓~%")
-                      (progn
-                        (format t " ✗ (expected 12)~%")
-                        (setf all-passed nil))))
+      ;; Test 2-7: Creating nested pockets
+      (let* ((*eval-fuel* 1000)
+             (newpocket (scheme-apply pocket-fn (list 12))))
+        (format t "  (POCKET 12) returns function: ")
+        (if (scheme-function-p newpocket)
+            (progn
+              (format t "✓~%")
+              (let* ((*eval-fuel* 1000)
+                     (val2 (scheme-apply newpocket (list nil))))
+                (unless (assert-number-equal val2 12 "  (NEWPOCKET NIL)")
+                  (setf all-passed nil))
 
                 (let* ((*eval-fuel* 1000)
                        (thirdpocket (scheme-apply newpocket (list 3))))
@@ -348,24 +316,20 @@
                            (val2-again (scheme-apply newpocket (list nil)))
                            (*eval-fuel* 1000)
                            (val1-again (scheme-apply pocket-fn (list nil))))
-                      (format t "  (THIRDPOCKET NIL) = ~a" val3)
-                      (if (and (numberp val3) (= val3 3))
-                          (format t " ✓~%")
-                          (progn
-                            (format t " ✗ (expected 3)~%")
-                            (setf all-passed nil)))
+                      (unless (assert-number-equal val3 3 "  (THIRDPOCKET NIL)")
+                        (setf all-passed nil))
                       (format t "  State preservation test: ")
                       (if (and (= val2-again 12) (= val1-again 8))
                           (format t "✓~%")
                           (progn
-                            (format t "✗~%")
-                            (setf all-passed nil)))))))
-              (progn
-                (format t "✗~%")
-                (setf all-passed nil))))
+                            (format t "✗ (expected newpocket=12, pocket=8; got ~a, ~a)~%"
+                                    val2-again val1-again)
+                            (setf all-passed nil))))))))
+            (progn
+              (format t "✗ (expected function)~%")
+              (setf all-passed nil))))
 
-        (format t "Checking with game's check-problem function:~%")
-        (and all-passed (check-problem 8))))))
+      (check-problem-with-tests 8 all-passed))))
 
 ;; Test environment display
 (run-test "Environment display (:e command)"
