@@ -603,13 +603,6 @@
   "Default search behavior - nothing found"
   (format t "You find nothing of interest.~%"))
 
-(defgeneric default-action-object (object)
-  (:documentation "Default action for scenery objects"))
-
-(defmethod default-action-object ((obj game-object))
-  "Default behavior for default action - do nothing"
-  nil)
-
 ;;; Define all game object classes
 
 (defclass genie-object (game-object)
@@ -789,9 +782,6 @@ you see the words \"*** You have won ***\""))
    :location 'lab
    :description "Clearly a geek's collection. Fantasy and science fiction on one side, puzzle books and loony philosophy on the other, and several shelves of little toys and puzzles in the middle."))
 
-(defmethod default-action-object ((obj bookshelves-object))
-  (format t "You decide that the stuff on the shelves is not what you're in here for.~%"))
-
 (defclass toys-object (game-object)
   ()
   (:default-initargs
@@ -799,9 +789,6 @@ you see the words \"*** You have won ***\""))
    :names '("toys" "toy" "puzzles" "puzzle")
    :location 'lab
    :description "You expected puzzle-less IF?"))
-
-(defmethod default-action-object ((obj toys-object))
-  (format t "You decide that the stuff on the shelves is not what you're in here for.~%"))
 
 (defclass genie-possessions-object (game-object)
   ()
@@ -814,18 +801,12 @@ you see the words \"*** You have won ***\""))
   "Genie possessions are visible in lab when genie present"
   (and (in-lab-p) (not (genie-finished-p))))
 
-(defmethod default-action-object ((obj genie-possessions-object))
-  (format t "The genie's possessions are not important.~%"))
-
 (defclass stuff-object (game-object)
   ()
   (:default-initargs
    :type-name 'stuff
    :names '("stuff" "things" "thing" "wall" "everything")
    :location 'entry))
-
-(defmethod default-action-object ((obj stuff-object))
-  (format t "Leave that alone; there's nothing new about it.~%"))
 
 ;;; Registry of all game objects
 (defvar *game-objects* nil
@@ -1764,12 +1745,6 @@ environment where it was created.\"~%"))))))
               (cmd-run-interpreter)))
          (t
           (format t "You can't do that.~%")))))))
-
-(defun cmd-default-action (what)
-  "Handle default actions on scenery objects"
-  (let ((obj (find-object-by-name what)))
-    (when (and obj (object-visible-p obj))
-      (default-action-object obj))))
 
 ;;; ============================================================================
 ;;; SAVE/LOAD SYSTEM
