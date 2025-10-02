@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Launcher script for Lists and Lists
 
 if command -v sbcl &> /dev/null; then

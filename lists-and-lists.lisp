@@ -32,6 +32,9 @@
   name
   fn)
 
+(defstruct scheme-syntax
+  name)
+
 ;;; Environment handling
 
 (defun make-env (&optional parent)
@@ -94,6 +97,12 @@
     (env-define '= (make-scheme-builtin :name '=
                                         :fn (lambda (args) (apply #'= args)))
                 env)
+    (env-define '>= (make-scheme-builtin :name '>=
+                                         :fn (lambda (args) (apply #'>= args)))
+                env)
+    (env-define '<= (make-scheme-builtin :name '<=
+                                         :fn (lambda (args) (apply #'<= args)))
+                env)
 
     ;; List operations
     (env-define 'car (make-scheme-builtin :name 'car
@@ -108,6 +117,14 @@
                                            :fn (lambda (args)
                                                  (make-scheme-cons :car (first args)
                                                                    :cdr (second args))))
+                env)
+    (env-define 'list (make-scheme-builtin :name 'list
+                                           :fn (lambda (args)
+                                                 (scheme-list-to-cons args)))
+                env)
+    (env-define 'length (make-scheme-builtin :name 'length
+                                             :fn (lambda (args)
+                                                   (scheme-length (first args))))
                 env)
 
     ;; Predicates
@@ -137,12 +154,47 @@
     (env-define 'equal? (make-scheme-builtin :name 'equal?
                                              :fn (lambda (args) (scheme-equal (first args) (second args))))
                 env)
+    (env-define 'not (make-scheme-builtin :name 'not
+                                          :fn (lambda (args) (not (scheme-truthy (first args)))))
+                env)
+
+    ;; Meta operations
+    (env-define 'eval (make-scheme-builtin :name 'eval
+                                           :fn (lambda (args)
+                                                 (scheme-eval (first args) *global-env*)))
+                env)
+
+    ;; Special forms (syntax)
+    (env-define 'quote (make-scheme-syntax :name 'quote) env)
+    (env-define 'define (make-scheme-syntax :name 'define) env)
+    (env-define 'lambda (make-scheme-syntax :name 'lambda) env)
+    (env-define 'if (make-scheme-syntax :name 'if) env)
+    (env-define 'cond (make-scheme-syntax :name 'cond) env)
+    (env-define 'let (make-scheme-syntax :name 'let) env)
+    (env-define 'let* (make-scheme-syntax :name 'let*) env)
+    (env-define 'letrec (make-scheme-syntax :name 'letrec) env)
+    (env-define 'error (make-scheme-syntax :name 'error) env)
 
     ;; Special constants
     (env-define 't t env)
     (env-define 'nil nil env)
 
     (setf *global-env* env)))
+
+(defun scheme-list-to-cons (lst)
+  "Convert a Common Lisp list to a scheme cons structure"
+  (if (null lst)
+      nil
+      (make-scheme-cons :car (car lst)
+                        :cdr (scheme-list-to-cons (cdr lst)))))
+
+(defun scheme-length (obj)
+  "Return the length of a scheme list"
+  (cond
+    ((null obj) 0)
+    ((scheme-cons-p obj)
+     (1+ (scheme-length (scheme-cons-cdr obj))))
+    (t (error "LENGTH called on non-list"))))
 
 (defun scheme-equal (a b)
   (cond
@@ -211,9 +263,17 @@
          ((eq op 'let)
           (scheme-eval-let (first args) (second args) env))
 
+         ;; Let*
+         ((eq op 'let*)
+          (scheme-eval-let* (first args) (second args) env))
+
          ;; Letrec
          ((eq op 'letrec)
           (scheme-eval-letrec (first args) (second args) env))
+
+         ;; Error
+         ((eq op 'error)
+          (error "~a" (first args)))
 
          ;; Function call
          (t
@@ -241,6 +301,14 @@
     (dolist (binding bindings)
       (let ((var (car binding))
             (val (scheme-eval (cadr binding) env)))
+        (env-define var val new-env)))
+    (scheme-eval body new-env)))
+
+(defun scheme-eval-let* (bindings body env)
+  (let ((new-env (make-env env)))
+    (dolist (binding bindings)
+      (let ((var (car binding))
+            (val (scheme-eval (cadr binding) new-env)))
         (env-define var val new-env)))
     (scheme-eval body new-env)))
 
@@ -299,6 +367,7 @@
      (format stream ")"))
     ((scheme-function-p obj) (format stream "[function]"))
     ((scheme-builtin-p obj) (format stream "[builtin: ~a]" (scheme-builtin-name obj)))
+    ((scheme-syntax-p obj) (format stream "[syntax]"))
     (t (format stream "~a" obj))))
 
 (defun scheme-print-list (obj stream)
