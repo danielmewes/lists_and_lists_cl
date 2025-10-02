@@ -687,7 +687,7 @@ keep working.")))
             ((string-equal cmd "break")
              (cmd-break (first rest)))
 
-            ((string-equal cmd "push")
+            ((member cmd '("push" "press") :test #'string-equal)
              (cmd-push (first rest)))
 
             ((member cmd '("yes" "y") :test #'string-equal)
