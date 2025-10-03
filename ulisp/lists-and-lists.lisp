@@ -6,6 +6,22 @@
 ;;;; An Interactive Tutorial for learning Scheme/Lisp
 
 ;;; ============================================================================
+;;; UTILITY FUNCTIONS
+;;; ============================================================================
+
+(defun string-downcase (str)
+  "Convert a string to lowercase using only uLisp built-in functions."
+  (let ((result ""))
+    (dotimes (i (length str))
+      (let* ((ch (char str i))
+             (code (char-code ch)))
+        ;; If character is uppercase - ASCII 65-90 - , convert to lowercase
+        (when (and (>= code 65) (<= code 90))
+          (setq code (+ code 32)))
+        (setq result (concatenate 'string result (string (code-char code))))))
+    result))
+
+;;; ============================================================================
 ;;; ULOS - uLisp Simple Object System
 ;;; ============================================================================
 
@@ -1305,8 +1321,7 @@ keep working.")
 
   (loop
     (format t "~%> ")
-    (finish-output)
-    (let* ((input (read-line *standard-input* nil))
+    (let* ((input (read-line))
            (words (and input (parse-command input))))
       (cond
         ((null input)
@@ -1477,8 +1492,7 @@ or :? for a list of other : commands.]~%")
 (defun run-interpreter ()
   (loop
     (format t "~%>> ")
-    (finish-output)
-    (let ((line (read-line *standard-input* nil)))
+    (let ((line (read-line)))
       (when (null line)
         (return))
 
@@ -2909,7 +2923,6 @@ environment where it was created.\"~%"))))
   (if (or *manual-available* (>= *genie-state* 2))
       (loop
         (display-manual-menu)
-        (finish-output)
         (let ((input (read-line)))
           (cond
             ((or (string-equal input "q") (string-equal input "quit"))
