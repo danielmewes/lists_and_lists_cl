@@ -55,7 +55,7 @@ The Scheme interpreter code may be freely used, modified, and incorporated into 
 ## Credits
 
 - **Original game**: Andrew Plotkin (1996)
-- **Common Lisp port**: 2025
+- **Common Lisp port**: Daniel Mewes, via Imbue Sculptor (2025)
 - **Beta testers** (original): Michael Kinyon, Dylan Thurston, Dave Seybert
 
 Enjoy learning Lisp!
