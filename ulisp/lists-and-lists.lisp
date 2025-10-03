@@ -1357,9 +1357,9 @@ keep working.")
                      (t
                       (if (symbolp handler)
                           (funcall (symbol-function handler) (first rest))
-                          (funcall handler (first rest)))))
+                          (funcall handler (first rest))))))
                    ;; Unrecognized verb
-                   (format t "That's not a verb I recognise.~%"))))))))))))
+                   (format t "That's not a verb I recognise.~%")))))))))))
 
 (defun split-string (string separator)
   "Simple string splitter"
