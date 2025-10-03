@@ -21,6 +21,49 @@
         (setq result (concatenate 'string result (string (code-char code))))))
     result))
 
+(defun char-in-string-p (ch str)
+  "Check if character ch is in string str."
+  (let ((found nil))
+    (dotimes (i (length str))
+      (when (eq ch (char str i))
+        (setq found t)
+        (return)))
+    found))
+
+(defun remove-if (predicate lst)
+  "Remove all elements from lst for which predicate returns true."
+  (let ((result nil))
+    (dolist (item lst)
+      (unless (funcall predicate item)
+        (push item result)))
+    (reverse result)))
+
+(defun string-trim (char-bag str)
+  "Remove characters in char-bag from both ends of str."
+  (let ((start 0)
+        (end (- (length str) 1))
+        (len (length str)))
+    ;; Find first non-trimmable character
+    (loop
+      (when (or (>= start len)
+                (not (char-in-string-p (char str start) char-bag)))
+        (return))
+      (setq start (+ start 1)))
+    ;; Find last non-trimmable character
+    (loop
+      (when (or (< end 0)
+                (not (char-in-string-p (char str end) char-bag)))
+        (return))
+      (setq end (- end 1)))
+    ;; Extract substring
+    (if (> start end)
+        ""
+        (let ((result ""))
+          (dotimes (i (+ (- end start) 1))
+            (setq result (concatenate 'string result
+                                     (string (char str (+ start i))))))
+          result))))
+
 ;;; ============================================================================
 ;;; ULOS - uLisp Simple Object System
 ;;; ============================================================================
@@ -413,9 +456,13 @@
     ((scheme-function-p fn)
      (let ((new-env (make-env (scheme-function-env fn))))
        ;; Bind parameters
-       (loop for param in (scheme-function-params fn)
-             for arg in args
-             do (env-define param arg new-env))
+       (let ((params (scheme-function-params fn))
+             (args-list args))
+         (loop
+           (when (null params) (return))
+           (env-define (car params) (car args-list) new-env)
+           (setq params (cdr params))
+           (setq args-list (cdr args-list))))
        (scheme-eval (scheme-function-body fn) new-env)))
 
     (t (error "Cannot apply non-function: ~a" fn))))
@@ -488,7 +535,7 @@
   (defun matches-in-list (c alts)
     (cond
       ((null alts) nil)
-      ((string-equal c (car alts)) t)
+      ((string= c (car alts)) t)
       (t (matches-in-list c (cdr alts)))))
   (matches-in-list cmd alternatives))
 
@@ -1247,34 +1294,40 @@ keep working.")
           nil)
         (let ((val1 (scheme-apply pocket-fn (list nil)))
               (fn2 (scheme-apply pocket-fn (list 12))))
-          (unless (and (numberp val1) (= val1 8))
-            (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
-            (return-from check-problem-8 nil))
-          (unless (scheme-function-p fn2)
-            (format t "~%\"No; pocket should return a function when given an integer.\"~%")
-            (return-from check-problem-8 nil))
-          (let ((val2 (scheme-apply fn2 (list nil)))
-                (fn3 (scheme-apply fn2 (list 3))))
-            (unless (and (numberp val2) (= val2 12))
-              (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
-              (return-from check-problem-8 nil))
-            (unless (scheme-function-p fn3)
-              (format t "~%\"No; a pocket function should return another function.\"~%")
-              (return-from check-problem-8 nil))
-            (let ((val3 (scheme-apply fn3 (list nil)))
-                  (val2-again (scheme-apply fn2 (list nil)))
-                  (val1-again (scheme-apply pocket-fn (list nil))))
-              (unless (and (numberp val3) (= val3 3))
-                (format t "~%\"No; the third pocket function should return 3.\"~%")
-                (return-from check-problem-8 nil))
-              (unless (and (numberp val2-again) (= val2-again 12))
-                (format t "~%\"No; the second pocket function should still return 12.\"~%")
-                (return-from check-problem-8 nil))
-              (unless (and (numberp val1-again) (= val1-again 8))
-                (format t "~%\"No; the original pocket function should still return 8.\"~%")
-                (return-from check-problem-8 nil))
-              (format t "~%\"Perfect.\"~%")
-              t))))))
+          (cond
+            ((not (and (numberp val1) (= val1 8)))
+             (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
+             nil)
+            ((not (scheme-function-p fn2))
+             (format t "~%\"No; pocket should return a function when given an integer.\"~%")
+             nil)
+            (t
+             (let ((val2 (scheme-apply fn2 (list nil)))
+                   (fn3 (scheme-apply fn2 (list 3))))
+               (cond
+                 ((not (and (numberp val2) (= val2 12)))
+                  (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
+                  nil)
+                 ((not (scheme-function-p fn3))
+                  (format t "~%\"No; a pocket function should return another function.\"~%")
+                  nil)
+                 (t
+                  (let ((val3 (scheme-apply fn3 (list nil)))
+                        (val2-again (scheme-apply fn2 (list nil)))
+                        (val1-again (scheme-apply pocket-fn (list nil))))
+                    (cond
+                      ((not (and (numberp val3) (= val3 3)))
+                       (format t "~%\"No; the third pocket function should return 3.\"~%")
+                       nil)
+                      ((not (and (numberp val2-again) (= val2-again 12)))
+                       (format t "~%\"No; the second pocket function should still return 12.\"~%")
+                       nil)
+                      ((not (and (numberp val1-again) (= val1-again 8)))
+                       (format t "~%\"No; the original pocket function should still return 8.\"~%")
+                       nil)
+                      (t
+                       (format t "~%\"Perfect.\"~%")
+                       t)))))))))))
 
 ;;; ============================================================================
 ;;; GAME INTERFACE
@@ -1379,15 +1432,16 @@ keep working.")
 (defun split-string (string separator)
   "Simple string splitter"
   (let ((parts nil)
-        (start 0))
-    (loop for i from 0 below (length string)
-          when (char= (char string i) separator)
-          do (when (> i start)
-               (push (subseq string start i) parts))
-             (setf start (1+ i)))
-    (when (< start (length string))
+        (start 0)
+        (len (length string)))
+    (dotimes (i len)
+      (when (eq (char string i) separator)
+        (when (> i start)
+          (push (subseq string start i) parts))
+        (setf start (1+ i))))
+    (when (< start len)
       (push (subseq string start) parts))
-    (nreverse parts)))
+    (reverse parts)))
 
 (defun parse-command (str)
   (let ((words (split-string (string-trim " " str) #\Space)))
@@ -1637,18 +1691,18 @@ what I have to teach? Yes or no will do.\"~%")
      (give-hint *genie-state*))))
 
 (defun give-hint (problem)
-  (when (= *hint-problem* -1)
-    (setf *hint-problem* 0)
-    (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
+  (if (= *hint-problem* -1)
+      (progn
+        (setf *hint-problem* 0)
+        (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
 to tell you, blah blah blah, irreparable loss of fun, blah blah, no refunds, fine. So if
-you still want help, ask again. If any hint I give isn't enough, ask again.\"~%")
-    (return-from give-hint))
+you still want help, ask again. If any hint I give isn't enough, ask again.\"~%"))
+      (progn
+        (when (/= *hint-problem* problem)
+          (setf *hint-problem* problem)
+          (setf *hint-level* 0))
 
-  (when (/= *hint-problem* problem)
-    (setf *hint-problem* problem)
-    (setf *hint-level* 0))
-
-  (incf *hint-level*)
+        (incf *hint-level*)
 
   ;; Simplified hints - just provide the basic guidance
   (cond
@@ -1709,7 +1763,7 @@ create a new pocket (if given an integer).\"~%"))
        (t (format t "\"The key insight: use static scoping. Each function remembers the
 environment where it was created.\"~%"))))
 
-    (t (error "Invalid problem number"))))
+    (t (error "Invalid problem number"))))))
 
 (defun cmd-about ()
   (format t "~%Lists And Lists is copyright 1996 by Andrew Plotkin.~%")
@@ -1839,7 +1893,7 @@ environment where it was created.\"~%"))))
              (setf *door-open* t))
            (setf *current-room* 'lab)
            (describe-room)
-           (return-from cmd-go t))
+           t)
          (format t "You can't go that way.~%")))
     ((cmd-matches-p direction "south" "s")
      ;; Go south - from lab to entry or leave game
@@ -1849,7 +1903,7 @@ environment where it was created.\"~%"))))
                (format t "~%You step back through the door...~%")
                (format t "~%*** You have won ***~%")
                (print-goodbye)
-               (return-from cmd-go t))
+               t)
              (format t "Leaving so soon?~%"))
          (format t "You ARE outside.~%")))
     ((cmd-matches-p direction "in")
@@ -2022,8 +2076,9 @@ environment where it was created.\"~%"))))
   "Save user-defined bindings from environment, recreating it on load"
   (let ((user-bindings (collect-user-bindings env)))
     `(let ((new-env (init-global-env)))
-       ,@(loop for (sym . val) in user-bindings
-               collect `(env-define ',sym ,(serialize-scheme-value val) new-env))
+       ,@(mapcar (lambda (binding)
+                   `(env-define ',(car binding) ,(serialize-scheme-value (cdr binding)) new-env))
+                 user-bindings)
        new-env)))
 
 (defun collect-user-bindings (env)
@@ -2031,10 +2086,10 @@ environment where it was created.\"~%"))))
   (if (or (null env) (not (eq (car env) 'env)))
       nil
       (let ((parent-bindings (collect-user-bindings (env-parent env)))
-            (local-bindings (loop for (sym . val) in (cddr env)
-                                  unless (or (scheme-builtin-p val)
-                                           (scheme-syntax-p val))
-                                  collect (cons sym val))))
+            (local-bindings (remove-if (lambda (binding)
+                                        (or (scheme-builtin-p (cdr binding))
+                                            (scheme-syntax-p (cdr binding))))
+                                      (cddr env))))
         (append local-bindings parent-bindings))))
 
 (defun serialize-scheme-value (val)
@@ -2059,8 +2114,9 @@ environment where it was created.\"~%"))))
       '*global-env*
       (let ((bindings (collect-user-bindings env)))
         `(let ((new-env (make-env *global-env*)))
-           ,@(loop for (sym . val) in bindings
-                   collect `(env-define ',sym ,(serialize-scheme-value val) new-env))
+           ,@(mapcar (lambda (binding)
+                       `(env-define ',(car binding) ,(serialize-scheme-value (cdr binding)) new-env))
+                     bindings)
            new-env))))
 
 ;;; ============================================================================
@@ -2915,8 +2971,8 @@ environment where it was created.\"~%"))))
   (format t "       A Simple Programmer's Introduction to Scheme~%")
   (format t "=======================================================================~%~%")
   (format t "Table of Contents:~%~%")
-  (loop for i from 0 to 20
-        do (format t "  ~2d: ~a~%" i (manual-chapter-name i)))
+  (dotimes (i 21)
+    (format t "  ~2d: ~a~%" i (manual-chapter-name i)))
   (format t "~%Enter chapter number (0-20), or 'q' to quit: "))
 
 (defun cmd-manual ()
@@ -2925,7 +2981,7 @@ environment where it was created.\"~%"))))
         (display-manual-menu)
         (let ((input (read-line)))
           (cond
-            ((or (string-equal input "q") (string-equal input "quit"))
+            ((or (string= input "q") (string= input "quit"))
              (format t "~%Closing manual.~%")
              (return))
             ((and (every #'digit-char-p input)
