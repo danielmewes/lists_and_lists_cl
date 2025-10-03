@@ -227,7 +227,7 @@
                                              (scheme-eval (first args) *global-env*)))
                 env)
 
-    ;; Special forms (syntax)
+    ;; Special forms
     (env-define 'quote (make-scheme-syntax 'quote) env)
     (env-define 'define (make-scheme-syntax 'define) env)
     (env-define 'lambda (make-scheme-syntax 'lambda) env)
@@ -616,7 +616,7 @@
   (find-in-alist (string-downcase cmd-string) *command-table*))
 
 ;;; ============================================================================
-;;; OBJECT-ORIENTED GAME OBJECT SYSTEM (Using ULOS)
+;;; OBJECT-ORIENTED GAME OBJECT SYSTEM
 ;;; ============================================================================
 
 ;;; Base game-object constructor
@@ -1347,7 +1347,7 @@ keep working.")
                         (if (symbolp handler)
                             (funcall (symbol-function handler))
                             (funcall handler)))
-                       ;; Commands that take rest as list (put, turn)
+                       ;; Commands that take rest as list
                        ((or (string= downcased-cmd "put") (string= downcased-cmd "turn")
                             (string= downcased-cmd "switch"))
                       (if (symbolp handler)
@@ -1946,7 +1946,7 @@ environment where it was created.\"~%"))))
           (format t "You can't do that.~%")))))))
 
 ;;; ============================================================================
-;;; SAVE/LOAD SYSTEM (Using uLisp SD Card Interface)
+;;; SAVE/LOAD SYSTEM Using uLisp SD Card Interface
 ;;; ============================================================================
 
 (defun cmd-save (&optional filename)
@@ -1976,7 +1976,7 @@ environment where it was created.\"~%"))))
                 (terpri out)
                 (print (list 'setf '*hint-level* *hint-level*) out)
                 (terpri out)
-                ;; Save environment (user-defined Scheme functions)
+                ;; Save environment - user-defined Scheme functions
                 (print (list 'setf '*global-env* (save-user-env *global-env*)) out)
                 (terpri out)
                 t)))
