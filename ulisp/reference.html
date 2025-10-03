@@ -1,0 +1,2168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>uLisp - Language reference</title>
+<link rel="stylesheet" type="text/css" href="/css/program/program.css">
+<script src='https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js'></script>
+<script>
+  WebFont.load({
+    google: {
+      families: ['Roboto', 'Roboto Medium', 'Roboto Bold']
+    }
+  });
+</script>
+<style type='text/css'><!--
+p { margin-top: 10px; margin-bottom: 10px; }
+
+#search { font-size: 12px; }
+
+table.new { border: none; }
+
+table.new thead tr { border: none; border-bottom: 3px solid #eee; }
+
+table.new tbody tr { border:none; border-bottom: 2px solid #e9e9e9; }
+
+table.new td { padding-right: 6px; border: none; }
+
+.box {
+	border:1px #CCCCCC solid;
+	padding: 0 8px 16px 8px;
+}
+
+.date {
+	margin: 0; font-size: 12px;
+	text-transform:uppercase;
+	letter-spacing:.2em;
+	color:#999999;
+}
+
+code { font-family: Consolas, "Lucida Console", "Courier New", Courier, monospace; }
+
+pre { font-size-adjust: ch-width from-font; }
+
+.eqn { display: inline-block; vertical-align: middle; }
+.num { display: block; text-align: center; border-bottom: 1px solid; }
+.den { display: block; text-align: center; } 
+
+.nextprevious { margin: 0 0 18px 0; }
+
+.instructions p { margin: 0; }
+
+.instructions td {white-space: nowrap; font-size: 13px; }
+--></style>
+<link rel="icon" type="image/x-icon" href="/pictures/3J/favicon.ico">
+<link rel="shortcut" type="image/x-icon" href="/pictures/3J/favicon.ico">
+<link rel="alternate" type="application/rss+xml" href="/rss?3J+3" title="uLisp Feed">
+</head>
+<body>
+<div id="container"><div id="navmenucontainer" class="wrap">
+<div id="navmenuv">
+    <ul class="nav">
+      <li><a href="http://www.ulisp.com/">Home</a></li>
+      <li><a href="http://www.ulisp.com/show?3L">Reference</a></li>
+      <li><a href="http://forum.ulisp.com/">Forum</a></li>
+    </ul>
+</div>
+</div><div id="header"><a href="/show?3J"><img src="/pictures/3J/logo.gif" alt="Logo" class="logo"></a>
+<h1 id="title">uLisp</h1>
+<div class="headernav">
+<div id="searchform">
+<form action="/search.html" method="post" enctype="application/x-www-form-urlencoded" class="searchform"><input type="text" name="find" size="20" maxlength="240" class="searchinput"><input type="hidden" name="id" value="3J">&nbsp;<input type="submit" name="q" value="Search" id="search"></form>
+</div>
+</div>
+</div>
+<div id="wiki">
+<div id="navigation">
+<div class="menu"><p>Getting started</p>
+<ul>
+<li><a class="auto" href="/show?3M">Lisp for microcontrollers</a></li>
+<li><a class="auto" href="/show?36M3">Performance</a></li>
+<li><a class="auto" href="/show?19XT">Using uLisp</a></li>
+<li><a class="auto" href="/show?34WV">Using uLisp from a terminal</a></li>
+<li><a class="auto" href="/show?41E0">Integral documentation</a></li>
+<li><a class="auto" href="/show?1J1Z">Using the program editor</a></li>
+<li><a class="auto" href="/show?207M">SD card interface</a></li>
+<li><a class="auto" href="/show?1EK4">I2C and SPI serial interfaces</a></li>
+<li><a class="auto" href="/show?27OV">Lisp Library</a></li>
+<li><a class="auto" href="/show?1AA0">Download and install uLisp</a></li>
+<li><a href="http://library.ulisp.com/">uLisp Sensor Library</a></li>
+<li><a href="http://forum.ulisp.com/">Forum</a></li>
+</ul>
+<p>Debugging in uLisp</p>
+<ul>
+<li><a class="auto" href="/show?4ZMD">Error messages</a></li>
+<li><a class="auto" href="/show?4XNK">Backtrace</a></li>
+<li><a class="auto" href="/show?4ZJ7">Tracing functions</a></li>
+<li><a class="auto" href="/show?4ZJ4">Inserting breaks</a></li>
+</ul>
+<p>Self-contained Lisp computers</p>
+<ul>
+<li><a class="auto" href="/show?56ZO">PicoCalc uLisp Machine</a></li>
+<li><a class="auto" href="/show?52G4">Cardputer uLisp Machine</a></li>
+<li><a class="auto" href="/show?4JAO">LILYGO T-Deck uLisp Machine</a></li>
+<li><span style="color: #ff0000;"><a class="auto" href="/show?4JUS">Lisp Badge LE</a><br /></span></li>
+<li><a class="auto" href="/show?2L0C">Lisp Badge</a></li>
+<li><a class="auto" href="/show?3I99">Pocket Op Amp Lab</a></li>
+<li><a class="auto" href="/show?2KZH">Tiny Lisp Computer</a></li>
+</ul>
+<p>8/16-bit platforms</p>
+<ul>
+<li><a class="auto" href="/show?1LG8">Arduino Uno and Nano</a></li>
+<li><a class="auto" href="/show?1LGA">Arduino Mega 2560</a></li>
+<li><a class="auto" href="/show?1LGC">ATmega1284</a></li>
+<li><a class="auto" href="/show?33LO">ATmega4809 boards</a></li>
+<li><a class="auto" href="/show?3BMI">AVR DA and DB series boards</a></li>
+<li><a class="auto" href="/show?5B7I">AVR128DA32 Feather board</a></li>
+</ul>
+<p>32/64-bit platforms</p>
+<ul>
+<li><a class="auto" href="/show?29RK">Arduino M0 boards</a></li>
+<li><a class="auto" href="/show?2OFG">Adafruit M0 boards</a></li>
+<li><a class="auto" href="/show?3NRF">QT Py SAMD21 and XIAO SAMD21</a></li>
+<li><a class="auto" href="/show?59BV">Adafruit M0 Trinkeys</a></li>
+<li><a class="auto" href="/show?2OH5">Adafruit M4 boards</a></li>
+<li><a class="auto" href="/show?33OF">Adafruit PyGamer and PyBadge</a></li>
+<li><a class="auto" href="/show?38J4">Seeed Studio Wio Terminal</a></li>
+<li><a class="auto" href="/show?2ZD1">Adafruit nRF52840 boards</a></li>
+<li><a class="auto" href="/show?1TZD">Circuit Playground Bluefruit</a></li>
+<li><a class="auto" href="/show?4AT6">Seeed Studio XIAO nRF52840</a></li>
+<li><a class="auto" href="/show?3CXJ">BBC Micro:bit and Calliope Mini</a></li>
+<li><a class="auto" href="/show?2IN9">Maxim MAX32620FTHR</a></li>
+<li><a class="auto" href="/show?36VJ">Teensy 4.0 and 4.1</a></li>
+<li><a class="auto" href="/show?3KN3">Raspberry Pi RP2040 boards</a></li>
+<li><a class="auto" href="/show?4UIB">Adafruit RP2040 Feather boards</a></li>
+<li><a class="auto" href="/show?4B16">QT Py RP2040 and XIAO RP2040</a></li>
+<li><a class="auto" href="/show?3JOX">LILYGO T-Display RP2040</a></li>
+<li><a class="auto" href="/show?4X21">Raspberry Pi RP2350 boards</a></li>
+<li><a class="auto" href="/show?58C2">Adafruit Feather RP2350 HSTX</a></li>
+<li><a class="auto" href="/show?4YCF">Pimoroni RP2350 boards</a></li>
+<li><a class="auto" href="/show?5CSS">Adafruit Fruit Jam</a><span>&nbsp;</span><span style="caret-color: #ff0000; color: #ff0000;">New!</span></li>
+<li><a class="auto" href="/show?4GBA">Arduino Uno R4 boards</a></li>
+<li><a class="auto" href="/show?4UGT">Adafruit ESP32 Feather boards</a></li>
+<li><a class="auto" href="/show?4FKT">Adafruit QT Py ESP32 Pico</a></li>
+<li><a class="auto" href="/show?2AJI">Other ESP32 boards</a></li>
+<li><a class="auto" href="/show?583D">LILYGO LoRa32</a></li>
+<li><a class="auto" href="/show?3TQF">ESP32-S2 and ESP-C3 boards</a></li>
+<li><a class="auto" href="/show?5A5O">ESP32-S3 boards</a></li>
+<li><a class="auto" href="/show?5AV5">ESP32-P4 boards</a></li>
+<li><a class="auto" href="/show?5ARJ">ESP32-C6 board</a></li>
+<li><span style="color: red;"><a class="auto" href="/show?5CDD">ESP32-C5 board</a></span></li>
+<li><a class="auto" href="/show?49WX">ESP32 boards with a TFT display</a></li>
+<li><a class="auto" href="/show?523F">Muse Lab ESP32 Keys</a></li>
+<li><a class="auto" href="/show?30X8">Sipeed MAiX RISC-V boards</a></li>
+</ul>
+<p>Simple examples</p>
+<ul>
+<li><a class="auto" href="/show?23YJ">Blinking primes</a></li>
+<li><a class="auto" href="/show?1ANR">Tweetmaze</a></li>
+<li><a class="auto" href="/show?1BFA">Mood light</a></li>
+<li><a class="auto" href="/show?2RU3">LED 8x8 dot-matrix display</a></li>
+<li><a class="auto" href="/show?1APD">Simon game</a></li>
+<li><a class="auto" href="/show?1DO6">I2C clock</a></li>
+<li><a class="auto" href="/show?1FCN">Data logging</a></li>
+<li><a class="auto" href="/show?1G42">Ringing the changes</a></li>
+<li><a class="auto" href="/show?1GEB">Driving DotStar RGB LEDs</a></li>
+<li><a class="auto" href="/show?2B6A">LCD character display</a></li>
+<li><a class="auto" href="/show?1GQS">DDS signal generator</a></li>
+<li><a class="auto" href="/show?1Y4C">Temperature sensor</a></li>
+<li><a class="auto" href="/show?2CYW">Simple data plotter</a></li>
+<li><a class="auto" href="/show?2GYT">Thermocouple interface</a></li>
+<li><a class="auto" href="/show?1EO1">Benchmarks</a></li>
+</ul>
+<p>Games</p>
+<ul>
+<li><a class="auto" href="/show?1LKX">Animals</a></li>
+<li><a class="auto" href="/show?240L">Eliza chatbot</a></li>
+<li><a class="auto" href="/show?3OAZ">Simple arcade game</a></li>
+<li><a class="auto" href="/show?3ONH">Simple maze game</a></li>
+<li><a class="auto" href="/show?2Z78">Bulls &amp; Cows game</a></li>
+<li><a class="auto" href="/show?383X">Mini text adventure game</a></li>
+</ul>
+<p>Larger examples</p>
+<ul>
+<li><a class="auto" href="/show?1BM4">Route finder</a></li>
+<li><a class="auto" href="/show?2D5X">Calculating with fractions</a></li>
+<li><a class="auto" href="/show?1FHA">Infinite precision arithmetic</a></li>
+<li><a class="auto" href="/show?1QHW">Scrolling text display</a></li>
+<li><a class="auto" href="/show?3AC6">Dot-matrix clock</a></li>
+<li><a class="auto" href="/show?23QU">Graphics display interface in Lisp</a></li>
+<li><a class="auto" href="/show?2NSB">Plotting to a colour TFT display</a></li>
+<li><a class="auto" href="/show?2UUG">GPS interface using uLisp</a></li>
+<li><a class="auto" href="/show?2DT6">GPS mapping application</a></li>
+<li><a class="auto" href="/show?2I60">Query language</a></li>
+<li><a class="auto" href="/show?1Q0L">uLisp GSM server</a></li>
+<li><a class="auto" href="/show?1XWL">A LoRaWAN node using uLisp</a></li>
+<li><a class="auto" href="/show?2A61">Solving resistor networks</a></li>
+<li><a class="auto" href="/show?27ES">Fast Fourier Transform</a></li>
+<li><a class="auto" href="/show?33J9">Sudoku solver</a></li>
+<li><a class="auto" href="/show?2L5B">Automatic uLisp to C converter</a></li>
+<li><a class="auto" href="/show?4W2I">A Lisp compiler to ARM written in Lisp</a></li>
+<li><a class="auto" href="/show?4Y20">A Lisp compiler to RISC-V written in Lisp</a></li>
+<li><a class="auto" href="/show?37VY">Simple object system</a></li>
+</ul>
+<p>Graphics examples</p>
+<ul>
+<li><a class="auto" href="/show?2YRM">Graphics utilities</a></li>
+<li><a class="auto" href="/show?577T">GIF image decoder</a></li>
+<li><a class="auto" href="/show?4FAI">Plotting the Hofstadter Q sequence</a></li>
+<li><a class="auto" href="/show?3GPX">Surface of rotation</a></li>
+<li><a class="auto" href="/show?2NWA">Ray tracing with uLisp</a></li>
+<li><a class="auto" href="/show?35SJ">Prime number spiral</a></li>
+<li><a class="auto" href="/show?4JLZ">Dragon curve</a></li>
+<li><a class="auto" href="/show?4JLN">Mandelbrot set</a></li>
+<li><a class="auto" href="/show?44WD">Barnsley Fern</a></li>
+</ul>
+<p>Wi-Fi examples</p>
+<ul>
+<li><a class="auto" href="/show?2B22">Wi-Fi examples</a></li>
+<li><a class="auto" href="/show?40X8">Wireless message display</a></li>
+</ul>
+<p>Assemblers</p>
+<ul>
+<li><a class="auto" href="/show?3IUO">AVR assembler overview</a></li>
+<li><a class="auto" href="/show?3IUM">AVR assembler examples</a></li>
+<li><a class="auto" href="/show?3JJQ">AVR NeoPixel driver using assembler</a></li>
+<li><a class="auto" href="/show?2YRU">ARM assembler overview</a></li>
+<li><a class="auto" href="/show?30B8">ARM assembler instructions</a></li>
+<li><a class="auto" href="/show?30BD">ARM assembler examples</a></li>
+<li><a class="auto" href="/show?4ZBD">ARM assembler Thumb-2 extensions</a></li>
+<li><a class="auto" href="/show?3NXU">ARM NeoPixel driver using assembler</a></li>
+<li><a class="auto" href="/show?310Z">RISC-V assembler overview</a></li>
+<li><a class="auto" href="/show?30Z4">RISC-V assembler instructions</a></li>
+<li><a class="auto" href="/show?30ZU">RISC-V assembler examples</a></li>
+<li><a class="auto" href="/show?4Y5E">RISC-V assembler RP2350 extensions</a></li>
+<li><a class="auto" href="/show?32VA">Mandelbrot set using assembler</a></li>
+<li><a class="auto" href="/show?3HSN">Returning a floating-point result</a></li>
+</ul>
+<p>Tutorials</p>
+<ul>
+<li><a class="auto" href="/show?1AAO">Getting started</a></li>
+<li><a class="auto" href="/show?1AC5">Lists</a></li>
+<li><a class="auto" href="/show?1ACY">Expressions</a></li>
+<li><a class="auto" href="/show?1AGL">Defining functions</a></li>
+<li><a class="auto" href="/show?1AEK">Variables</a></li>
+<li><a class="auto" href="/show?1LRV">Strings</a></li>
+<li><a class="auto" href="/show?1AJM">Testing a result</a></li>
+<li><a class="auto" href="/show?1AHT">Manipulating lists</a></li>
+<li><a class="auto" href="/show?1B0R">Processing items in a list</a></li>
+<li><a class="auto" href="/show?19W8">Recursion</a></li>
+<li><a class="auto" href="/show?1A6U">Returning functions</a></li>
+<li><a class="auto" href="/show?2I01">Lisp for C programmers</a></li>
+<li><a class="auto" href="/show?2JNZ">Thinking in a Lispy way</a></li>
+</ul>
+<p>Reference</p>
+<ul>
+<li class="on"><a class="auto" href="/show?3L">Language reference</a></li>
+<li><a href="/show?3L#floating-point-functions">Floating-point functions</a></li>
+<li><a class="auto" href="/show?31GT">Graphics extensions</a></li>
+<li><a class="auto" href="/show?2B27">Wi-Fi extensions</a></li>
+<li><a class="auto" href="/show?3QQB">Programming AVR registers</a></li>
+<li><a class="auto" href="/show?3R8W">Programming ARM registers</a></li>
+<li><a class="auto" href="/show?1NNP">List of error messages</a></li>
+<li><a class="auto" href="/show?4I7E">Preloading functions in uLisp</a></li>
+<li><a class="auto" href="/show?3GSE">Adding useful functions to uLisp</a></li>
+</ul>
+<p>Implementation</p>
+<ul>
+<li><a class="auto" href="/show?1AWG">Implementation</a></li>
+<li><a class="auto" href="/show?1BLW">Objects</a></li>
+<li><a class="auto" href="/show?2YZ2">Symbols</a></li>
+<li><a class="auto" href="/show?3GGR">Built-in symbols</a></li>
+<li><a class="auto" href="/show?1ERL">Strings</a></li>
+<li><a class="auto" href="/show?3AHM">Arrays</a></li>
+<li><a class="auto" href="/show?1DLD">Read, Evaluate, Print</a></li>
+<li><a class="auto" href="/show?1BD3">Garbage collection</a></li>
+<li><a class="auto" href="/show?5837">Streams</a></li>
+<li><a class="auto" href="/show?1BBP">Tail-call optimization</a></li>
+<li><a class="auto" href="/show?1DTL">Saving and loading images</a></li>
+<li><a class="auto" href="/show?4UKH">Extended RAM</a></li>
+<li><a class="auto" href="/show?2Z88">Assembler and defcode</a></li>
+<li><a class="auto" href="/show?4HP3">ARM assembler written in Lisp</a></li>
+<li><a class="auto" href="/show?19V2">Debugging uLisp</a></li>
+<li><a class="auto" href="/show?19Q4">Adding your own functions</a></li>
+<li><a class="auto" href="/show?2E0A">Converting between C and uLisp</a></li>
+<li><a class="auto" href="/show?2JZO">Porting uLisp to a new platform</a></li>
+<li><a class="auto" href="/show?3F07">uLisp Builder</a></li>
+<li><a class="auto" href="/show?1OPZ">uLisp Zero</a></li>
+</ul>
+<p>uLisp extensions</p>
+<ul>
+<li><a class="auto" href="/show?19Q4">Adding your own functions</a></li>
+<li><a class="auto" href="/show?582Q">LoRa extension</a></li>
+<li><a class="auto" href="/show?282B">Arbitrary-precision arithmetic extension</a></li>
+<li><a class="auto" href="/show?4GMV">NeoPixel extension</a></li>
+<li><a class="auto" href="/show?4WKE">T-Deck screen capture</a></li>
+</ul>
+<p>Other information</p>
+<ul>
+<li><a class="auto" href="/show?419N">FAQ</a></li>
+<li><a class="auto" href="/show?1AA6">About me</a></li>
+<li><a class="auto" href="/show?1DM5">Contact</a></li>
+<li><a class="auto" href="/show?1B83">Legal stuff</a></li>
+</ul>
+<p>RSS Feed</p>
+<p><a href="http://www.ulisp.com/rss?1DQ5">uLisp news!</a></p></div>
+</div>
+<div id="colophon"></div>
+<div id="content">
+<h2>Language reference</h2>
+<h3>Summary</h3>
+<h4>Symbols</h4>
+<p><a href="#nil">nil</a>, <a href="#t">t</a>, <a href="#nothing">nothing</a>, <a href="#features">*features*</a>, <a href="#quote">quote</a>, <a href="#apostrophe">'</a>, <a href="#semicolon">;</a></p>
+<h4>Reader macros</h4>
+<p><a href="#hash-quote">#'</a>, <a href="#hash-star">#*</a>, <a href="#hash-dot">#.</a>, <a href="#hash-backslash">#\</a>, <a href="#hash-bracket">#(</a>, <a href="#hash-na">#nA</a>, <a href="#hash-verticalbar">#|</a>, <a href="#hash-box">#b</a>, <a href="#hash-box">#o</a>, <a href="#hash-box">#x</a></p>
+<h4>List functions</h4>
+<p><a href="#cons">cons</a>, <a href="#car">car</a>, <a href="#first">first</a>, <a href="#cdr">cdr</a>, <a href="#rest">rest</a>, <a href="#cxxxr">caar</a>, <a href="#cxxxr">cadr</a>, <a href="#second">second</a>, <a href="#cxxxr">cdar</a>, <a href="#cxxxr">cddr</a>, <a href="#cxxxr">caaar</a>, <a href="#cxxxr">caadr</a>, <a href="#cxxxr">cadar</a>, <a href="#cxxxr">caddr</a>, <a href="#third">third</a>, <a href="#cxxxr">cdaar</a>, <a href="#cxxxr">cdadr</a>, <a href="#cxxxr">cddar</a>, <a href="#cxxxr">cdddr</a>, <a href="#list">list</a>, <a href="#copy-list">copy-list</a>,&nbsp;<a href="#append">append</a>, <a href="#length">length</a>, <a href="#reverse">reverse</a>, <a href="#nth">nth</a>, <a href="#sort">sort</a></p>
+<h4>Array functions</h4>
+<p><a href="#makearray">make-array</a>, <a href="#length">length</a>, <a href="#aref">aref</a>, <a href="#arrayp">arrayp</a>, <a href="#array-dimensions">array-dimensions</a></p>
+<h4>Defining variables and functions</h4>
+<p><a href="#lambda">lambda</a>, <a href="#defun">defun</a>, <a href="#defvar">defvar</a>, <a href="#setq">setq</a>, <a href="#set">set</a>, <a href="#let">let</a>, <a href="#letstar">let*</a></p>
+<h4>Arithmetic functions</h4>
+<p><a href="#add">+</a>, <a href="#subtract">-</a>, <a href="#multiply">*</a>, <a href="#divide">/</a>, <a href="#mod">mod</a>, <a href="#rem">rem</a>,&nbsp;<a href="#oneplus">1+</a>, <a href="#oneminus">1-</a>, <a href="#abs">abs</a>, <a href="#random">random</a>, <a href="#max">max</a>, <a href="#min">min</a></p>
+<h4>Arithmetic comparisons</h4>
+<p><a href="#numeq">=</a>, <a href="#less">&lt;</a>, <a href="#lesseq">&lt;=</a>, <a href="#greater">&gt;</a>, <a href="#greatereq">&gt;=</a>, <a href="#noteq">/=</a>, <a href="#plusp">plusp</a>, <a href="#minusp">minusp</a>, <a href="#zerop">zerop</a>, <a href="#oddp">oddp</a>, <a href="#evenp">evenp</a></p>
+<h4 id="bitwise-operations">Bitwise operations</h4>
+<p><a href="#logand">logand</a>, <a href="#logior">logior</a>, <a href="#logxor">logxor</a>, <a href="#lognot">lognot</a>, <a href="#ash">ash</a>, <a href="#logbitp">logbitp</a></p>
+<h4>Conditionals</h4>
+<p><a href="#if">if</a>, <a href="#cond">cond</a>, <a href="#when">when</a>, <a href="#unless">unless</a>, <a href="#case">case</a>, <a href="#and">and</a>, <a href="#or">or</a>, <a href="#not">not</a></p>
+<h4>Tests</h4>
+<p><a href="#null">null</a>, <a href="#atom">atom</a>, <a href="#listp">listp</a>, <a href="#consp">consp</a>, <a href="#numberp">numberp</a>, <a href="#streamp">streamp</a>, <a href="#eq">eq</a>, <a href="#equal">equal</a>, <a href="#symbolp">symbolp</a>, <a href="#boundp">boundp</a></p>
+<h4>Characters</h4>
+<p><a href="#char">char</a>, <a href="#charcode">char-code</a>, <a href="#codechar">code-char</a>, <a href="#characterp">characterp</a></p>
+<h4>Strings</h4>
+<p><a href="#stringnoteq">string/=</a>,&nbsp;<a href="#stringless">string&lt;</a>, <a href="#stringlesseq">string&lt;=</a>,&nbsp;<a href="#stringeq">string=</a>, <a href="#stringgreater">string&gt;</a>, <a href="#stringgreatereq">string&gt;=</a>,&nbsp;<a href="#stringp">stringp</a>, <a href="#stringfn">string</a>, <a href="#concatenate">concatenate</a>, <a href="#readfromstring">read-from-string</a>, <a href="#prin1tostring">prin1-to-string</a>, <a href="#princtostring">princ-to-string</a>,&nbsp;<a href="#withoutputtostring">with-output-to-string</a></p>
+<h4>Evaluation</h4>
+<p><a href="#funcall">funcall</a>,&nbsp;<a href="#apply">apply</a>,&nbsp;<a href="#eval">eval</a>, <a href="#progn">progn</a></p>
+<h4>Strings and lists</h4>
+<p><a href="#subseq">subseq</a>, <a href="#searchx">search</a></p>
+<h4>Iteration</h4>
+<p><a href="#loop">loop</a>, <a href="#return">return</a>, <a href="#dolist">dolist</a>, <a href="#dotimes">dotimes</a>, <a href="#do">do</a>, <a href="#dostar">do*</a></p>
+<h4>Mapping</h4>
+<p><a href="#mapc">mapc</a>,&nbsp;<a href="#mapcar">mapcar</a>,&nbsp;<a href="#mapcan">mapcan</a>, <a href="#mapcon">mapcon</a>, <a href="#mapl">mapl</a>, <a href="#maplist">maplist</a>,&nbsp;<a href="#assoc">assoc</a>,&nbsp;<a href="#member">member</a></p>
+<h4>In-place operations</h4>
+<p><a href="#setf">setf</a>, <a href="#push">push</a>, <a href="#pop">pop</a>, <a href="#incf">incf</a>, <a href="#decf">decf</a></p>
+<h4>Error handling</h4>
+<p><a href="#unwind-protect">unwind-protect</a>, <a href="#ignore-errors">ignore-errors</a>, <a href="#error">error</a></p>
+<h4>Documentation</h4>
+<p><a href="#help">?</a>, <a href="#documentation">documentation</a>, <a href="#apropos">apropos</a>, <a href="#apropos-list">apropos-list</a></p>
+<h4>Input/output</h4>
+<p><a href="#read">read</a>, <a href="#print">print</a>, <a href="#princ">princ</a>, <a href="#prin1">prin1</a>, <a href="#pprint">pprint</a>, <a href="#pprintall">pprintall</a>, <a href="#terpri">terpri</a>, <a href="#readbyte">read-byte</a>, <a href="#writebyte">write-byte</a>, <a href="#readline">read-line</a>, <a href="#writeline">write-line</a>, <a href="#writestring">write-string</a>, <a href="#format">format</a>, <a href="#directory">directory</a></p>
+<h4>System functions</h4>
+<p><a href="#globals">globals</a>, <a href="#makunbound">makunbound</a>, <a href="#break">break</a>, <a href="#gc">gc</a>, <a href="#save-image">save-image</a>, <a href="#load-image">load-image</a>, <a href="#edit">edit</a>, <a href="#room">room</a>, <a href="#time">time</a>, <a href="#trace">trace</a>, <a href="#untrace">untrace</a>, <a href="#backtrace">backtrace</a>,&nbsp;<a href="#sleep">sleep</a>, <a href="#require">require</a>, <a href="#listlibrary">list-library</a>, <a href="#register">register</a></p>
+<h4>Arduino interface</h4>
+<p><a href="#millis">millis</a>, <a href="#formillis">for-millis</a>, <a href="#withi2c">with-i2c</a>, <a href="#restarti2c">restart-i2c</a>, <a href="#withserial">with-serial</a>, <a href="#withspi">with-spi</a>, <a href="#withsdcard">with-sd-card</a>,&nbsp;<a href="#pinmode">pinmode</a>, <a href="#digitalread">digitalread</a>, <a href="#digitalwrite">digitalwrite</a>, <a href="#analogread">analogread</a>, <a href="#analogreference">analogreference</a>, <a href="#analogreadresolution">analogreadresolution</a>, <a href="#analogwrite">analogwrite</a>, <a href="#analogwriteresolution">analogwriteresolution</a>, <a href="#delay">delay</a>, <a href="#note">note</a></p>
+<h4 id="floating-point-functions">Floating-point functions</h4>
+<p><a href="#sin">sin</a>, <a href="#cos">cos</a>, <a href="#tan">tan</a>, <a href="#asin">asin</a>, <a href="#acos">acos</a>, <a href="#atan">atan</a>, <a href="#sinh">sinh</a>, <a href="#cosh">cosh</a>, <a href="#tanh">tanh</a>, <a href="#exp">exp</a>, <a href="#log">log</a>, <a href="#sqrt">sqrt</a>, <a href="#expt">expt</a>, <a href="#random">random</a>,&nbsp;<a href="#ceiling">ceiling</a>, <a href="#floor">floor</a>, <a href="#round">round</a>, <a href="#truncate">truncate</a>,&nbsp;<a href="#float">float</a>,&nbsp;<a href="#floatp">floatp</a>, <a href="#integerp">integerp</a></p>
+<hr />
+<h3 id="hash-quote">#'&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>Ignored.</p>
+<p>The sequence #' is ignored, to allow you to paste in Common Lisp programs that need to include it before function names in some contexts.</p>
+<h3 id="hash-star">#*&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>Introduces a one-dimensional bit array. For example:</p>
+<pre>&gt; #*10100100010000</pre>
+<h3 id="hash-dot">#.&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>The atom or form after the #. is evaluated when the code is read in.</p>
+<h3 id="hash-backslash">#\&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>Allows you to enter a character.</p>
+<p>The sequence #\ can be followed by one of the following three options:</p>
+<ul>
+<li>A single ASCII character</li>
+<li>One of the following strings representing a control code:</li>
+</ul>
+<p style="margin-left: 18px;">Null, SOH, STX, ETX, EOT, ENQ, ACK, Bell, Backspace, Tab, Newline, VT, Page, Return, SO, SI,<br />DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EM, SUB, Escape, FS, GS, RS, US, Space</p>
+<ul>
+<li>A number between 000 and 255 representing the decimal character code of the character.</li>
+</ul>
+<h3 id="hash-bracket">#(&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>Introduces a one-dimensional array.</p>
+<p>For example:</p>
+<pre>&gt; #(6 28 496 8128)
+#(6 28 496 8128)</pre>
+<h3 id="hash-na">#nA&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>Introduces an n-dimensional array.</p>
+<p>For example:</p>
+<pre>&gt; #2A((1 2 3) (2 4 6))
+#2A((1 2 3) (2 4 6))</pre>
+<h3 id="hash-verticalbar">#|&nbsp;<span style="color: #90aa55;">reader macro</span></h3>
+<p>Introduces a multi-line comment.</p>
+<p>All the text between #| and |# is ignored.</p>
+<h3 id="hash-box">#b, #o, #x&nbsp;<span style="color: #90aa55;">reader macros</span></h3>
+<p>Allow you to enter numbers in binary, octal, or hexadecimal notation.</p>
+<p>For example:</p>
+<pre>&gt; #b0101010101010101
+21845
+
+&gt; #o777
+511
+
+&gt; #xFFFF
+-1
+</pre>
+<h3 id="apostrophe">'&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">'<em>item</em></span></p>
+<p>Quotes the argument.</p>
+<pre>'(+ 1 2)</pre>
+<p>is a shorthand for:</p>
+<pre>(quote (+ 1 2))</pre>
+<h3 id="multiply">*&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(* <em>number</em>*)</code></p>
+<p>Multiplies its arguments together.</p>
+<h3 id="features">*features*&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">*features*</span></p>
+<p>Returns a list of keywords representing the capabilities of this version of uLisp.</p>
+<p>The following features are available:</p>
+<table class="new">
+<thead>
+<tr>
+<td><strong>Feature</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:floating-point</td>
+<td>Floating-point arithmetic, in addition to integers; see&nbsp;<a class="auto" href="/show?1G5Y">Floating-point extensions</a>.</td>
+</tr>
+<tr>
+<td>:arrays</td>
+<td>Arrays.</td>
+</tr>
+<tr>
+<td>:documentation</td>
+<td>Integral documentation; see&nbsp;<a class="auto" href="/show?41E0">Integral documentation</a>.</td>
+</tr>
+<tr>
+<td>:machine-code</td>
+<td>Machine-code and assembler programming.</td>
+</tr>
+<tr>
+<td>:error-handling</td>
+<td>Error handling using&nbsp;<a href="http://www.ulisp.com/show?3L#unwind-protect">unwind-protect</a>,&nbsp;<a href="http://www.ulisp.com/show?3L#ignore-errors">ignore-errors</a>,&nbsp;and&nbsp;<a href="http://www.ulisp.com/show?3L#error">error</a>.</td>
+</tr>
+<tr>
+<td>:wi-fi</td>
+<td>Wi-fi extensions; see&nbsp;<a class="auto" href="/show?2B27">Wi-Fi extensions</a>.</td>
+</tr>
+<tr>
+<td>:gfx</td>
+<td>Graphics extensions; see&nbsp;<a class="auto" href="/show?31GT">Graphics extensions</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>For example:</p>
+<pre>&gt; *features*
+(:floating-point :arrays :documentation :machine-code :error-handling :wi-fi :gfx)
+</pre>
+<p>You can use <strong>member</strong> to test whether a particular feature is supported.</p>
+<p>Note that&nbsp;<strong>*features*</strong>&nbsp;is not a regular variable and cannot be modified.</p>
+<h3 id="add">+&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(+ <em>number*</em>)</code></p>
+<p>Adds its arguments together.</p>
+<h3 id="subtract">-&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(- <em>number*</em>)</code></p>
+<p>If there is one argument, negates the argument.</p>
+<p>If there are two or more arguments, subtracts the second and subsequent arguments from the first argument.</p>
+<h3 id="divide">/&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(/ <em>number*</em>)</code></p>
+<p>If there is one argument, inverts the argument (floating-point platforms only).</p>
+<p>If there are two or more arguments, divides the first argument by the second and subsequent arguments.</p>
+<p>For example:</p>
+<pre>&gt; (/ 60 2 3)<br />10&nbsp;</pre>
+<h3 id="noteq">/=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(/= <em>number*</em>)</code></p>
+<p>Not equal. Returns <strong>t</strong> if none of the arguments are equal, and <strong>nil</strong> if two or more arguments are equal.</p>
+<p>A potential source of confusion is that this function is called "!=" in C.</p>
+<h3 id="oneplus">1+&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(1+ <em>number</em>)</code></p>
+<p>Adds one to its argument and returns it.</p>
+<pre>&gt; (1+ (* 3 3))<br />10&nbsp;</pre>
+<p>(1+ x) is a shorter way of writing (+ x 1).</p>
+<h3 id="oneminus">1-&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(1- <em>number</em>)</code></p>
+<p>Subtracts one from its argument and returns it.</p>
+<pre>&gt; (1- (* 3 3))<br />8&nbsp;</pre>
+<p>(1- x) is a shorter way of writing (- x 1).</p>
+<h3 id="semicolon">; (semicolon)</h3>
+<p>Introduces a comment line, which will be ignored. For example:</p>
+<pre>; Factorial function<br />(defun f (n) (if (= n 0) 1 (* n (f (- n 1)))))</pre>
+<p>Because the Arduino Serial Monitor removes line endings, uLisp ignores all characters after a semicolon up to the next opening bracket. This imposes a couple of restrictions in the use of comments:</p>
+<ul>
+<li>Comments should not include an opening bracket.</li>
+<li>Comments are not valid if they are not followed by an opening bracket; for example:</li>
+</ul>
+<pre>(defvar data '(#x01 ; Invalid comment
+  #x20))</pre>
+<p>In this situation you can use a multi-line comment instead; see <a href="#hash-verticalbar">#|</a>.</p>
+<p>A comment line turns off echo, so that by starting a long listing with a comment it can safely be pasted in to the Arduino IDE's <strong>Serial Monitor</strong> without overflowing the serial buffer. Echo is turned back on automatically after a one second delay if there is no activity on the serial input.</p>
+<h3 id="less">&lt;&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(&lt; <em>number*</em>)</code></p>
+<p>Returns t if each argument is less than the next argument, and nil otherwise.</p>
+<h3 id="lesseq">&lt;=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(&lt;= <em>number*</em>)</code></p>
+<p>Returns t if each argument is less than or equal to the next argument, and nil otherwise.</p>
+<h3 id="numeq">=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(= <em>number*</em>)</code></p>
+<p>Returns t if the arguments are numerically equal, and nil otherwise.</p>
+<p>For example:</p>
+<pre>&gt; (= (* 4 3) (* 2 6) (* 1 12))<br />t&nbsp;</pre>
+<p>To add documentation to a user-defined function see <a href="#defun">defun</a>.</p>
+<h3 id="greater">&gt;&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(&gt; <em>number*</em>)</code></p>
+<p>Returns t if each argument is greater than the next argument, and nil otherwise.</p>
+<h3 id="greatereq">&gt;=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(&gt;= <em>number*</em>)</code></p>
+<p>Returns t if each argument is greater than or equal to the next argument, and nil otherwise.</p>
+<h3 id="help">?&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(?&nbsp;<em>symbol</em>)</code></p>
+<p>Prints documentation about the built-in or user-defined function <em>symbol</em>.</p>
+<p>For example:</p>
+<pre>&gt; (? maplist)
+(maplist function list1 [list]*)
+Applies the function to one or more lists and then successive cdrs of those lists,
+and returns the resulting list.</pre>
+<p>For information about adding documentation to a user-defined function see <a href="#defun">defun</a>.</p>
+<h3 id="abs">abs&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(abs <em>number</em>)</code></p>
+<p>Returns the absolute, positive value of its argument.</p>
+<h3 id="acos">acos&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(acos&nbsp;<em>number</em>)</code></p>
+<p>Returns the arc cosine of&nbsp;<em>number</em>, in radians.</p>
+<h3 id="analogread">analogread&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(analogread <em>pin</em>)</code></p>
+<p>Reads the specified Arduino analogue pin number and returns the value.</p>
+<p>For details of the available pins see the appropriate board description on this site.</p>
+<p>On most processors the analogue inputs are 10 bits, so the value is a number between 0 and 1023.</p>
+<p>If you prefer to use the pin labels A0, A1, etc you can define appropriate variables; for example, for the Arduino Zero:</p>
+<pre>(defvar A0 15)</pre>
+<h3 id="analogreadresolution">analogreadresolution&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(analogreadresolution&nbsp;<em>bits</em>)</code></p>
+<p>Sets the analogue read resolution for the analogue inputs on platforms that support it. The default resolution on all platforms is 10 bits.</p>
+<p>For details of the options available see the appropriate board description on this site.</p>
+<h3 id="analogreference">analogreference&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(analogreference&nbsp;<em>keyword</em>)</code></p>
+<p>Selects the analogue reference voltage used for analogue input.</p>
+<p>For details of the available keywords see the appropriate board description on this site.</p>
+<h3 id="analogwrite">analogwrite <span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong> <code>(analogwrite <em>pin</em> <em>value</em>)</code></p>
+<p>Writes the value to the specified Arduino pin number.</p>
+<p>For details of the available pins see the appropriate board description on this site.</p>
+<p>On most processors the analogue outputs are 8 bits, so the value is a number between 0 and 255. For example:</p>
+<pre>(analogwrite 3 127)</pre>
+<h3 id="analogwriteresolution">analogwriteresolution&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(analogwriteresolution&nbsp;<em>value</em>)</code></p>
+<p>Sets the analogue write resolution.</p>
+<h3 id="and">and&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(and&nbsp;<em>item*</em>)</code></p>
+<p>Evaluates its arguments until one returns nil, and returns the last value. It's usually used to combine conditions. For example, <strong>pos</strong> tests whether something is a positive number:</p>
+<pre>(defun pos (a) (and (numberp a) (&gt; a 0)))</pre>
+<h3 id="append">append&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(append&nbsp;<em>list*</em>)</code></p>
+<p>Joins its arguments, which should be lists, into a single list.</p>
+<p>For example:</p>
+<pre>&gt; (append '(1 2 3) '(4 5 6) '(7 8 9))<br />(1 2 3 4 5 6 7 8 9)&nbsp;</pre>
+<h3 id="apply">apply&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(apply&nbsp;<em>function list</em>)</code></p>
+<p>Returns the result of evaluating the function specified by the first argument with the list of arguments specified by the second parameter. So, for example:</p>
+<pre>&gt; (apply cons '(a b))<br />(a . b)</pre>
+<p>This is equivalent to (cons 'a 'b).</p>
+<h3 id="apropos">apropos&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(apropos <em>item</em>)</code></p>
+<p>Prints the user-defined and built-in functions and variables whose names contain the specified string or symbol.</p>
+<p>For example:</p>
+<pre>&gt; (defun catty () "meow")
+catty
+
+&gt; (apropos "cat")
+catty (user function)
+truncate (function)
+concatenate (function)</pre>
+<p>You could also write:</p>
+<pre>(apropos 'cat)</pre>
+<h3 id="apropos-list">apropos-list&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(apropos-list&nbsp;<em>item</em>)</code></p>
+<p>Returns a list of the user-defined and built-in functions and variables whose names contain the specified string or symbol.</p>
+<p>For example:</p>
+<pre>&gt; (defun catty () "meow")
+catty
+
+&gt; (apropos-list "cat")
+(catty truncate concatenate)</pre>
+<p>You could use this to write a function that prints out the documentation for all functions containing a string:</p>
+<pre>(defun all-doc (pat)
+  (mapc #'(lambda (symbol) (format t "~a~%~%" (documentation symbol))) (apropos-list pat))
+  nothing)</pre>
+<p>For example, try:</p>
+<pre>&gt; (all-doc 'map)</pre>
+<h3 id="array-dimensions">array-dimensions&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(array-dimensions&nbsp;<em>item</em>)</code></p>
+<p>Returns a list of the dimensions of an array. For example:</p>
+<pre>&gt; (array-dimensions #2A((1 2) (3 4) (5 6)))
+(3 2)</pre>
+<p>You can also use&nbsp;<a href="#length">length</a>&nbsp;to get the length of a one-dimensional array.</p>
+<h3 id="arrayp">arrayp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(arrayp&nbsp;<em>item</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if its argument is an array.</p>
+<h3 id="aref">aref&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(aref&nbsp;<em>array</em>&nbsp;<em>index</em> [<em>index*</em>])</code></p>
+<p>Returns an element from the specified array. The&nbsp;<strong>aref</strong>&nbsp;function can be used to return a value as in:</p>
+<pre>(print (aref a 99))</pre>
+<p>To access elements in a multi-dimensional array you need to give an index for each dimension; for example:</p>
+<pre>(print (aref b 2 3))</pre>
+<p>The&nbsp;<strong>aref</strong>&nbsp;function can also be used with the in-place operations&nbsp;<strong>setf</strong>,&nbsp;<strong>incf</strong>, and&nbsp;<strong>decf</strong>&nbsp;to change an element of an array; for example, to change the value of an array element:</p>
+<pre>(setf (aref b 42) 3.14159)</pre>
+<p>or to increment an element:</p>
+<pre>(incf (aref c 99))</pre>
+<h3 id="ash">ash&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(ash&nbsp;<em>value</em>&nbsp;<em>shift</em></span><span style="font-family: monospace;">)</span></p>
+<p>Returns the result of bitwise shifting&nbsp;<em>value</em>&nbsp;by&nbsp;<em>shift</em>&nbsp;bits. If&nbsp;<em>shift</em>&nbsp;is positive,&nbsp;<em>value</em>&nbsp;is shifted to the left. For example:</p>
+<pre>&gt; (ash 7 3)
+56</pre>
+<p>If&nbsp;<em>shift</em>&nbsp;is negative,&nbsp;<em>value</em>&nbsp;is shifted to the right. For example:</p>
+<pre>&gt; (ash 15 -2)
+3</pre>
+<p>The right shift is an arithmetic shift, so the sign bit is preserved; for example:</p>
+<pre>&gt; (format t "~x" (ash #x8000 -8))
+ff80</pre>
+<h3 id="asin">asin&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(asin&nbsp;<em>number</em>)</code></p>
+<p>Returns the arc sine of&nbsp;<em>number</em>, in radians.</p>
+<h3 id="assoc">assoc&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(assoc&nbsp;<em>key list </em>[:test<em> function</em>])</code></p>
+<p>Looks up a key in an association list of (key . value) pairs, and returns the matching pair, or <strong>nil</strong> if no pair is found.</p>
+<p>Example:</p>
+<pre>&gt; (assoc 'c '((a . 1) (b . 2) (c . 3) (d . 4)))
+(c . 3)</pre>
+<p>The test function defaults to <strong>eq</strong>, but you can specify an alternative after a <strong>:test</strong> keyword; for example:</p>
+<pre>&gt; (assoc "three" '(("one" . "eins") ("two" . "zwei") ("three" . "drei")) :test #'string=)
+("three" . "drei")</pre>
+<p>Association lists are useful for storing complex data; for example you could use an association list to specify the colour of an RGB LED:</p>
+<pre>(setq col '((r . 127) (g . 63) (b . 255)))</pre>
+<p>You could then get one colour component using <strong>assoc</strong>:</p>
+<pre>&gt; (cdr (assoc 'g col))<br />63&nbsp;</pre>
+<h3 id="atan">atan&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(atan&nbsp;<em>number1&nbsp;</em>[<em>number2</em>])</code></p>
+<p style="font-size: 14px; font-weight: normal;">Returns the arc tangent of&nbsp;<em>number1/number2</em>, in radians. If&nbsp;<em>number2</em>&nbsp;is omitted it defaults to 1.</p>
+<h3 id="atom">atom&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(atom&nbsp;<em>item</em>)</code></p>
+<p>Returns <strong>t</strong> if its argument is a single number, symbol, or nil.</p>
+<p>Example:</p>
+<pre>&gt; (atom 'b)
+t<br /><br />&gt; (atom '(a b))<br />nil&nbsp;</pre>
+<p>The function <strong>atom</strong> is the inverse of <strong>consp</strong>.</p>
+<h3 id="backtrace">backtrace&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(backtrace&nbsp;<em>[on]</em>)</code></p>
+<p>Enables or disables the backtrace, which records the last seven calls to user-defined functions. The backtrace is shown in error messages, or you can display it with the <strong>:b</strong> command in a <strong>break</strong>.</p>
+<p>The backtrace is disabled by default; to enable it:</p>
+<pre>(backtrace t)</pre>
+<p>or to disable it again:</p>
+<pre>(backtrace nil)</pre>
+<p>You might want to disable it if your program takes advantage of tail-call optimisation, because tail-call optimisation is incompatible with the backtrace feature.</p>
+<p>You can see the current state of backtrace by calling the function with no argument; for example:</p>
+<pre>&gt; (backtrace)
+t</pre>
+<h3 id="boundp">boundp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(boundp&nbsp;<em>item</em>)</code></p>
+<p>Returns <strong>t</strong> if the argument has a value or <strong>nil</strong> otherwise.&nbsp;</p>
+<pre>&gt; (boundp 'a)
+nil
+
+&gt; (defvar a 23)
+a
+
+&gt; (boundp 'a)
+t</pre>
+<h3 id="break">break <span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(break)</code></p>
+<p>Inserts a breakpoint in your uLisp program.</p>
+<p>When the <strong>(break)</strong>&nbsp;function is evaluated you will be returned to the uLisp prompt, and you can then examine the values of parameters and local variables.</p>
+<p>The uLisp prompt is preceded by a number giving the break level. Type <strong>nil</strong> to exit from break and continue execution.</p>
+<p>For example:</p>
+<pre>&gt; (let* (lis) (dolist (x '(a b c)) (setq lis (cons x lis)) (break)))
+
+Break!
+: 1&gt; lis
+
+(a)
+
+: 1&gt; nil
+
+Break!
+: 1&gt; lis
+
+(b a)</pre>
+<h3 id="cxxxr">caaar ... cdddr&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(caaar&nbsp;<em>list</em>)</code></p>
+<p>These are all equivalent to the corresponding sequence of car and cdr functions. For example,</p>
+<pre>(cdaar list)</pre>
+<p>is equivalent to:</p>
+<pre>(cdr (car (car list)))</pre>
+<h3 id="car">car&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(car&nbsp;<em>list</em>)</code></p>
+<p>Returns the first item in a list.&nbsp;</p>
+<pre>&gt; (car '(a b c d e f))<br />a</pre>
+<p>Equivalent to&nbsp;<strong>first</strong>.</p>
+<h3 id="case">case&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(case <em>keyform</em> ((<em>key</em>&nbsp;<em>form*</em>) (<em>key</em>&nbsp;<em>form*</em>) &hellip;&nbsp;))</code></p>
+<p>The&nbsp;<strong>case</strong>&nbsp;special form&nbsp;evaluates a keyform to produce a test key, and then tests this against a series of arguments, each of which is a list containing a key optionally followed by one or more forms.</p>
+<p>If the test key equals the key the forms are evaluated, and the last value is returned as the result of the <strong>case</strong>. Otherwise none of the forms are evaluated, and the next argument is processed in the same way.</p>
+<p>Specifying a key of <strong>t</strong> will always succeed.</p>
+<p>In place of a single key you can specify a list of keys, any of which will match the test key.</p>
+<p>The following example prints a different string according to the value of&nbsp;<strong>animal</strong>:</p>
+<pre>(case animal
+   (cat (print "maiou"))
+   (dog (print "woof"))
+   ((sparrow thrush) (print "tweet"))
+   (t (print "don't know"))</pre>
+<h3 id="ceiling">ceiling&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(ceiling&nbsp;<em>number&nbsp;</em>[<em>divisor</em>])</code></p>
+<p>Returns the smallest integer greater than or equal to&nbsp;<em>number</em>/<em>divisor</em>. If&nbsp;<em>divisor</em>&nbsp;is omitted it defaults to 1.</p>
+<h3 id="char">char&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(char&nbsp;<em>string n</em>)</code></p>
+<p>Returns the nth character in a string, counting from zero.</p>
+<p>Example:</p>
+<pre>&gt; (char "uLisp" 1)
+#\L</pre>
+<h3 id="charcode">char-code&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(char-code&nbsp;<em>character</em>)</code></p>
+<p>Returns the ASCII code for a character, as an integer.</p>
+<p>For example:</p>
+<pre>&gt; (char-code #\return)<br />13</pre>
+<h3 id="characterp">characterp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(characterp&nbsp;<em>item</em>)</span></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if the argument is a character and&nbsp;<strong>nil</strong>&nbsp;otherwise.</p>
+<h3 id="cdr">cdr&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(cdr&nbsp;<em>list</em>)</code></p>
+<p>Returns a list with the first item removed.&nbsp;</p>
+<pre>&gt; (cdr '(a b c d e f))<br />(b c d e f)</pre>
+<p><span style="font-size: 14px;">Equivalent to&nbsp;</span><strong style="font-size: 14px;">rest</strong><span style="font-size: 14px;">.</span></p>
+<h3 id="codechar">code-char&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(code-char&nbsp;<em>integer</em>)</code></p>
+<p>Returns the character for the specified ASCII code.</p>
+<p>For example:</p>
+<pre>&gt; (code-char 126)
+#\~</pre>
+<h3 id="concatenate">concatenate&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(concatenate 'string&nbsp;<em>string*</em>)</code></p>
+<p>Joins together the strings given in the second and subsequent arguments, and returns a single string. The second argument specifies the type of the result; uLisp only supports <strong>string</strong>.</p>
+<p>Example:</p>
+<pre>&gt; (concatenate 'string "One" "Two" "Three")
+"OneTwoThree"</pre>
+<h3 id="cond">cond&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(cond ((<em>test</em>&nbsp;<em>form*</em>) (<em>test</em>&nbsp;<em>form*</em>) &hellip;&nbsp;))</code></p>
+<p>The <strong>cond</strong> special form provides a more flexible conditional structure than the simpler functions <strong>if</strong>, <strong>while</strong>, and <strong>unless</strong>.</p>
+<p>Each argument is a list consisting of a test optionally followed by one or more forms.</p>
+<p>If the test evaluates to non-nil the forms are evaluated, and the last value is returned as the result of the cond.</p>
+<p>If the test evaluates to nil, none of the forms are evaluated, and the next argument is processed in the same way.</p>
+<p>The following example reads an analogue input and sets one of four outputs high depending on the value of the input:</p>
+<pre>(let* ((a (analogread 0)))
+  (cond
+   ((&lt; a 64) (digitalwrite 2 t))
+   ((&lt; a 128) (digitalwrite 3 t))
+   ((&lt; a 192) (digitalwrite 4 t))
+   (t (digitalwrite 5 t))))</pre>
+<p>As in this example, the last test in a <strong>cond</strong> is usually <strong>t</strong> to provide the action to be performed when all the previous tests fail.</p>
+<h3 id="cons">cons&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(cons&nbsp;<em>item item</em>)</code></p>
+<p>If the second argument is a list, <strong>cons</strong> returns a new list with item added to the front of the list. For example:</p>
+<pre>&gt; (cons 'a '(b c d e))<br />(a b c d e)</pre>
+<p>If the second argument isn't a list <strong>cons</strong> returns a dotted pair:</p>
+<pre>&gt; (cons 'a 'b)<br />(a . b)&nbsp;</pre>
+<h3 id="consp">consp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(consp&nbsp;<em>item</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if its argument is a non-null list.</p>
+<p>Example:</p>
+<pre>&gt; (consp 'b)
+nil<br /><br />&gt; (consp '(a b))<br />t&nbsp;</pre>
+<p>The function&nbsp;<strong>consp</strong>&nbsp;is the inverse of&nbsp;<strong>atom</strong>.</p>
+<h3 id="copy-list">copy-list&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(copy-list&nbsp;<em>list</em>)</code></p>
+<p>Returns a copy of a list.</p>
+<p>This is useful to keep a copy of an original list before using a function that modifies it, such as <strong>sort</strong> or<strong> setf</strong>.</p>
+<h3 id="cos">cos&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(cos&nbsp;<em>number</em>)</code></p>
+<p>Returns the cosine of&nbsp;<em>number</em>&nbsp;radians.</p>
+<p>For example:</p>
+<pre>&gt; (cos 3.14159)<br />-1.0&nbsp;</pre>
+<h3 id="cosh">cosh&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(cosh&nbsp;<em>number</em>)</code></p>
+<p><span>Returns the hyperbolic cosine of&nbsp;</span><em>number</em><span>.</span></p>
+<h3 id="decf">decf&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax</strong>:&nbsp;<code>(decf&nbsp;<em>place</em> [<em>number</em>])</code></p>
+<p>Subtracts one from the value of <em>place</em>, and returns the new value. The second argument&nbsp;<em>place</em>&nbsp;can be one of the forms:</p>
+<pre><em>symbol</em>
+(car <em>form</em>)
+(cdr <em>form</em>)
+(nth <em>n</em> <em>form</em>)
+(aref <em>array</em>&nbsp;<em>index</em>&nbsp;[<em>index</em>*]) </pre>
+<p>For more information see&nbsp;<a href="#setf">setf</a>.</p>
+<p>For example:</p>
+<pre>&gt; (defvar a 123)
+a
+
+&gt; (decf a)
+122
+
+&gt; a
+122&nbsp;</pre>
+<p>You can include an optional second argument to specify the decrement.</p>
+<h3 id="defun">defun&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(defun&nbsp;<em>name (parameters) [docstring] form*</em>)</code></p>
+<p>Allows you to define a function. For example:</p>
+<pre>(defun sq (x) (* x x))</pre>
+<p>This creates a function called <strong>sq</strong> with one parameter, <strong>x</strong>. When the function is called, the body is evaluated with <strong>x</strong> bound to the argument. For example:</p>
+<pre>&gt; (sq 7)<br />49</pre>
+<p>This is equivalent to:</p>
+<pre>(defvar sq '(lambda (x) (* x x))</pre>
+<h4>Optional arguments</h4>
+<p>You can specify optional arguments by giving the <strong>&amp;optional</strong> keyword followed by the parameters you want to make optional. If an argument is not specified for an optional parameter it will have the value <strong>nil</strong>. For example, the following function <strong>rec</strong> calculates the area of a rectangle:</p>
+<pre>(defun rec (x &amp;optional y) (if y (* x y) (* x x)))</pre>
+<p>It can be called with two arguments:</p>
+<pre>&gt; (rec 3 4)
+12</pre>
+<p>or one argument to calculate the area of a square:</p>
+<pre>&gt; (rec 5)
+25</pre>
+<p>You can specify a default value for any optional argument by specifying a list consisting of the optional argument followed by an expression. For example, the above definition could be written:</p>
+<pre>(defun rct (x &amp;optional (y x)) (* x y))</pre>
+<h4>Variable number of arguments</h4>
+<p>You can define a function that takes a variable number of arguments by giving the <strong>&amp;rest</strong> keyword followed by a single parameter; this parameter is bound to a list of the remaining arguments.</p>
+<p>For example, this defines a function <strong>out</strong> that defines any number of Arduino pins as outputs:</p>
+<pre>(defun out (&amp;rest x) (mapc (lambda (p) (pinmode p t)) x))</pre>
+<p>You could call it with:</p>
+<pre>(out 4 5 6 7)</pre>
+<p>You can use both <strong>&amp;optional</strong> and <strong>&amp;rest</strong> in the same definition; for example:</p>
+<pre>(defun tst (x &amp;optional y &amp;rest z) (list "x=" x "y=" y "z=" z))</pre>
+<p>Trying it out:</p>
+<pre>&gt; (tst 1 2 3 4 5)
+("x=" 1 "y=" 2 "z=" (3 4 5))</pre>
+<h4>Documentation</h4>
+<p>You can add documentation to a function by adding a documentation string <em>docstring</em> after the parameters. You can then display this using <a href="#help">?</a> or <a href="#documentation">documentation</a>.</p>
+<p>For example:</p>
+<pre style="font-weight: normal;">&gt; (defun sq (x) "Squares a number" (* x x))
+sq
+
+&gt; (? sq)
+Squares a number</pre>
+<h3 id="defvar">defvar&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(defvar&nbsp;<em>variable form</em>)</code></p>
+<p>Defines a global variable. For example:</p>
+<pre>(defvar x 1000)</pre>
+<h3 id="delay">delay&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(delay&nbsp;<em>number</em>)</code></p>
+<p>Delays for a specified number of milliseconds. For example:</p>
+<pre>(delay 1000)</pre>
+<p>gives a one-second delay.</p>
+<p>On the 16-bit platforms the maximum delay is 32767, or approximately 32 seconds. On the 32-bit platforms the maximum delay is 2147483647, or approximately 24 days.</p>
+<p>See also <a href="#formillis">for-millis</a>.</p>
+<h3 id="digitalread">digitalread&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(digitalread&nbsp;<em>pin</em>)</code></p>
+<p>Reads the state of the specified Arduino pin number and returns&nbsp;<strong>t</strong>&nbsp;(high) or&nbsp;<strong>nil</strong>&nbsp;(low).</p>
+<p>The <em>pin</em> can also be the keyword&nbsp;<strong>:led-builtin</strong>.</p>
+<h3 id="digitalwrite">digitalwrite&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(digitalwrite&nbsp;<em>pin state</em>)</code></p>
+<p>Sets the state of the specified Arduino pin number. The pins are the same as for <strong>digitalread</strong> above.</p>
+<p>The <em>pin</em> can also be the keyword <strong>:led-builtin</strong>.</p>
+<p>The&nbsp;<em>state</em>&nbsp;can be a keyword, or t or nil:</p>
+<table class="new">
+<thead>
+<tr>
+<td><strong>Keyword</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:low or nil</td>
+<td>Low level</td>
+</tr>
+<tr>
+<td>:high or t</td>
+<td>High level</td>
+</tr>
+</tbody>
+</table>
+<h3 id="directory">directory&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(directory)</code></p>
+<p>Returns a list of the names of the files and directories on the SD card.</p>
+<h4>Example</h4>
+<pre>&gt; (directory)<br />(".Spotlight-V100" ".fseventsd" "Greeting.txt" "ULISP.IMG" "Fred.txt" "letters")</pre>
+<h3 id="do">do&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(do ((<em>var</em>&nbsp;[<em>init</em> [<em>step</em>])*) (<em>end-test</em>&nbsp;<em>result</em>*)&nbsp;<em>form*</em>)</code></p>
+<p>Iterates over a group of <em>forms</em> until <em>end-test</em> is true. An arbitrary number of variables <em>var</em> can be initialised and are updated in parallel at the start of each iteration. Each variable can be given an initial value <em>init</em>, and can be updated by a <em>step&nbsp;</em>form.</p>
+<p>In&nbsp;<strong>do</strong>&nbsp;each variable's&nbsp;<em>init</em>&nbsp;and&nbsp;<em>step</em>&nbsp;forms are evaluated in parallel.</p>
+<p style="font-size: 14px; font-weight: normal;">The following example uses three variables, <strong>i</strong>, <strong>this</strong>, and <strong>next</strong>, and calculates the nth Fibonacci number:</p>
+<pre>(defun fib (n)
+  (do ((i 0 (1+ i))
+       (this 0 next)
+       (next 1 (+ this next)))
+      ((= i n) this)))
+
+&gt; (fib 10)
+55</pre>
+<p>Often, as in this example, all the work is done in the variable forms, and there is no need for a <strong>do</strong> body.</p>
+<h3 id="dostar">do*&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(do* ((<em>var</em>&nbsp;[<em>init</em>] [<em>step</em>])*) (<em>end-test</em>&nbsp;<em>result</em>*)&nbsp;<em>form</em>*)</code></p>
+<p>Iterates over a group of <em>forms</em> until&nbsp;<em>end-test</em>&nbsp;is true. An arbitrary number of variables&nbsp;<em>var</em>&nbsp;can be initialised and are updated in sequence at the start of each iteration. Each variable can be given an initial value&nbsp;<em>init</em>, and can be updated by a&nbsp;<em>step&nbsp;</em>form.</p>
+<p>In <strong>do*</strong> each variable's <em>init</em> and <em>step</em> forms can refer to a previous variable in the list.</p>
+<p>For example, the following function calculates the nth triangular number:</p>
+<pre>(defun triangular (n)
+  (do* ((i 1 (1+ i))
+        (sum i (+ sum i)))
+       ((= i n) sum)))
+
+&gt; (triangular 10)
+55</pre>
+<p>Again, in this example, all the work is done in the variable forms, and there is no need for a&nbsp;<strong>do*</strong>&nbsp;body.</p>
+<h3 id="documentation">documentation&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(documentation '<em>symbol</em>&nbsp;[<em>type</em>])</code></p>
+<p>Returns the documentation string for the built-in or user-defined function <em>symbol</em>.</p>
+<p>For example:</p>
+<pre>&gt; (documentation 'nth)
+"(nth number list)
+Returns the nth item in list, counting from zero."</pre>
+<p>For information about adding documentation to a user-defined function see&nbsp;<a href="#defun">defun</a>.</p>
+<h3 id="dolist">dolist&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong> <code>(dolist (<em>var</em> <em>list</em> [<em>result</em>])&nbsp;<em>form*</em>)</code></p>
+<p>Sets the local variable <em>var</em> to each element of <em>list</em> in turn, and executes the forms. It then returns <em>result</em>, or <strong>nil</strong> if <em>result</em> is omitted.</p>
+<h3 id="dotimes">dotimes&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(dotimes (<em>var</em>&nbsp;<em>number</em>&nbsp;[<em>result</em>])&nbsp;<em>form*</em>)</code></p>
+<p>Executes the forms <em>number</em> times, with the local variable&nbsp;<em>var</em>&nbsp;set to each integer from 0 to&nbsp;<em>number</em>-1&nbsp;in turn. It then returns&nbsp;<em>result</em>, or&nbsp;<strong>nil</strong>&nbsp;if&nbsp;<em>result</em>&nbsp;is omitted.</p>
+<p>For example, to flash an LED ten times:</p>
+<pre>(defun ten ()
+  (pinmode 13 t)
+  (dotimes (x 10)
+    (digitalwrite 13 t)
+    (delay 500)
+    (digitalwrite 13 nil)
+    (delay 500)))</pre>
+<h3 id="edit">edit&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(edit&nbsp;'<em>function</em>)</code></p>
+<p>Lets you step through a function definition, editing it a bit at a time, using the following single-key editing commands:</p>
+<table class="new">
+<thead>
+<tr>
+<td><strong>Command</strong></td>
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Enter</td>
+<td>enter</td>
+<td>Prettyprints the current form.</td>
+</tr>
+<tr>
+<td>a</td>
+<td>car</td>
+<td>Takes the car of the current form.</td>
+</tr>
+<tr>
+<td>d</td>
+<td>cdr</td>
+<td>Takes the cdr of the current form.</td>
+</tr>
+<tr>
+<td>r</td>
+<td>replace</td>
+<td>Replaces the current form with what you type in.</td>
+</tr>
+<tr>
+<td>c</td>
+<td>cons</td>
+<td>Conses what you type in onto the front of the current form.</td>
+</tr>
+<tr>
+<td>x</td>
+<td>delete</td>
+<td>Deletes the car of the current form.</td>
+</tr>
+<tr>
+<td>b</td>
+<td>back</td>
+<td>Backs up the tree.</td>
+</tr>
+<tr>
+<td>q</td>
+<td>quit</td>
+<td>Quits from the editor.</td>
+</tr>
+</tbody>
+</table>
+<p>To edit the function you type a series of <strong>a</strong> or <strong>d</strong> commands to step through the function to the part you want to edit, use <strong>r</strong>, <strong>c</strong>, or <strong>x</strong> to make changes, type <strong>b</strong>&nbsp;to go back, or type <strong>q</strong> to exit from the editor.</p>
+<p>At any stage you can press <strong>Enter</strong> to print the current part of the function you've reached.</p>
+<p>If you type an invalid key the editor prints <strong>?</strong>, and if&nbsp;you reach the end of the tree with <strong>a</strong> or <strong>d</strong> the editor prints <strong>!</strong>. For more information see&nbsp;<a class="auto" href="/show?1J1Z">Using the program editor</a>.</p>
+<p>Note that for the editor to work properly you need to have the line ending option set to&nbsp;<strong>Newline</strong>&nbsp;on the pop-up menu at the bottom of the&nbsp;<strong>Serial Monitor</strong>&nbsp;window.</p>
+<h3 id="eq">eq&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(eq&nbsp;<em>item item</em>)</code></p>
+<p>Tests whether the two arguments are the same object, and returns&nbsp;<strong>t</strong>&nbsp;or&nbsp;<strong>nil</strong>&nbsp;as appropriate.</p>
+<p>Objects are <strong>eq</strong> if they are the same symbol, same character, equal numbers, or point to the same cons.</p>
+<h3 id="equal">equal&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(equal&nbsp;<em>item item</em>)</code></p>
+<p>Tests whether the two arguments look the same when printed, and returns&nbsp;<strong>t</strong>&nbsp;or&nbsp;<strong>nil</strong>&nbsp;as appropriate. Note that they might not necessarily be the same object.</p>
+<p>Objects are <strong>equal</strong> if they are <strong>eq</strong>, have the same string representation, or have the same list structure.</p>
+<p>For example:</p>
+<pre>&gt; (defvar a "twin")
+a
+
+&gt; (defvar b "twin")
+b
+
+&gt; (eq a b)
+nil
+
+&gt; (equal a b)
+t</pre>
+<h3 id="error">error&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(error <em>controlstring</em> <em>[arguments]</em>*)</code></p>
+<p>Signals an error. The message is printed by <strong>format</strong> using the <em>controlstring</em> and <em>arguments</em>.</p>
+<h3 id="eval">eval&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(eval&nbsp;<em>form*</em>)</code></p>
+<p>Evaluates its argument an extra time.</p>
+<p>For example:</p>
+<pre>&gt; (eval (list '* 7 8))<br />56&nbsp;</pre>
+<h3 id="evenp">evenp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(evenp&nbsp;<em>number</em>)</code></p>
+<p>Returns <strong>t</strong> if the argument is even, or <strong>nil</strong> otherwise.</p>
+<h3 id="exp">exp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(exp&nbsp;<em>number</em>)</code></p>
+<p><span>Returns&nbsp;<em>e</em>&nbsp;raised to the specified&nbsp;<em>number</em></span><span>.</span></p>
+<h3 id="expt">expt&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(expt&nbsp;<em>number power</em>)</code></p>
+<p><span>Returns&nbsp;<em>number</em>&nbsp;raised to the specified&nbsp;<em>power</em></span><span>.</span></p>
+<h3 id="first">first&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(first&nbsp;<em>list</em>)</code></p>
+<p>Returns the first item in a list.&nbsp;</p>
+<pre>&gt; (first '(a b c d e f))<br />a</pre>
+<p>Equivalent to&nbsp;<strong>car</strong>.</p>
+<h3 id="float">float&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(float&nbsp;<em>number</em>)</code></p>
+<p>Returns its argument converted to a floating-point number.</p>
+<h3 id="floatp">floatp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(floatp&nbsp;<em>item</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if its argument is a floating-point number<span>.</span></p>
+<h3 id="floor">floor&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(floor&nbsp;<em>number&nbsp;</em>[<em>divisor</em>])</code></p>
+<p>Returns the greatest integer less than or equal to&nbsp;<em>number</em>/<em>divisor</em>. If&nbsp;<em>divisor</em>&nbsp;is omitted it defaults to 1.</p>
+<h3 id="format">format&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(format <em>output</em> <em>controlstring</em>&nbsp;<em>arguments*</em>)</code></p>
+<p>Outputs its arguments formatted according to the format directives in the control string.</p>
+<p>The <em>output</em> argument can be one of:</p>
+<ul>
+<li><strong>nil</strong>: the formatted output is returned as a string. For example:</li>
+</ul>
+<pre>&gt; (format nil "The answer is ~a" 42)
+"The answer is 42"</pre>
+<ul>
+<li><strong>t</strong>: the formatted output is printed to the serial output. For example:</li>
+</ul>
+<pre>&gt; (format t "The answer is ~a" 42)
+The answer is 42
+nil</pre>
+<ul>
+<li><strong>a stream</strong>: the formatted output is printed to the specified stream.</li>
+</ul>
+<h4>Format directives</h4>
+<p>The control string can contain the following format directives:</p>
+<table class="new">
+<thead>
+<tr>
+<td><strong>Directive</strong></td>
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>~a</td>
+<td>ASCII</td>
+<td>Output as <strong>princ</strong> would print it in human-readable format.</td>
+</tr>
+<tr>
+<td>~s</td>
+<td>Sexp</td>
+<td>Output as <strong>prin1</strong> would print it, with escape characters and quotation marks.</td>
+</tr>
+<tr>
+<td>~d</td>
+<td>Decimal</td>
+<td>Decimal, as&nbsp;<strong>princ</strong>&nbsp;would print it.</td>
+</tr>
+<tr>
+<td>~b</td>
+<td>Binary</td>
+<td>Binary.</td>
+</tr>
+<tr>
+<td>~x</td>
+<td>Hexadecimal</td>
+<td>Hexadecimal.</td>
+</tr>
+<tr>
+<td>~g</td>
+<td>General</td>
+<td>General floating-point format, as <strong>princ</strong> would print it.</td>
+</tr>
+<tr>
+<td>~~</td>
+<td>Tilde</td>
+<td>Just prints a ~.</td>
+</tr>
+<tr>
+<td>~%</td>
+<td>Newline</td>
+<td>Outputs a newline.</td>
+</tr>
+<tr>
+<td>~&amp;</td>
+<td>Newline</td>
+<td>Outputs a newline unless already at the start of a line.</td>
+</tr>
+<tr>
+<td>~{</td>
+<td>List start</td>
+<td>Formats elements from a list.</td>
+</tr>
+<tr>
+<td>~^</td>
+<td>List exit</td>
+<td>Exits from ~{ &hellip; ~} if the list is empty.</td>
+</tr>
+<tr>
+<td>~}</td>
+<td>List end</td>
+<td>Ends formatting list elements.</td>
+</tr>
+</tbody>
+</table>
+<p>Any other characters in the control string are just output unchanged.</p>
+<p>For example:</p>
+<pre>&gt; (format t "The battery is ~aV or ~a%." batt (* batt 20))
+The battery is 4.75V or 95%.</pre>
+<p>If the argument is the wrong type for the directives <strong>~d</strong>, <strong>~b</strong>,&nbsp;<strong>~x</strong>, or <strong>~g</strong> the&nbsp;argument is output&nbsp;as if with <strong>~a</strong>.</p>
+<h4>Width parameter</h4>
+<p>Each of the directives <strong>~a</strong>, <strong>~s</strong>, <strong>~d</strong>, <strong>~g</strong>, <strong>~b</strong>, or <strong>~x</strong> can include a width parameter after the tilde, and the output is padded with spaces to the specified width. If the output wouldn't fit in the specified width it is output in full, and overflows the width. The <strong>~a</strong> and <strong>~s</strong> directives pad with spaces to the right; all the other directives pad with spaces to the left. In uLisp this is the only difference between <strong>~a</strong> and <strong>~d</strong> or <strong>~g</strong>.</p>
+<p>The width parameter is useful for formatting data in a neat table. For example:</p>
+<pre>(defun facts ()
+  (let ((n 1)) 
+    (dotimes (x 10) 
+      (format t "n = ~2d,  n! = ~7d~%" (1+ x) (setq n (* n (1+ x)))))))</pre>
+<p>This prints:</p>
+<pre>&gt; (facts)
+n =  1,  n! =       1
+n =  2,  n! =       2
+n =  3,  n! =       6
+n =  4,  n! =      24
+n =  5,  n! =     120
+n =  6,  n! =     720
+n =  7,  n! =    5040
+n =  8,  n! =   40320
+n =  9,  n! =  362880
+n = 10,  n! = 3628800
+nil</pre>
+<h4>Pad character</h4>
+<p>The directives&nbsp;<strong>~d</strong>, <strong>~g</strong>, <strong>~b</strong>, or <strong>~x</strong>&nbsp;can also include a pad character, which is output in place of spaces to fill the argument to the specified width. The pad character is specified after the width, separated by a comma and a single quote. The pad character is useful combined with the width character for formatting output to be displayed on output devices such as seven-segment displays; for example:</p>
+<pre>&gt; (format nil "~2,'0d-~2,'0d-~2,'0d" 1 45 7)
+"01-45-07"</pre>
+<h4>Lists</h4>
+<p>The <strong>~{</strong> and <strong>~}</strong> directives allow you to format elements in a list. The argument must be a list, and the format directives between <strong>~{</strong> and <strong>~}</strong> are repeated until all the items in the list have been used. For example:</p>
+<pre>&gt; (format t "~{~a/~a ~}" '(1 2 3 4 5 6))
+1/2 3/4 5/6</pre>
+<p>The <strong>~^</strong> directive exits from the directives between&nbsp;<strong>~{</strong>&nbsp;and&nbsp;<strong>~}</strong>&nbsp;if the list being processed is finished. It is useful if you want to put a delimiter between list elements, but not after the last one. For example, to convert a Lisp list to JavaScript format you could use:</p>
+<pre>&gt; (format t "[~{~a~^,~}]" '(1 2 3 4 5))
+[1,2,3,4,5]</pre>
+<p>Note that uLisp only supports one level of nesting of&nbsp;<strong>~{</strong>&nbsp;and&nbsp;<strong>~}.</strong></p>
+<h3 id="formillis">for-millis&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(for-millis (<em>[number]</em>) <em>form*</em>)</code></p>
+<p>Executes the forms&nbsp;and then waits until a total of <em>number</em> milliseconds have elapsed. It returns the total number of milliseconds taken.</p>
+<p>It can be used to define the duration of an event. For example, to play a one-second tone:</p>
+<pre>(defun bep () (for-millis (1000) (note 3 0 4)) (note))</pre>
+<p>Alternatively, if the&nbsp;<em>number</em>&nbsp;parameter is zero or omitted,&nbsp;<strong>for-millis</strong>&nbsp;can be used to time the execution of a function:</p>
+<pre>&gt;  (for-millis () (fib 15))
+493</pre>
+<p>On the 16-bit platforms the maximum delay is approximately 32 seconds. On the 32-bit platforms the maximum delay is approximately 24 days. If the execution of the body takes longer than this&nbsp;<strong>for-millis</strong>&nbsp;returns <strong>nil</strong>.</p>
+<h3 id="funcall">funcall&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong> <code>(funcall&nbsp;<em>function argument*</em>)</code></p>
+<p>Calls the <em>function</em> with the specified <em>arguments</em>.</p>
+<h3 id="gc">gc <span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(gc)</code></p>
+<p>Forces a garbage collection and prints the number of objects collected, and the time taken.</p>
+<h3 id="globals">globals&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(globals)</code></p>
+<p><span>Returns a list of the global variables and functions that are currently defined. For example:</span></p>
+<pre>&gt; (globals)
+(blu grn red)</pre>
+<h3 id="if">if&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(if&nbsp;<em>test then [else]</em>)</code></p>
+<p>Evaluates <em>test</em>. If it's non-nil the form <em>then</em> is evaluated and returned; otherwise the form <em>else</em> is evaluated and returned.</p>
+<p>The <em>else</em> form is optional.</p>
+<p>For example:</p>
+<pre>&gt; (if (digitalread 3) (digitalwrite 4 t) (digitalwrite 5 t))</pre>
+<p>This reads input D3. If it's high the LED on D4 is lit; otherwise the LED on D5 is lit.</p>
+<h3 id="ignore-errors">ignore-errors&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(ignore-errors<em>&nbsp;[forms]*</em>)</code></p>
+<p>Evaluates&nbsp;<em>forms</em>&nbsp;ignoring errors, and returns the value of the last form, or if an error occurs it returns the special value <strong>nothing</strong>.&nbsp;</p>
+<p>For example, the following function <strong>calc</strong> evaluates Lisp expressions you type in:</p>
+<pre>(defun calc ()
+  (loop
+   (let ((input (read)))
+     (when (eq input '~) (return))
+     (ignore-errors (format t "~%Result: ~a~%" (eval input))))))</pre>
+<p>Run it with:</p>
+<pre>&gt; (calc)
+(/ 1 2)
+Result: 0.5
+</pre>
+<p>Without&nbsp;<strong>ignore-errors</strong> the calculator will exit if you type in an invalid expression, such as (/ 1 0).</p>
+<h3 id="incf">incf&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong> <code>(incf&nbsp;<em>place </em>[<em>number</em>])</code></p>
+<p>Adds one to the value of <em>place</em>, and returns the new value. The second argument&nbsp;<em>place</em>&nbsp;can be one of the forms:</p>
+<pre><em>symbol</em>
+(car <em>form</em>)
+(cdr <em>form</em>
+(nth n <em>form</em>)
+(aref array&nbsp;<em>index</em>&nbsp;[<em>index</em>*]) </pre>
+<p>For more information see&nbsp;<a href="#setf">setf</a>.</p>
+<p>For example:</p>
+<pre>&gt; (defvar a 123)
+a
+
+&gt; (incf a)
+124
+
+&gt; a
+124</pre>
+<p>You can include an optional second argument to specify the increment.</p>
+<h3 id="integerp">integerp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(integerp&nbsp;<em>item</em>)</code></p>
+<p><span>Returns&nbsp;</span><strong>t</strong><span>&nbsp;if its argument is an integer</span><span>.</span></p>
+<h3 id="lambda">lambda&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(lambda (<em>parameter*</em>) <em>form*</em>)</code></p>
+<p>Creates an unnamed function with parameters. The body is evaluated with the parameters as local variables whose initial values are defined by the values of the forms after the <strong>lambda</strong> form.</p>
+<p>Functions are usually defined with a specified name using&nbsp;<strong>defun</strong>. The usual use of&nbsp;<strong>lambda</strong>&nbsp;is to create an unnamed function as the argument for a function such as&nbsp;<strong>mapc</strong>&nbsp;or&nbsp;<strong>mapcar</strong>. For details of the options see <a href="#defun">defun</a>.</p>
+<h4>Examples</h4>
+<p>For example, you could write:</p>
+<pre>((lambda (x y) (+ x y)) 4 3)</pre>
+<p>This would assign 4 to x and 3 to y, evaluate (+ x y), and return the result.</p>
+<p>&nbsp;The following example uses <strong>mapcar</strong> to square every number in a list:</p>
+<pre>&gt; (mapcar (lambda (x) (* x x)) '(0 1 2 3 4 5 6))
+(0 1 4 9 16 25 36)</pre>
+<p>It is also used when you want to create a function that returns a function. The following example defines a function <strong>do2</strong> that takes a function of one argument, and returns a function that performs that function twice:</p>
+<pre>&gt; (defun sq (x) (* x x))
+sq
+
+&gt; (defun do2 (fun) (lambda (arg) (fun (fun arg))))
+do2
+
+&gt; ((do2 sq) 3)
+81</pre>
+<h3 id="length">length&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(length&nbsp;<em>item</em>)</code></p>
+<p>Returns the number of items in a list, the length of a string, or the length of a one-dimensional array.</p>
+<p>Examples:</p>
+<pre>&gt; (length '(a b c d))<br />4</pre>
+<pre>&gt; (length "hello")<br />5</pre>
+<pre>&gt; (length #(1 4 9 16 25))<br />5</pre>
+<h3 id="let">let&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(let ((<em>var</em> <em>value</em>) &hellip; )&nbsp;<em>forms*</em>)</code></p>
+<p>Declares local variables, and evaluates forms with those local variables.</p>
+<p>In its simplest form you can declare a list of one or more variables which will be initialised to <strong>nil</strong>, and these can then be used in the subsequent forms:</p>
+<pre>(let (a b)
+  (setq a 1)
+  (setq b 2)
+  (* a a b))</pre>
+<p>For each variable you can specify an initial value by specifying it as a list of (variable value), so the above example is equivalent to:</p>
+<pre>(let ((a 1) (b 2)) 
+  (* a a b))</pre>
+<h3 id="letstar">let*&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(let* ((<em>var</em>&nbsp;<em>value</em>) &hellip; )&nbsp;<em>form*</em>)</code></p>
+<p>Like <strong>let</strong>, but each declaration can refer to local variables that have already been defined.</p>
+<p>For example, defining:</p>
+<pre>(defun tst ()
+  (let ((a 7)
+        (b a))
+    (print a) (print b)))</pre>
+<p>and evaluating <strong>(tst)</strong> will give the error:</p>
+<p>Error: 'a' undefined</p>
+<div>whereas defining:</div>
+<pre>(defun tst (a)
+  (let* ((a 7)
+         (b a))
+    (print a) (print b)))</pre>
+<p>and evaluating <strong>(tst)</strong> will print 7 7.</p>
+<h3 id="list">list&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(list <em>item*</em>)</code></p>
+<p>Returns a list of the values of its arguments.</p>
+<p>Example:</p>
+<pre>&gt; (list (* 1 1) (* 2 2) (* 3 3) (* 4 4))<br />(1 4 9 16)&nbsp;</pre>
+<h3 id="listlibrary">list-library&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(list-library)</code></p>
+<p>Prints a list of the functions defined in the Lisp Library.</p>
+<p>For example, if the Lisp Library is defined in the source file with:</p>
+<pre>const char LispLibrary[] PROGMEM =
+"(defun sq (x) (* x x))"
+"(defun cub (x) (* x x x))";</pre>
+<p>then you could list the library with:</p>
+<pre>&gt; (list-library)
+sq cub</pre>
+<p>For more information see&nbsp;<a class="auto" href="/show?27OV">Lisp Library</a>.</p>
+<h3 id="listp">listp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(listp&nbsp;<em>item</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if its argument is a list.</p>
+<p>Example:</p>
+<pre>&gt; (listp 'b)
+nil<br /><br />&gt; (listp '(a b))<br />t&nbsp;</pre>
+<p>The function&nbsp;<strong>listp</strong>&nbsp;differs from&nbsp;<strong>consp</strong> because (listp nil) is <strong>t</strong> whereas (consp nil) is <strong>nil</strong>.</p>
+<h3 id="load-image">load-image&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(load-image&nbsp;</code>[<em style="font-family: monospace;">filename</em>])</p>
+<p>Loads a saved uLisp image from non-volatile memory or SD card.</p>
+<p>On SD card, by default the image is saved to a file ULISP.IMG, but you can specify a string parameter to load the image from a file of that name.</p>
+<p>Like&nbsp;<strong>save-image</strong>, the function returns the size of the image, in objects.</p>
+<p>To see a list of the functions and variables defined in the image do:</p>
+<pre>(globals)</pre>
+<p><strong>Note:</strong> You can make a saved uLisp image load automatically and run a specified function at startup; see&nbsp;<a href="#save-image">save-image</a>.</p>
+<h3 id="log">log&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(number [<em>base</em>])</code></p>
+<p>Returns the logarithm of&nbsp;<em>number</em>&nbsp;to the specified<em>&nbsp;base</em>. If&nbsp;<em>base</em>&nbsp;is omitted it defaults to&nbsp;<em>e</em>.</p>
+<h3 id="logand">logand&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(logand [<em>value*</em>])</code></p>
+<p>Returns the bitwise logical AND of the values.</p>
+<h3 id="logbitp">logbitp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(logbitp&nbsp;<em>bit value</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if bit number&nbsp;<em>bit</em>&nbsp;in&nbsp;<em>value</em>&nbsp;is a '1', and&nbsp;<strong>nil</strong>&nbsp;if it is a '0'.</p>
+<p>For example:</p>
+<pre>&gt;&nbsp;(logbitp 0 1)<br />t&nbsp;</pre>
+<h3 id="logior">logior&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(logior [</span><em style="font-family: monospace;">value*</em><span style="font-family: monospace;">])</span></p>
+<p>Returns the bitwise logical OR of the values.</p>
+<h3 id="lognot">lognot&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(lognot </span><em style="font-family: monospace;">value</em><span style="font-family: monospace;">)</span></p>
+<p>Returns the bitwise logical NOT of the value.</p>
+<h3 id="logxor">logxor&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(</code><span style="font-family: monospace;">logxor [</span><em style="font-family: monospace;">value*</em><span style="font-family: monospace;">])</span></p>
+<p>Returns the bitwise logical EXCLUSIVE-OR of the values.</p>
+<h3 id="loop">loop&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(loop&nbsp;<em>forms*</em>)</code></p>
+<p>The <strong>loop</strong> special form executes its arguments repeatedly until one of them reaches a return form, which exits from the loop.</p>
+<p>For example, the following function <strong>b</strong> blinks an LED on I/O line 10 a specified number of times:</p>
+<pre>(defun b (x)
+  (loop
+   (digitalwrite 10 t)
+   (delay 1000)
+   (digitalwrite 10 nil) 
+   (delay 1000) 
+   (setq x (- x 1))
+   (if (= x 0) (return))))</pre>
+<p>To blink the light 5 times execute:</p>
+<pre>&gt; (b 5)<br />nil</pre>
+<h3 id="makearray">make-array&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(make-array&nbsp;<em>size</em>&nbsp;[:initial-element&nbsp;<em>element</em>]&nbsp;</code><span style="font-family: monospace;">[:element-type 'bit</span><span style="font-family: monospace;">]</span>)</p>
+<p style="font-size: 14px; font-weight: normal;">Arrays are not supported in the AVR-Nano version of uLisp.</p>
+<p style="font-size: 14px; font-weight: normal;">If&nbsp;<em>size</em>&nbsp;is an integer&nbsp;<strong>make-array</strong>&nbsp;creates a one-dimensional array with elements from 0 to&nbsp;<em>size</em>-1. By default they are initialised to&nbsp;<strong>nil</strong>, but you can provide a default value with the&nbsp;<strong>:initial-element</strong>&nbsp;keyword parameter. For example:</p>
+<pre>(defvar a (make-array 100 :initial-element 0))</pre>
+<p>One-dimensional arrays are printed in the standard <strong>#( ... )</strong> notation; for example:</p>
+<pre>&gt; (make-array 3 :initial-element "Hello")
+#("Hello" "Hello" "Hello")</pre>
+<p style="font-size: 14px; font-weight: normal;">If&nbsp;<em>size</em>&nbsp;is a list of n integers&nbsp;<strong>make-array</strong>&nbsp;creates an n-dimensional array. For example:</p>
+<pre style="font-weight: normal;">(defvar a (make-array '(2 3 4) :initial-element 0))</pre>
+<p style="font-size: 14px; font-weight: normal;">N-dimensional arrays are printed using the notation <strong>#nA( ... )</strong>, where n is the number of dimensions in the array. For example, the above array is printed as:</p>
+<pre>&gt; a
+#3A(((0 0 0 0) (0 0 0 0) (0 0 0 0)) ((0 0 0 0) (0 0 0 0) (0 0 0 0)))</pre>
+<p style="font-size: 14px; font-weight: normal;">You can read in an array using the same notation; for example:</p>
+<pre>(defvar a #2a((1 2 3) (4 5 6)))</pre>
+<h4>Bit arrays</h4>
+<p style="font-size: 14px; font-weight: normal;">To make a bit array use the option <strong>:element-type 'bit</strong>. For example:</p>
+<pre>&gt; (defvar b (make-array 40 :element-type 'bit))
+b</pre>
+<p>By default bit arrays are initialised to 0, but you can override this with:</p>
+<pre>:initial-element 1</pre>
+<p>One-dimensional bit arrays are printed using <strong>#*</strong> notation followed by a string of bits; for example:</p>
+<pre>&gt; b
+#*0000000000000000000000000000000000000000</pre>
+<p>For an example of using bit arrays see&nbsp;<a class="auto" href="/show?35SJ">Prime number spiral</a>.</p>
+<h4>Accessing or changing array elements</h4>
+<p>To access elements in arrays or bit arrays use the&nbsp;<a href="#aref">aref</a>&nbsp;function.</p>
+<p>To change elements in arrays or bit arrays use the <a href="#setf">setf</a>, <a href="#incf">incf</a>, or <a href="#decf">decf</a> functions.</p>
+<h3 id="makunbound">makunbound&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(makunbound <em>symbol</em>)</code></p>
+<p>Removes the definition of a function created with <strong>defun</strong>, or a global variable created with <strong>defvar</strong>, freeing up the space.</p>
+<p>For example:</p>
+<pre>&gt; (makunbound 'rgb)<br />rgb</pre>
+<p>The function will return the symbol.</p>
+<p>To remove the definitions of several functions or variables, for example do:</p>
+<pre>(mapc makunbound '(tak fib q q2 factor))</pre>
+<h3 id="mapc">mapc&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(mapc&nbsp;<em>function list1 </em>[<em>list</em>]*)</code></p>
+<p>Applies the function to each element in one or more lists, ignoring the results. It returns the first list argument.</p>
+<p>For example:</p>
+<pre>&gt; (mapc print '(1 2 3))<br />1<br />2<br />3<br />(1 2 3)&nbsp;</pre>
+<p>The function <strong>mapc</strong> is like <strong>mapcar</strong>, but it doesn't accumulate a list of results, and so is used for its side-effects. For example, if you had an RGB LED connected to I/O pins 9, 10, and 11 you could set the colour of the LED to yellow with:</p>
+<pre>(mapc digitalwrite '(9 10 11) '(255 255 0))</pre>
+<p><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">For other examples of using <strong>mapc</strong>&nbsp;see&nbsp;<a class="auto" href="/show?1B0R">Processing items in a list</a>.</span></p>
+<h3 id="mapcan">mapcan<em>&nbsp;</em><span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(mapcan&nbsp;<em>function list1 </em>[<em>list2</em>]*)</code></p>
+<p>Applies the function to each element in one or more lists. The results, which should be lists, are&nbsp;destructively concatenated&nbsp;together to give the result.</p>
+<p>One use for&nbsp;<strong>mapcan</strong>&nbsp;is as a filter, to select elements from a list only if they meet a specified test. For example, to extract the numbers from a list:</p>
+<pre>&gt; (mapcan (lambda (x) (if (numberp x) (list x))) '(1 a 2 b c 3 d 4))
+(1 2 3 4)</pre>
+<p>For other examples of using&nbsp;<strong>mapcan</strong>&nbsp;see&nbsp;<a href="/show?1B0R">Processing items in a list</a>.</p>
+<h3 id="mapcar">mapcar <span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong> <code>(mapcar&nbsp;<em>function list1 </em>[<em>list</em>]*)</code></p>
+<p>Applies the function to each element in one or more lists, and returns a list of the results.</p>
+<p>The function can be a built-in function; for example:</p>
+<pre>&gt; (mapcar * '(1 2 3) '(4 5 6)&nbsp;'(7 8 9))</pre>
+<pre>(28 80 162)&nbsp;</pre>
+<p>Alternatively it can be a user-defined function or a lambda expression; for example:</p>
+<pre>&gt; (mapcar (lambda (x) (* x x)) '(1 2 3 4 5))
+(1 4 9 16 25)</pre>
+<p>For other examples of using&nbsp;<strong>mapcar</strong>&nbsp;see&nbsp;<a href="/show?1B0R">Processing items in a list</a>.</p>
+<h3 id="mapcon">mapcon&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(mapcon&nbsp;<em>function list1&nbsp;</em>[<em>list</em>]*)</code></p>
+<p>Applies the function to the lists and then successive&nbsp;<strong>cdr</strong>s of those lists. The results, which should be lists, are&nbsp;destructively concatenated&nbsp;together&nbsp;to give the result.</p>
+<p>One application is to extract duplicate values from a sorted list:</p>
+<pre>&gt; (mapcon (lambda (x) (when (eq (first x) (second x)) (list (car x)))) '(1 2 3 3 5 7 7 8 9))
+(3 7 11)</pre>
+<p>For other examples of using&nbsp;<strong>mapcon</strong>&nbsp;see&nbsp;<a href="/show?1B0R">Processing items in a list</a>.</p>
+<h3 id="mapl">mapl&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(mapl&nbsp;<em>function list1&nbsp;</em>[<em>list</em>]*)</code></p>
+<p>Applies the function to the lists and then successive&nbsp;<strong>cdr</strong>s of those lists, ignoring the results. It&nbsp;returns the first list argument.</p>
+<p>For example:</p>
+<pre>&gt; (mapl print '(1 2 3 4))
+
+(1 2 3 4) 
+(2 3 4) 
+(3 4) 
+(4) 
+(1 2 3 4)</pre>
+<p>For other examples of using&nbsp;<strong>mapl</strong>&nbsp;see&nbsp;<a href="/show?1B0R">Processing items in a list</a>.</p>
+<h3 id="maplist">maplist&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(maplist&nbsp;<em>function list1&nbsp;</em>[<em>list</em>]*)</code></p>
+<p>Applies the function to the lists and then successive&nbsp;<strong>cdr</strong>s of those lists, and returns a list of the results.</p>
+<p>For example:</p>
+<pre>&gt; (maplist princ-to-string '(1 2 3 4))
+("(1 2 3 4)" "(2 3 4)" "(3 4)" "(4)")</pre>
+<p>For other examples of using&nbsp;<strong>maplist</strong>&nbsp;see&nbsp;<a href="/show?1B0R">Processing items in a list</a>.</p>
+<h3 id="max">max&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong> <code>(max&nbsp;<em>number*</em>)</code></p>
+<p>Returns the maximum of one or more arguments. For example:</p>
+<pre>&gt; (max 3 1 4 1 5 9 1 6)<br />9&nbsp;</pre>
+<h3 id="member">member&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(member&nbsp;<em>item list </em>[:test<em> function</em>])</code></p>
+<p>Searches for an item in a list&nbsp;and returns the list starting from the first occurrence of the item, or <strong>nil</strong> if it is not found.</p>
+<p>For example:</p>
+<pre>&gt; (member 's '(u l i s p))<br />(s p)</pre>
+<p>The test function defaults to&nbsp;<strong>eq</strong>, but you can specify an alternative after a&nbsp;<strong>:test</strong>&nbsp;keyword; for example:</p>
+<pre>&gt; (member "three" '("one" "two" "three" "four") :test string=)
+("three" "four")</pre>
+<h3 id="millis">millis <span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(millis)</code></p>
+<p><span style="font-size: 14px;">Returns the time in milliseconds that uLisp has been running.&nbsp;On 8/16-bit versions of uLisp this is a signed 16-bit number, so after 32.767 seconds the number will wrap around from 32767 to -32768. In 32-bit versions of uLisp this is a signed 32-bit number which will wrap around after about 25 days.</span></p>
+<p><span style="font-size: 14px;">See also <a href="#formillis">for-millis</a>.</span></p>
+<h3 id="min">min&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(min&nbsp;<em>numbers</em>)</code></p>
+<p>Returns the minimum of one or more arguments. For example:</p>
+<pre>&gt; (min 3 1 4 1 5 9 1 6)<br />1&nbsp;</pre>
+<h3 id="minusp">minusp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(minusp&nbsp;<em>number</em>)</code></p>
+<p>Returns t if the argument is less than zero, or nil otherwise.</p>
+<h3 id="mod">mod&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(mod&nbsp;<em>number number</em>)</code></p>
+<p>Returns its first argument modulo the second argument.</p>
+<p>For example:</p>
+<pre>&gt; (mod 127 -10)
+-3</pre>
+<h3 id="nil">nil&nbsp;<span style="color: #90aa55;">symbol</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;<span style="font-family: monospace;">nil</span></span></p>
+<p>A symbol equivalent to the empty list ().</p>
+<h3 id="not">not&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(not&nbsp;<em>item</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if its argument is&nbsp;<strong>nil</strong>, or&nbsp;<strong>nil</strong>&nbsp;otherwise. Equivalent to&nbsp;<strong>null</strong>.</p>
+<h3 id="note">note&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(note [<em>pin</em>] [<em>note</em>] [<em>octave</em>])</code></p>
+<p>This is a lightweight replacement for the Arduino function <strong>tone</strong>. It generates a square wave on a digital pin.</p>
+<p>It takes three arguments:</p>
+<ul>
+<li>A pin number. The pins supported depend on the platform.</li>
+<li>A note number, from 0 to 11, representing the note in the well-tempered scale, where 0 represents C, 1 represents C#, and so on.</li>
+<li>The octave, which can be from 0 to 8*. If omitted it defaults to 0.</li>
+</ul>
+<p>* On the ATmega328P, ATmega2560, and ATmega1284P the octave can be between 3 and 6.</p>
+<p>So to play middle C, C4, on pin 3 use:</p>
+<pre>(note 3 0 4)</pre>
+<p>To stop the note playing call <strong>note</strong> with no arguments:</p>
+<pre>(note)</pre>
+<p>The note number can be greater than 11 as an alternative way of representing notes in higher octaves. For example, the following function <strong>scale&nbsp;</strong>plays the scale of C on pin 3:</p>
+<pre>(defun scale () 
+  (mapc 
+   (lambda (n) (note 3 n 4) (delay 500))
+   '(0 2 4 5 7 9 11 12)) 
+  (note))</pre>
+<p>The following function <strong>wow</strong> uses the voltage on analogue input A0 to change the note:</p>
+<pre>(defun wow () (loop (let ((x (analogread 0))) (note 3 (/ x 22) 3))))</pre>
+<h3 id="nothing">nothing&nbsp;<span style="color: #90aa55;">symbol</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">nothing</span></p>
+<p>A symbol with no value. It is useful if you want to suppress printing the result of evaluating a function.</p>
+<p>It is equivalent to <strong>(values)</strong> in Common Lisp.</p>
+<h3 id="nth">nth&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(nth&nbsp;<em>number list</em>)</code></p>
+<p>Returns the nth item in a list, counting from zero.</p>
+<p>Example:</p>
+<pre>&gt; (nth 2 '(a b c d))
+c</pre>
+<p><span>You could use <strong>nth</strong> to write a function <strong>end</strong> which returns the last item in a list:</span></p>
+<pre>(defun end (lis)
+  (nth (- (length lis) 1) lis))</pre>
+<p>For example:</p>
+<pre>&gt; (end '(a b c d))
+d</pre>
+<h3 id="null">null&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(null&nbsp;<em>item</em>)</code></p>
+<p>Returns <strong>t</strong> if its argument is <strong>nil</strong>, or <strong>nil</strong> otherwise. Equivalent to <strong>not</strong>.</p>
+<h3 id="numberp">numberp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(numberp&nbsp;<em>item</em>)</code></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if its argument is a number.</p>
+<p>Example:</p>
+<pre>&gt; (numberp 'b)
+nil<br /><br />&gt; (numberp (+ 1 2))<br />t</pre>
+<h3 id="oddp">oddp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(oddp&nbsp;<em>number</em>)</code></p>
+<p>Returns t if the argument is odd, or nil otherwise.</p>
+<h3 id="or">or&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(or&nbsp;<em>item*</em>)</code></p>
+<p>Evaluates its arguments until one returns non-nil, and returns its value.</p>
+<h3 id="pinmode">pinmode&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(pinmode <em>pin</em> <em>mode</em>)</code></p>
+<p>Sets the input/output mode of an Arduino pin number, and returns nil. The <em>mode</em> parameter can be an integer, a keyword, or t or nil:</p>
+<table class="new">
+<thead>
+<tr>
+<td><strong>Keyword</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:input or nil</td>
+<td>Input</td>
+</tr>
+<tr>
+<td>:output or t</td>
+<td>Output</td>
+</tr>
+<tr>
+<td>:input-pullup</td>
+<td>Input with pullup resistor</td>
+</tr>
+<tr>
+<td>:input-pulldown</td>
+<td>Input with pulldown resistor *</td>
+</tr>
+</tbody>
+</table>
+<p>* ARM processors only.</p>
+<h3 id="plusp">plusp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><span style="font-size: 14px;"><strong>Syntax:</strong><span>&nbsp;</span><code>(plusp&nbsp;<em>number</em>)</code></span></p>
+<p>Returns t if the argument is greater than zero, or nil otherwise. Note that <strong>(plusp 0)</strong> is nil.</p>
+<h3 id="pop">pop&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(pop&nbsp;<em>place</em>)</code></p>
+<p>Modifies the value of <em>place</em>, which should be a list,&nbsp;to remove its first item, and returns that item. The second argument&nbsp;<em>place</em>&nbsp;can be one of the forms:</p>
+<pre><em>symbol</em>
+(car <em>form</em>)
+(cdr <em>form</em>)
+(nth <em>n</em> <em>form</em>)
+(aref <em>array</em><span style="font-family: monospace; font-size: 14px; white-space: normal;">&nbsp;</span><em>index</em><span style="font-family: monospace; font-size: 14px; white-space: normal;">&nbsp;[</span><em>index</em>*<span style="font-family: monospace; font-size: 14px; white-space: normal;">]</span>) </pre>
+<p>For more information see <a href="#setf">setf</a>.</p>
+<p>For example:</p>
+<pre>&gt; (defvar a '(1 2 3 4))
+a<br />
+&gt; (pop a)
+1
+
+&gt; a
+(2 3 4)&nbsp;</pre>
+<h3 id="pprint">pprint&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(pprint&nbsp;<em>item</em></code><code>&nbsp;</code>[<em style="font-family: monospace;">stream</em>])</p>
+<p>Prints its argument, using the pretty printer, to display it formatted in a structured way. It returns no value. For example, after defining the function <strong>var</strong> as follows:</p>
+<pre>(defun var () (loop (let* ((v (analogread 0))) (mapc analogwrite '(10 9 11)
+(list (red v) (grn v) (blu v))))))
+</pre>
+<div>you could print it formatted using:</div>
+<pre>&gt; (pprint var)
+
+(lambda nil
+  (loop
+    (let* ((v (analogread 0)))
+      (mapc analogwrite '(10 9 11) (list (red v) (grn v) (blu v))))))</pre>
+<p>If <em>stream</em> is specified the argument is printed to the specified stream.</p>
+<h3 id="pprintall">pprintall&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(pprintall<em>&nbsp;</em>[<em>stream</em>]</code>)</p>
+<p>Pretty-prints the definition of every function and variable you've defined in the uLisp workspace nicely formatted. The optional stream allows you to print the definitions to a stream</p>
+<p>For example, to print a listing of all the currently defined functions and variables to an SD card do:</p>
+<pre>(with-sd-card (str "Listing.txt" 2)
+  (pprintall str))</pre>
+<h3 id="prin1">prin1&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(prin1&nbsp;<em>item</em></code><code>&nbsp;</code>[<em style="font-family: monospace;">stream</em>])</p>
+<p>Prints its argument, and returns its value. Strings are printed with quotation marks and escape characters; for example:</p>
+<pre>(prin1 "He said \"hello\"")
+</pre>
+<div>would print:</div>
+<pre>"He said \"hello\""</pre>
+<p>If&nbsp;<em style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">stream</em><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">&nbsp;is specified the argument is printed to the specified stream.</span></p>
+<h3 id="prin1tostring">prin1-to-string&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(prin1-to-string&nbsp;<em>item</em></code><code>&nbsp;</code>[<em style="font-family: monospace;">stream</em>])</p>
+<p>Prints its argument to a string, and returns the string.&nbsp;Characters and strings&nbsp;are printed with quotation marks and escape characters, in a format that will be suitable for <strong>read-from-string</strong>. For example:</p>
+<pre>&gt; (prin1-to-string #\")
+"#\\\""</pre>
+<p>In general,</p>
+<pre>(read-from-string (princ-to-string 'item))</pre>
+<p>will give <strong>item</strong>.</p>
+<p>If&nbsp;<em>stream</em>&nbsp;is specified the argument is printed to the specified stream.</p>
+<h3 id="princ">princ&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(princ&nbsp;<em>item</em></code><code>&nbsp;</code>[<em style="font-family: monospace;">stream</em>])</p>
+<p>Prints its argument, and returns its value. Characters and strings are printed without quotation marks or escape characters; for example:</p>
+<pre>(princ "He said \"hello\"")
+</pre>
+<div>would print:</div>
+<pre>He said "hello"</pre>
+<p><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">If&nbsp;</span><em style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">stream</em><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">&nbsp;is specified the argument is printed to the specified stream.</span></p>
+<h3 id="princtostring">princ-to-string&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(princ-to-string&nbsp;<em>item</em>)</code></p>
+<p>Prints its argument to a string, and returns the string. Characters and strings&nbsp;are printed without quotation marks or escape characters.</p>
+<p>For example:</p>
+<pre>&gt; (concatenate 'string "The result is " (princ-to-string (* 12 34 56)))
+"The result is 22848"</pre>
+<h3 id="print">print&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong><span>&nbsp;</span><code>(print&nbsp;<em>item</em></code><code>&nbsp;</code><em style="font-family: monospace;">[stream]</em>)</p>
+<p>Prints its argument like <strong>prin1</strong>, but on a new line and followed by a space.</p>
+<p>If&nbsp;<em>stream</em>&nbsp;is specified the argument is printed to the specified stream.</p>
+<h3 id="progn">progn&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(progn&nbsp;<em>form*</em>)</code></p>
+<p>Evaluates several forms grouped together into a block, and returns the result of evaluating the last form.</p>
+<h3 id="push">push&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(push&nbsp;<em>item place</em>)</code></p>
+<p>Modifies the value of&nbsp;<em>place</em>, which should be a list, to add <em>item</em> onto the front of the list, and returns the new list. The second argument&nbsp;<em>place</em>&nbsp;can be one of the forms:</p>
+<pre><em>symbol</em>
+(car <em>form</em>)
+(cdr <em>form</em>)
+(nth <em>n</em> <em>form</em>)
+(aref <em>array</em>&nbsp;<em>index</em>&nbsp;[<em>index</em>*]) </pre>
+<p>For more information see&nbsp;<a href="#setf">setf</a>.</p>
+<p>For example:</p>
+<pre>&gt; (defvar a '(2 3 4))
+a<br />
+&gt; (push 1 a)
+(1 2 3 4)
+
+&gt; a
+(1 2 3 4)&nbsp;</pre>
+<h3 id="quote">quote&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(quote&nbsp;<em>item</em>)</code></p>
+<p>Prevents its argument from being evaluated. Can be abbreviated to a single quote mark.</p>
+<p>For example:</p>
+<pre>&gt; '(+ 2 3)<br />(+ 2 3)&nbsp;</pre>
+<h3 id="random">random&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(random&nbsp;<em>number</em>)</code></p>
+<p>If <em>number</em> is an integer it returns a random number between 0 and one less than <em>number</em>. For example, to simulate a dice throw:</p>
+<pre>(+ (random 6) 1)</pre>
+<p>On versions of uLisp that support floating point, if&nbsp;<em>number</em> is floating point <strong>random</strong> returns a random floating-point number between zero and <em>number</em>.</p>
+<h3 id="read">read <span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(read&nbsp;</code>[<em style="font-family: monospace;">stream</em>])</p>
+<p>Reads an atom or list from the specified <em>stream</em> and returns it.</p>
+<p>If <em>stream</em> is not specified the item is read from the serial input.</p>
+<h3 id="readbyte">read-byte&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(read-byte&nbsp;<em>stream</em>)</code></p>
+<p>Reads a byte from a stream and returns it.</p>
+<h3 id="readfromstring">read-from-string&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(read-from-string <em>string</em>)</code></p>
+<p>Reads an atom or list from the specified string and returns it.</p>
+<p>For example:</p>
+<pre>&gt; (eval (read-from-string "(* 7 8)"))
+56</pre>
+<p>Any additional characters after the atom or list are ignored; for example:</p>
+<pre>&gt; (read-from-string "(+ 1 2) (+ 3 4)")
+(+ 1 2)</pre>
+<h3 id="readline">read-line&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(read-line&nbsp;</code><em style="font-family: monospace;">[stream]</em>)</p>
+<p>Reads characters from the serial input up to a newline character, and returns them as a string, excluding the newline.</p>
+<p>If <em>stream</em> is specified the line is read from the specified stream.</p>
+<h3 id="register">register&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(register address&nbsp;</code>[<em style="font-family: monospace;">value</em>])</p>
+<p>Reads or writes the value of a peripheral register.</p>
+<p>If&nbsp;<em>value</em>&nbsp;is not specified the function returns the value of the register at&nbsp;<em>address</em>.</p>
+<p>If&nbsp;<em>value</em>&nbsp;is specified the value is written to the register at <em>address</em> and the function returns <em>value</em>.</p>
+<p>For examples on the AVR and ARM versions of uLisp see&nbsp;<a class="auto" href="/show?3QQB">Programming AVR registers</a>&nbsp;or&nbsp;<a class="auto" href="/show?3R8W">Programming ARM registers</a>.</p>
+<h3 id="rem">rem&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(rem&nbsp;<em>number number</em>)</code></p>
+<p>Returns the remainder when the first argument is divided by the second argument.</p>
+<p>For example:</p>
+<pre>&gt; (rem 127 -10)
+7</pre>
+<h3 id="require">require&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(require&nbsp;'<em>symbol</em>)</code></p>
+<p>Loads the definition of a function defined with <strong>defun</strong>, or a variable defined with <strong>defvar</strong>, from the Lisp Library. It returns <strong>t</strong> if it was loaded, or <strong>nil</strong> if the symbol is already defined, or if the symbol isn't defined in the Lisp Library.</p>
+<p>For example, if the Lisp Library is defined in the source file with:</p>
+<pre>const char LispLibrary[] PROGMEM =
+"(defun square (x) (* x x))"
+"(defun cube (x) (* x x x))";</pre>
+<p>then you could load the definition of <strong>square</strong> into the Lisp workspace using:</p>
+<pre>(require 'square)</pre>
+<p>For more information see&nbsp;<a class="auto" href="/show?27OV">Lisp Library</a>.</p>
+<h3 id="rest">rest&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(rest&nbsp;<em>list</em>)</code></p>
+<p>Returns a list with the first item removed.</p>
+<pre>&gt; (rest '(a b c d e f))<br />(b c d e f)</pre>
+<p>Equivalent to <strong>cdr</strong>.</p>
+<h3 id="restarti2c">restart-i2c&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(restart-i2c <em>stream&nbsp;</em></code>[<em style="font-family: monospace;">read-p</em>])</p>
+<p>Restarts an i2c-stream.</p>
+<p>If&nbsp;<em>read-p</em>&nbsp;is&nbsp;<strong>nil</strong>&nbsp;or omitted the stream is written to.</p>
+<p>If&nbsp;<em>read-p</em>&nbsp;is&nbsp;an integer it specifies the number of bytes to be read from the stream.</p>
+<h3 id="return">return <span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(return <em>[value]</em>)</code></p>
+<p>Exits from a <strong>loop</strong>, <strong>do</strong>, <strong>do*</strong>,&nbsp;<strong>dotimes</strong>, or <strong>dolist</strong> block. Returns&nbsp;<em>value</em>, or <strong>nil</strong> if no value is specified.</p>
+<h3 id="reverse">reverse&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(reverse&nbsp;<em>list</em>)</code></p>
+<p>Returns a list with the elements of <strong>list</strong> in reverse order. For example:</p>
+<pre>&gt; (reverse '(1 2 3 4 5))<br />(5 4 3 2 1)&nbsp;</pre>
+<p>The function <strong>reverse</strong> is useful if you have been using <strong>cons</strong> to add elements onto the front of a list, but you want to return the list with the earliest elements at the front. For example, the following function <strong>log</strong> reads <strong>x</strong> values on analogue input <strong>A0</strong> once a second, and returns the list of values:</p>
+<pre>(defun log (x)
+  (let ((lst nil))
+    (dotimes (j x (reverse lst))
+      (setq lst (cons (analogread 0) lst))
+      (delay 1000))))</pre>
+<p>If the voltage was slowly rising on <strong>A0</strong> you might get:</p>
+<pre>&gt; (log 10)<br />(14 16 27 38 49 79 102 134 156 178)</pre>
+<h3 id="room">room&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(room)</code></p>
+<p>Returns the number of free Lisp cells remaining.</p>
+<pre>&gt; (room)<br />280</pre>
+<h3 id="round">round&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(round&nbsp;<em>number&nbsp;</em>[<em>divisor</em>])</code></p>
+<p style="font-size: 14px; font-weight: normal;">Returns the integer closest to&nbsp;<em>number</em>/<em>divisor</em>. If&nbsp;<em>divisor</em>&nbsp;is omitted it defaults to 1.</p>
+<h3 id="save-image">save-image&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(save-image&nbsp;<em>[symbol]</em>)</code></p>
+<p>Saves the current uLisp image to non-volatile memory or SD card so it can be loaded using&nbsp;<strong>load-image</strong>.</p>
+<p>The&nbsp;<strong>save-image</strong>&nbsp;command will return the size of the image, in objects. For example, since on 8/16-bit platforms each object is four bytes, an ATmega328 with 1 Kbytes of EEPROM has room for an image containing 256 objects.</p>
+<p>Note that saved Lisp images are not guaranteed to be compatible across different releases of uLisp.</p>
+<h4>Saving to EEPROM or DataFlash</h4>
+<p>If you don't have SD card support enabled, with&nbsp;<strong>#define sdcardsupport</strong>&nbsp;commented out,&nbsp;<strong>save-image</strong>&nbsp;saves to EEPROM or DataFlash if these are available:</p>
+<ul>
+<li>To save the image to EEPROM/DataFlash give the command:</li>
+</ul>
+<pre>(save-image)</pre>
+<p style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">If there isn't enough EEPROM or DataFlash space to save the image, the following error will be displayed;</p>
+<pre>Error: Image size too large: 258</pre>
+<h4>Saving to SD card</h4>
+<p>If you have SD card support enabled, with&nbsp;<strong>#define sdcardsupport</strong> active, <strong>save-image</strong> saves to the SD card:</p>
+<ul>
+<li>To save the image to the SD card with the default name&nbsp;<strong>ulisp.img&nbsp;</strong>give the command:</li>
+</ul>
+<pre>(save-image)</pre>
+<ul>
+<li>To save the image to the SD card as <strong>filename&nbsp;</strong>give the command:</li>
+</ul>
+<pre>(save-image <em>filename</em>)</pre>
+<h4>Loading or running an image automatically</h4>
+<p>To have the default saved image&nbsp;loaded automatically at reset or power-on:</p>
+<ul>
+<li>Uncomment the option&nbsp;<strong>#define resetautorun</strong>&nbsp;before uploading uLisp to the board.</li>
+</ul>
+<p>In addition, you can have a function run automatically when the image is loaded. For example:</p>
+<ul>
+<li>To save the image&nbsp;with&nbsp;<strong>(fun)</strong>&nbsp;as the autorun function, give the command:</li>
+</ul>
+<pre>(save-image 'fun)</pre>
+<p>For example:</p>
+<pre>(defun fun () "Welcome to uLisp!")</pre>
+<h3 id="searchx">search&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(search <em>pattern</em> <em>target&nbsp;</em></code><span style="font-family: monospace;">[</span>:test<em style="font-family: monospace;"> function</em><span style="font-family: monospace;">]</span>)</p>
+<p>Returns the index of the first occurrence of <em>pattern</em> in <em>target</em>, or nil if it's not found. The target can be a list or string.</p>
+<p>For example:</p>
+<pre>&gt; (search "cat" "the cat sat on the mat"))<br />4</pre>
+<pre>&gt; (search '(1 5) '(3 1 4 1 5 9 2 6))<br />3</pre>
+<p><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">If target is a list you can specify the test function; otherwise&nbsp;</span><strong style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">eq</strong><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">&nbsp;</span><span style="font-family: 'Lucida Grande', 'Trebuchet MS', 'Bitstream Vera Sans', Verdana, Helvetica, sans-serif; font-size: 14px; white-space: normal;">is used. For example:</span></p>
+<pre>&gt; (search '("one" "five") '("three" "one" "four" "one" "five" "nine") :test string=)
+3</pre>
+<h3 id="second">second&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(second&nbsp;<em>list</em>)</code></p>
+<p>Returns the second item in a list.&nbsp;</p>
+<pre>&gt; (second '(a b c d e f))<br />b</pre>
+<p>A more memorable name for&nbsp;<strong>cadr</strong>.</p>
+<h3 id="set">set&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(set&nbsp;<em>symbol value [</em></code><em style="font-family: monospace;">symbol value</em><em>]</em>*)</p>
+<p>Assigns the value of the second argument to the value of the first argument:</p>
+<pre>&gt; (set 'a (+ 1 2 3))
+6</pre>
+<h3 id="setf">setf&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(setf&nbsp;<em>place value [</em></code><em style="font-family: monospace;">place value</em><em>]</em><em style="font-family: monospace;">*</em>)</p>
+<p>Modifies an existing list by setting the position in the list specified by <em>place</em> to the result of evaluating&nbsp;<em>value</em>. The second argument <em>place</em> can be one of the forms:</p>
+<pre><em>symbol</em>
+(car <em>form</em>)
+(cdr <em>form</em>)
+(nth <em>n</em> <em>form</em>)
+(char <em>string</em> <em>n</em>)
+(aref <em>array</em>&nbsp;<em>index</em>&nbsp;[<em>index</em>*]) </pre>
+<p><strong>first</strong> and <strong>rest</strong> can also be used as synonyms for <strong>car</strong> and <strong>cdr</strong>.</p>
+<p>The following examples illustrate each of these options.</p>
+<h4>variable</h4>
+<pre>(setf <em>symbol</em> <em>value</em>)</pre>
+<p>This is equivalent to:</p>
+<pre>(setq <em>symbol</em> <em>value</em>)</pre>
+<h4>car</h4>
+<pre>(setf (car <em>form</em>) <em>value</em>)</pre>
+<p>Replaces the <strong>car</strong> of the value of <em>form</em> with <em>value</em>. For example:</p>
+<pre>&gt; (defvar a '(b c))
+a
+
+&gt; (setf (car a) 'e)
+e<br /><br />&gt; a<br />(e c)&nbsp;</pre>
+<h4>cdr</h4>
+<pre>(setf (cdr <em>form</em>) <em>value</em>)</pre>
+<p>Replaces the <strong>cdr</strong> of the value of&nbsp;<em style="font-family: Monaco, Consolas, 'Lucida Console', 'Courier New', Courier, monospace; font-size: 12px;">form&nbsp;</em>with&nbsp;<em>value</em>. This is particularly useful in conjunction with <strong>assoc</strong>, to change the value associated with a key in an association list. For example:</p>
+<pre>&gt; (defvar col '((red . 23) (blu . 34) (grn . 45)))
+col
+
+&gt; (setf (cdr (assoc 'grn col)) 100)
+100
+
+&gt; col
+((red . 23) (blu . 34) (grn . 100))</pre>
+<h4>nth</h4>
+<pre>(setf (nth <em>n</em> <em>form</em>) <em>value</em>)</pre>
+<p>Replaces the nth&nbsp;value of the list&nbsp;<em>form</em>&nbsp;with&nbsp;<em>value</em>. For example:</p>
+<pre>&gt; (let ((x '(1 2 3))) (setf (nth 1 x) 7) x)
+(1 7 3)</pre>
+<h4>char</h4>
+<pre>(setf (char <em>string</em>&nbsp;<em>index</em>) <em>character</em>)</pre>
+<p>Replaces the value of the specified character in <em>string</em>&nbsp;with&nbsp;<em>character</em>. For example:</p>
+<pre>&gt; (let ((s "abc")) (setf (char s 1) #\r) s)
+"arc"</pre>
+<h4>aref</h4>
+<pre>(setf (aref array&nbsp;index&nbsp;[index*]) value)</pre>
+<p>Replaces the value of the specified element in <em>array</em>&nbsp;with&nbsp;<em>value</em>. For example:</p>
+<pre>&gt; (defvar a (make-array '(2 3)))
+a
+
+&gt; a
+#2A((nil nil nil) (nil nil nil))
+
+&gt; (setf (aref a 1 2) 90)
+90
+
+&gt; a
+#2A((nil nil nil) (nil nil 90))</pre>
+<h3 id="setq">setq&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(setq&nbsp;<em>symbol value [</em></code><em style="font-family: monospace;">symbol value</em><em>]</em>*)</p>
+<p>Assigns the value of the second argument to the&nbsp;variable specified in the first argument:</p>
+<pre>&gt; (setq a (+ 1 2 3))
+6</pre>
+<p>You can make several assignments in a single <strong>setq</strong>:</p>
+<pre>&gt; (setq a (+ 2 3) b (+ 4 5))
+9</pre>
+<h3 id="sin">sin&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(sin&nbsp;<em>number</em>)</code></p>
+<p>Returns the sine of&nbsp;<em>number</em>&nbsp;radians.</p>
+<p>For example:</p>
+<pre>&gt; (sin 3.14159)<br />0.0&nbsp;</pre>
+<h3 id="sinh">sinh&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(sinh&nbsp;<em>number</em>)</code></p>
+<p>Returns the hyperbolic sine of&nbsp;<em>number</em>.</p>
+<h3 id="sleep">sleep&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(sleep&nbsp;<em>seconds</em>)</code></p>
+<p>Puts the processor into a low-power sleep mode for approximately the specified number of seconds. During sleep the current consumption typically drops to 50 &micro;A on ATmega processors.</p>
+<h3 id="sort">sort&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(sort&nbsp;<em>list test</em>)</code></p>
+<p>Sorts the <em>list</em> according to the test function, and returns the sorted list. Note that for efficiency the sort is destructive, meaning that the value of <em>list</em> may be changed by the operation.</p>
+<p>For example:</p>
+<pre>&gt;  (sort '(3 1 4 1 5 9) &lt;)
+(1 1 3 4 5 9)</pre>
+<pre>&gt;  (sort '("dog" "cat" "ant" "eel" "owl" "mouse") string&lt;)
+("ant" "cat" "dog" "eel" "mouse" "owl")</pre>
+<p>The test function could be a lambda expression; for example, to sort strings into ascending order of length:</p>
+<pre>&gt; (sort '("giraffe" "lion" "ape" "rhino") (lambda (x y) (&lt; (length x) (length y))))
+("ape" "lion" "rhino" "giraffe")</pre>
+<h3 id="sqrt">sqrt&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(sqrt&nbsp;<em>number</em>)</code></p>
+<p style="font-size: 14px; font-weight: normal;"><span>Returns the square root of&nbsp;</span><em>number</em><span>.</span></p>
+<h3 id="streamp">streamp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(streamp&nbsp;<em>item</em>)</span></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if the argument is a valid stream and&nbsp;<strong>nil</strong>&nbsp;otherwise.</p>
+<h3 id="stringfn">string&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(string <em>item</em>)</span></p>
+<p>Converts its argument, which should be a character or a symbol, to a string.</p>
+<p>For example:</p>
+<pre>&gt; (string #\*)
+"*"
+
+&gt; (string 'cons)
+"cons"</pre>
+<h3 id="stringnoteq">string/=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(string/=&nbsp;<em>string</em>&nbsp;<em>string</em>)</span></p>
+<p>Returns the index to the first mismatch if the two strings are not the same, or&nbsp;<strong>nil</strong>&nbsp;otherwise. For example:</p>
+<pre>&gt; (string/= "love" "lisp")
+1</pre>
+<h3 id="stringless">string&lt;&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(string&lt;&nbsp;<em>string</em>&nbsp;<em>string</em>)</code></p>
+<p>Returns the index to the first mismatch&nbsp;if the first string is alphabetically less than the second string, or&nbsp;<strong>nil</strong> otherwise. For example:</p>
+<pre>&gt; (string&lt; "mouse" "mice")
+nil</pre>
+<h3 id="stringlesseq">string&lt;=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;(string&lt;=&nbsp;<em>string</em>&nbsp;<em>string</em>)</p>
+<p>Returns the index to the first mismatch&nbsp;if the first string is alphabetically less than or equal to the second string, or&nbsp;<strong>nil</strong>&nbsp;otherwise. For example:</p>
+<pre>&gt; (string&lt;= "cat" "cats")
+3</pre>
+<h3 id="stringeq">string=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(string=&nbsp;<em>string</em>&nbsp;<em>string</em>)</code></p>
+<p>Returns <strong>t</strong> if the two strings are the same, or <strong>nil</strong> otherwise.</p>
+<h3 id="stringgreater">string&gt;&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(string&gt; <em>string</em> <em>string</em>)</code></p>
+<p>Returns the index to the first mismatch&nbsp;if the first string is alphabetically greater than the second string, or&nbsp;<strong>nil</strong>&nbsp;otherwise. For example:</p>
+<pre>&gt; (string&gt; "mouse" "mice")
+1</pre>
+<h3 id="stringgreatereq">string&gt;=&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(string&gt;=&nbsp;<em>string</em>&nbsp;<em>string</em>)</code></p>
+<p>Returns the index to the first mismatch&nbsp;if the first string is alphabetically greater than or equal to the second string, or&nbsp;<strong>nil</strong>&nbsp;otherwise. For example:</p>
+<pre>&gt; (string&gt;= "mouser" "mouse")
+5</pre>
+<h3 id="stringp">stringp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(stringp&nbsp;<em>item</em>)</code></p>
+<p>Returns <strong>t</strong> if the argument is a string and <strong>nil</strong> otherwise.</p>
+<h3 id="subseq">subseq&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(subseq&nbsp;<em>string start [end]</em>)</code></p>
+<p>Returns a subsequence of a list or string.</p>
+<h4>Lists</h4>
+<p>Returns a new list consisting of item <strong>start</strong> to item <strong>end-1</strong>:</p>
+<pre>&gt; (subseq '(0 1 2 3 4 5) 2 4)
+(2 3)</pre>
+<p>If the third argument is omitted&nbsp;<strong>subseq</strong>&nbsp;returns from&nbsp;<strong>start</strong>&nbsp;to the end of the string:</p>
+<pre>&gt; (subseq '(0 1 2 3 4 5) 2)
+(2 3 4 5)</pre>
+<h4>Strings</h4>
+<p>Returns a new string consisting of character <strong>start</strong> to character <strong>end</strong>-1:</p>
+<pre>&gt; (subseq "hello" 0 3)
+"hel"</pre>
+<p>If the third argument is omitted <strong>subseq</strong> returns from <strong>start</strong> to the end of the string:</p>
+<pre>&gt; (subseq "hello" 3)
+"lo"</pre>
+<p>The following example <strong>day</strong> returns a three-letter day string for the day number 0 to 6:</p>
+<pre>(defun day (d)
+  (subseq "MonTueWedThuFriSatSun" (* 3 d) (* 3 (1+ d))))</pre>
+<h3 id="symbolp">symbolp&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">(symbolp&nbsp;<em>item</em>)</span></p>
+<p>Returns&nbsp;<strong>t</strong>&nbsp;if the argument is a symbol and&nbsp;<strong>nil</strong>&nbsp;otherwise.</p>
+<h3 id="t">t&nbsp;<span style="color: #90aa55;">symbol</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<span style="font-family: monospace;">t</span></p>
+<p>A symbol representing true.</p>
+<h3 id="tan">tan&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(tan&nbsp;<em>number</em>)</code></p>
+<p style="font-size: 14px; font-weight: normal;">Returns the tangent of&nbsp;<em>number</em>&nbsp;radians.</p>
+<h3 id="tanh">tanh&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(tanh&nbsp;<em>number</em>)</code></p>
+<p>Returns the hyperbolic tangent of <em>number</em>.</p>
+<h3 id="terpri">terpri&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(terpri </code><em style="font-family: monospace;">[stream]</em>)</p>
+<p>Prints a new line, and returns nil.</p>
+<p>If <em>stream</em> is specified the new line is written to the specified stream.&nbsp;</p>
+<h3 id="third">third&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(third&nbsp;<em>list</em>)</code></p>
+<p>Returns the third item in a list.&nbsp;</p>
+<pre>&gt; (third '(a b c d e f))<br />c</pre>
+<p>A more memorable name for&nbsp;<strong>caddr</strong>.</p>
+<h3 id="time">time&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(time&nbsp;<em>form</em>)</code></p>
+<p>Prints the value returned by the form, and the time taken to evaluate the form in milliseconds or seconds.</p>
+<p>For example:</p>
+<pre>&gt; (time (tak 18 12 6))
+7
+Time: 56.1 s</pre>
+<h3 id="trace">trace&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(trace&nbsp;<em>[function]*</em>)</code></p>
+<p>Turns on tracing of up to three user-defined functions. It returns a list of the functions currently being traced; for example:</p>
+<pre>&gt; (trace fac)
+(fac sq)</pre>
+<p>Giving <strong>(trace)</strong> with no arguments returns a list of the functions currently being traced.</p>
+<p>Tracing a function prints out the call depth, and a list of the arguments each time the function is called, and the call depth and result each time the function returns.</p>
+<p>For example, if you defined:</p>
+<pre>(defun fac (n)
+  (if (= n 1) 1
+    (* n (fac (- n 1)))))</pre>
+<p>you can turn on tracing of <strong>fac</strong> by typing:</p>
+<pre>&gt; (trace fac)</pre>
+<p>Calling <strong>fac</strong> as follows:</p>
+<pre>&gt; (fac 4)</pre>
+<p>will print this trace output:</p>
+<pre>0: (fac 4)
+  1: (fac 3)
+    2: (fac 2)
+      3: (fac 1)
+      3: fac returned 1
+    2: fac returned 2
+  1: fac returned 6
+0: fac returned 24
+24</pre>
+<p>Note that <strong>trace</strong> will not show calls to functions supplied as an argument to another function, such as <strong>apply</strong>, <strong>funcall</strong>, <strong>mapc</strong>, or <strong>mapcar</strong>, because in these cases only the body of the function is passed. For example:</p>
+<pre>(defun sq (x) (* x x))
+(trace sq)
+(mapcar sq '(1 2 3))</pre>
+<p>The solution is to wrap the function call in a <strong>lambda</strong>:</p>
+<pre>(mapcar (lambda (x) (sq x)) '(1 2 3))</pre>
+<h3 id="truncate">truncate&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(truncate&nbsp;<em>number&nbsp;</em>[<em>divisor</em>])</code></p>
+<p style="font-size: 14px; font-weight: normal;">Returns the integer part of&nbsp;<em>number</em>/<em>divisor</em>. If&nbsp;<em>divisor</em>&nbsp;is omitted it defaults to 1. For example:</p>
+<pre style="font-weight: normal;">(truncate x 100)</pre>
+<p style="font-size: 14px; font-weight: normal;">is equivalent to writing:</p>
+<pre style="font-weight: normal;">(truncate (/ x 100))</pre>
+<h3 id="unless">unless&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(unless&nbsp;<em>test form*</em>)</code></p>
+<p>Evaluates the test. If it's <strong>nil</strong> the forms are evaluated and the last value is returned.</p>
+<p>For example:</p>
+<pre>&gt; (unless (digitalread 3) (digitalwrite 4 t))</pre>
+<p>This reads input D3. If it's low the LED on D4 is lit.</p>
+<h3 id="untrace">untrace&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(untrace&nbsp;<em>[function]*</em>)</code></p>
+<p>Turns off tracing of the specified user-defined functions.</p>
+<p>To turn off tracing for all functions type:</p>
+<pre>&gt; (untrace)</pre>
+<p>This returns a list of the functions that have been untraced.</p>
+<h3 id="unwind-protect">unwind-protect&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(unwind-protect&nbsp;<em>form1</em> <em>[forms]</em>*)</code></p>
+<p>Evaluates <em>form1</em> and <em>forms</em> in order and returns the value of <em>form1</em>, but guarantees to evaluate <em>forms</em> even if an error occurs in <em>form1</em>.</p>
+<p>For example, the standard <strong>blink</strong> program can leave the LED on if you escape. You can solve this with <strong>unwind-protect</strong>:</p>
+<pre>(defun blink ()
+  (pinmode :led-builtin t)
+  (unwind-protect
+      (loop
+       (digitalwrite :led-builtin (not (digitalread :led-builtin)))
+       (delay 1000))
+    (digitalwrite :led-builtin nil)))</pre>
+<p>Now the LED will always be turned off when you escape by typing ~.</p>
+<h3 id="when">when&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(when&nbsp;<em>test form*</em>)</code></p>
+<p>Evaluates the test. If it's non-nil the forms are&nbsp;evaluated and the last value is returned.</p>
+<p>For example:</p>
+<pre>&gt; (when (digitalread 3) (digitalwrite 4 t))</pre>
+<p>This reads input D3. If it's high the LED on D4 is lit.</p>
+<h3 id="withi2c">with-i2c&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(with-i2c (<em>stream</em>&nbsp;<em>[port]</em>&nbsp;<em>address</em>&nbsp;<em>[read-p]</em>)&nbsp;<em>form*</em>)</code></p>
+<p>Evaluates the forms with&nbsp;<em>stream</em>&nbsp;bound to an&nbsp;<strong>i2c-stream</strong>&nbsp;defined by&nbsp;<em>address</em>.</p>
+<p>On processors that support two I2C ports <em>port</em> can be 0 or 1 to specify the port. If omitted it defaults to 0.</p>
+<p>For details of the available pins see the appropriate board description on this site.</p>
+<p>If&nbsp;<em>read-p</em>&nbsp;is&nbsp;<strong>nil</strong>&nbsp;or omitted the stream is written to.</p>
+<p>If&nbsp;<em>read-p</em>&nbsp;is&nbsp;an integer it specifies the number of bytes to be read from the stream.</p>
+<p>The stream is bound to an i2c-stream:</p>
+<pre>&gt; (with-i2c (str #x70) str)<br />&lt;i2c-stream #x70&gt;</pre>
+<p>The AVR version of uLisp uses my own I2C routines which don't need a buffer, and don't impose any limit on the length of transactions. The ARM, ESP, and MSP430 versions of uLisp use the Arduino Wire library, which imposes a 32-byte limit on each transaction.</p>
+<h4 style="font-size: 14px;">Port scanner</h4>
+<p>If the start operation fails the stream variable is bound to nil:</p>
+<pre>&gt;&nbsp;(with-i2c (str #x71) str)<br />nil</pre>
+<p>This allows you to write a very simple port scanner to find all the I2C devices on the bus:</p>
+<pre>(defun scn () 
+  (dotimes (p 127)
+    (with-i2c (str p)
+      (when str (print p)))))</pre>
+<h3 id="withoutputtostring">with-output-to-string&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p style="font-size: 14px; font-weight: normal;"><strong>Syntax:</strong>&nbsp;<code>(with-output-to-string (<em>stream</em>)&nbsp;<em>form*</em>)</code></p>
+<p>Returns a string containing the output to the specified stream variable.</p>
+<p>For example:</p>
+<pre>&gt; (with-output-to-string (str) (princ "The result is: " str) (princ 24 str))
+"The result is: 24"</pre>
+<p>uLisp only supports outputting to one string at a time from&nbsp;<strong>with-output-to-string</strong>&nbsp;or&nbsp;<strong>princ-to-string</strong>.</p>
+<h3 id="withsdcard">with-sd-card&nbsp;<span style="color: #90aa55;">Arduino function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(with-sd-card (<em>stream filename&nbsp;</em>[<em>mode</em>]) <em>form*</em>)</code></p>
+<p>Evaluates the forms with <em>stream</em> bound to an <strong>sd-stream</strong>&nbsp;reading from or writing to the file <em>filename</em>.</p>
+<p>The <em>filename</em> should be a string of up to 12 characters, consisting of a filename of up to 8 characters, a dot, and an extension of up to three characters.</p>
+<p>The <strong>mode</strong> argument specifies whether the file is opened for reading or writing:</p>
+<table class="new">
+<thead>
+<tr>
+<td><strong>Mode</strong></td>
+<td><strong>Effect</strong></td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 or nil</td>
+<td>Read</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Write-Append</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Write-Overwrite</td>
+</tr>
+</tbody>
+</table>
+<p>If the file already exists Append writes to the end of the file without affecting the existing contents, whereas Overwrite deletes any existing content first.</p>
+<p>For example, the following command writes the string "Hello" to the SD card file "Greeting.txt":</p>
+<pre>(with-sd-card (str "Greeting.txt" 2)
+  (print "Hello" str))</pre>
+<p>and the following command reads it back:</p>
+<pre>(with-sd-card (str "Greeting.txt")
+  (read str))</pre>
+<h4>Writing to an SD card</h4>
+<p>The functions <strong>print</strong>, <strong>prin1</strong>, <strong>princ</strong>, <strong>terpri</strong>,&nbsp;<strong>pprint</strong>, <strong>write-byte</strong>, <strong>write-string</strong>, and <strong>write-line</strong> can all be used to write to an SD card.</p>
+<h4>Reading from an SD card</h4>
+<p>The functions <strong>read</strong>, <strong>read-byte</strong>, and <strong>read-line</strong> can all be used to read from an SD card. If the end of the file has been reached, each of these functions returns <strong>nil</strong>.</p>
+<h3 id="withserial">with-serial&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(with-serial (<em>stream</em>&nbsp;<em>port [baud]</em>)&nbsp;<em>form*</em>)</code></p>
+<p>Evaluates the forms with&nbsp;<em>stream</em>&nbsp;bound to a&nbsp;<strong>serial-stream</strong>&nbsp;using serial port&nbsp;<em>port</em>.</p>
+<p>For details of the available pins see the appropriate board description on this site.</p>
+<p>By default the baud rate is 9600. You can specify the following baud rates by specifying the third <em>baud</em> parameter as one of the following values:</p>
+<p>3, 6, 12, 24, 48, 96, 144, 192, 288, 384, 576, or 1152.</p>
+<p>Note that the baud rate is the baud parameter times 100; for example, for 38400 baud specify 384.</p>
+<p>For example, if you define:</p>
+<pre>(defun listen ()
+  (with-serial (str 1 96)
+    (loop
+     (print (read-line str)))))</pre>
+<p>and then connect the Port 1 RX pin to the TX pin of a GPS module, running the <strong>listen</strong> program by typing:</p>
+<pre>(listen)</pre>
+<p>will display output from the GPS module; for example:</p>
+<pre>"$GPRMC,183534.000,A,5213.1091,N,00008.2271,E,0.39,248.14,201117,,,A*61
+"$GPVTG,248.14,T,,M,0.39,N,0.72,K,A*39</pre>
+<h3 id="withspi">with-spi&nbsp;<span style="color: #90aa55;">special form</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(with-spi (<em>stream</em>&nbsp;<em>pin [clock] [bitorder] [mode] [port]</em>)&nbsp;<em>form*</em>)</code></p>
+<p>Evaluates the forms with&nbsp;<em>stream</em>&nbsp;bound to an&nbsp;<strong>spi-stream</strong>. The parameters are:</p>
+<ul>
+<li><em>stream</em>: a variable that will be bound to an&nbsp;<strong>spi-stream</strong>. The variable should be specified in commands to read from and write to the stream within the form.</li>
+<li><em>pin</em>: the enable pin.</li>
+<li><em>clock</em>: the frequency of the SPI clock, in kHz. It defaults to 4000, a 4 MHz clock.</li>
+<li><em>bitorder</em>: the bit order, 0 for LSBFIRST, or 1 for MSBFIRST. It defaults to MSBFIRST.</li>
+<li><em>mode</em>: the SPI mode, 0 to 3. It defaults to mode 0.</li>
+<li><em>port</em>: the SPI port, 0 or 1. It defaults to 0.</li>
+</ul>
+<p>For example, to write a byte <strong>#xAA</strong> using pin 10 as the enable pin, a 4 MHz clock, MSB first, and mode 0, you would specify:</p>
+<pre>(with-spi (str 10 4000 1 0)
+  (write-byte #xAA str))</pre>
+<p>You would get the same settings if you wrote:</p>
+<pre>(with-spi (str 10)
+  (write-byte #xAA str))</pre>
+<p>For details of the available pins see the appropriate board description on this site.</p>
+<p>The SPI interface will use the fastest available clock rate that is less than or equal to the specified value of <em>clock</em>.</p>
+<h3 id="writebyte">write-byte&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(write-byte&nbsp;<em>number&nbsp;</em>[<em>stream</em>])</code></p>
+<p>Writes a byte to a stream.</p>
+<h3 id="writeline">write-line&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(write-line&nbsp;<em>string&nbsp;</em>[<em>stream</em>])</code></p>
+<p>Writes a string terminated by a newline character. If <em>stream</em> is specified the string is written to the stream.</p>
+<h3 id="writestring">write-string&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(write-string&nbsp;<em>string&nbsp;</em>[<em>stream</em>])</code></p>
+<p>Writes a string. If&nbsp;<em>stream</em>&nbsp;is specified the string is written to the stream.</p>
+<h3 id="zerop">zerop&nbsp;<span style="color: #90aa55;">function</span></h3>
+<p><strong>Syntax:</strong>&nbsp;<code>(zerop&nbsp;<em>number</em>)</code></p>
+<p>Returns <strong>t</strong> if the argument is zero, or <strong>nil</strong> otherwise.</p><div class="nextprevious" style="overflow:hidden;"><hr>
+<p style="float: left;">
+<span style="font-weight: bold;">Previous: </span>
+<a href="/show?2JNZ">Thinking in a Lispy way</a></p>
+<p style="float: right;">
+<span style="font-weight: bold;">Next: </span>
+<a href="/show?31GT">Graphics extensions</a></p>
+</div>
+</div>
+</div>
+<div id="footer"><p style="text-align:center">Copyright 2025</p></div>
+</div>
+</body>
+</html>
