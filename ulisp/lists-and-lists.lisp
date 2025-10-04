@@ -15,7 +15,7 @@
     (dotimes (i (length str))
       (let* ((ch (char str i))
              (code (char-code ch)))
-        ;; If character is uppercase - ASCII 65-90 - , convert to lowercase
+        ;; If character is uppercase - ASCII 65-90 -, convert to lowercase
         (when (and (>= code 65) (<= code 90))
           (setq code (+ code 32)))
         (setq result (concatenate 'string result (string (code-char code))))))
@@ -1294,40 +1294,34 @@ keep working.")
           nil)
         (let ((val1 (scheme-apply pocket-fn (list nil)))
               (fn2 (scheme-apply pocket-fn (list 12))))
-          (cond
-            ((not (and (numberp val1) (= val1 8)))
-             (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
-             nil)
-            ((not (scheme-function-p fn2))
-             (format t "~%\"No; pocket should return a function when given an integer.\"~%")
-             nil)
-            (t
-             (let ((val2 (scheme-apply fn2 (list nil)))
-                   (fn3 (scheme-apply fn2 (list 3))))
-               (cond
-                 ((not (and (numberp val2) (= val2 12)))
-                  (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
-                  nil)
-                 ((not (scheme-function-p fn3))
-                  (format t "~%\"No; a pocket function should return another function.\"~%")
-                  nil)
-                 (t
-                  (let ((val3 (scheme-apply fn3 (list nil)))
-                        (val2-again (scheme-apply fn2 (list nil)))
-                        (val1-again (scheme-apply pocket-fn (list nil))))
-                    (cond
-                      ((not (and (numberp val3) (= val3 3)))
-                       (format t "~%\"No; the third pocket function should return 3.\"~%")
-                       nil)
-                      ((not (and (numberp val2-again) (= val2-again 12)))
-                       (format t "~%\"No; the second pocket function should still return 12.\"~%")
-                       nil)
-                      ((not (and (numberp val1-again) (= val1-again 8)))
-                       (format t "~%\"No; the original pocket function should still return 8.\"~%")
-                       nil)
-                      (t
-                       (format t "~%\"Perfect.\"~%")
-                       t)))))))))))
+          (unless (and (numberp val1) (= val1 8))
+            (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
+            (return-from check-problem-8 nil))
+          (unless (scheme-function-p fn2)
+            (format t "~%\"No; pocket should return a function when given an integer.\"~%")
+            (return-from check-problem-8 nil))
+          (let ((val2 (scheme-apply fn2 (list nil)))
+                (fn3 (scheme-apply fn2 (list 3))))
+            (unless (and (numberp val2) (= val2 12))
+              (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
+              (return-from check-problem-8 nil))
+            (unless (scheme-function-p fn3)
+              (format t "~%\"No; a pocket function should return another function.\"~%")
+              (return-from check-problem-8 nil))
+            (let ((val3 (scheme-apply fn3 (list nil)))
+                  (val2-again (scheme-apply fn2 (list nil)))
+                  (val1-again (scheme-apply pocket-fn (list nil))))
+              (unless (and (numberp val3) (= val3 3))
+                (format t "~%\"No; the third pocket function should return 3.\"~%")
+                (return-from check-problem-8 nil))
+              (unless (and (numberp val2-again) (= val2-again 12))
+                (format t "~%\"No; the second pocket function should still return 12.\"~%")
+                (return-from check-problem-8 nil))
+              (unless (and (numberp val1-again) (= val1-again 8))
+                (format t "~%\"No; the original pocket function should still return 8.\"~%")
+                (return-from check-problem-8 nil))
+              (format t "~%\"Perfect.\"~%")
+              t))))))
 
 ;;; ============================================================================
 ;;; GAME INTERFACE
@@ -1374,7 +1368,8 @@ keep working.")
 
   (loop
     (format t "~%> ")
-    (let* ((input (read-line))
+    (finish-output)
+    (let* ((input (read-line *standard-input* nil))
            (words (and input (parse-command input))))
       (cond
         ((null input)
@@ -1546,7 +1541,8 @@ or :? for a list of other : commands.]~%")
 (defun run-interpreter ()
   (loop
     (format t "~%>> ")
-    (let ((line (read-line)))
+    (finish-output)
+    (let ((line (read-line *standard-input* nil)))
       (when (null line)
         (return))
 
@@ -1691,18 +1687,18 @@ what I have to teach? Yes or no will do.\"~%")
      (give-hint *genie-state*))))
 
 (defun give-hint (problem)
-  (if (= *hint-problem* -1)
-      (progn
-        (setf *hint-problem* 0)
-        (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
+  (when (= *hint-problem* -1)
+    (setf *hint-problem* 0)
+    (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
 to tell you, blah blah blah, irreparable loss of fun, blah blah, no refunds, fine. So if
-you still want help, ask again. If any hint I give isn't enough, ask again.\"~%"))
-      (progn
-        (when (/= *hint-problem* problem)
-          (setf *hint-problem* problem)
-          (setf *hint-level* 0))
+you still want help, ask again. If any hint I give isn't enough, ask again.\"~%")
+    (return-from give-hint))
 
-        (incf *hint-level*)
+  (when (/= *hint-problem* problem)
+    (setf *hint-problem* problem)
+    (setf *hint-level* 0))
+
+  (incf *hint-level*)
 
   ;; Simplified hints - just provide the basic guidance
   (cond
@@ -1763,7 +1759,7 @@ create a new pocket (if given an integer).\"~%"))
        (t (format t "\"The key insight: use static scoping. Each function remembers the
 environment where it was created.\"~%"))))
 
-    (t (error "Invalid problem number"))))))
+    (t (error "Invalid problem number"))))
 
 (defun cmd-about ()
   (format t "~%Lists And Lists is copyright 1996 by Andrew Plotkin.~%")
@@ -1893,7 +1889,7 @@ environment where it was created.\"~%"))))
              (setf *door-open* t))
            (setf *current-room* 'lab)
            (describe-room)
-           t)
+           (return-from cmd-go t))
          (format t "You can't go that way.~%")))
     ((cmd-matches-p direction "south" "s")
      ;; Go south - from lab to entry or leave game
@@ -1903,7 +1899,7 @@ environment where it was created.\"~%"))))
                (format t "~%You step back through the door...~%")
                (format t "~%*** You have won ***~%")
                (print-goodbye)
-               t)
+               (return-from cmd-go t))
              (format t "Leaving so soon?~%"))
          (format t "You ARE outside.~%")))
     ((cmd-matches-p direction "in")
@@ -2979,6 +2975,7 @@ environment where it was created.\"~%"))))
   (if (or *manual-available* (>= *genie-state* 2))
       (loop
         (display-manual-menu)
+        (finish-output)
         (let ((input (read-line)))
           (cond
             ((or (string= input "q") (string= input "quit"))
