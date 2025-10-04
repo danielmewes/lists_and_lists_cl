@@ -1414,18 +1414,15 @@ keep working.")
                             (string= downcased-cmd "n") (string= downcased-cmd "south")
                             (string= downcased-cmd "s"))
                         (if (symbolp handler)
-                            (funcall (symbol-function handler))
                             (funcall handler)))
                        ;; Commands that take rest as list
                        ((or (string= downcased-cmd "put") (string= downcased-cmd "turn")
                             (string= downcased-cmd "switch"))
                       (if (symbolp handler)
-                          (funcall (symbol-function handler) rest)
                           (funcall handler rest)))
                      ;; Commands that take first arg
                      (t
                       (if (symbolp handler)
-                          (funcall (symbol-function handler) (first rest))
                           (funcall handler (first rest))))))
                    ;; Unrecognized verb
                    (format t "That's not a verb I recognise.~%")))))))))))
