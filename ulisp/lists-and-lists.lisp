@@ -1582,8 +1582,7 @@ or :? for a list of other : commands.]~%")
 
         (t
          (handler-case
-             (let* ((*package* (find-package :lists-and-lists))
-                    (expr (read-from-string line nil))
+             (let* ((expr (read-from-string line nil))
                     (*eval-fuel* 1000)
                     (result (scheme-eval expr *global-env*)))
                (format t " ")
