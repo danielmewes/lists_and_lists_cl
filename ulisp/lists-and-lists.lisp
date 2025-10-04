@@ -1294,34 +1294,42 @@ keep working.")
           nil)
         (let ((val1 (scheme-apply pocket-fn (list nil)))
               (fn2 (scheme-apply pocket-fn (list 12))))
-          (unless (and (numberp val1) (= val1 8))
-            (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
-            (return-from check-problem-8 nil))
-          (unless (scheme-function-p fn2)
-            (format t "~%\"No; pocket should return a function when given an integer.\"~%")
-            (return-from check-problem-8 nil))
-          (let ((val2 (scheme-apply fn2 (list nil)))
-                (fn3 (scheme-apply fn2 (list 3))))
-            (unless (and (numberp val2) (= val2 12))
-              (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
-              (return-from check-problem-8 nil))
-            (unless (scheme-function-p fn3)
-              (format t "~%\"No; a pocket function should return another function.\"~%")
-              (return-from check-problem-8 nil))
-            (let ((val3 (scheme-apply fn3 (list nil)))
-                  (val2-again (scheme-apply fn2 (list nil)))
-                  (val1-again (scheme-apply pocket-fn (list nil))))
-              (unless (and (numberp val3) (= val3 3))
-                (format t "~%\"No; the third pocket function should return 3.\"~%")
-                (return-from check-problem-8 nil))
-              (unless (and (numberp val2-again) (= val2-again 12))
-                (format t "~%\"No; the second pocket function should still return 12.\"~%")
-                (return-from check-problem-8 nil))
-              (unless (and (numberp val1-again) (= val1-again 8))
-                (format t "~%\"No; the original pocket function should still return 8.\"~%")
-                (return-from check-problem-8 nil))
-              (format t "~%\"Perfect.\"~%")
-              t))))))
+          (if (not (and (numberp val1) (= val1 8)))
+              (progn
+                (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
+                nil)
+              (if (not (scheme-function-p fn2))
+                  (progn
+                    (format t "~%\"No; pocket should return a function when given an integer.\"~%")
+                    nil)
+                  (let ((val2 (scheme-apply fn2 (list nil)))
+                        (fn3 (scheme-apply fn2 (list 3))))
+                    (if (not (and (numberp val2) (= val2 12)))
+                        (progn
+                          (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
+                          nil)
+                        (if (not (scheme-function-p fn3))
+                            (progn
+                              (format t "~%\"No; a pocket function should return another function.\"~%")
+                              nil)
+                            (let ((val3 (scheme-apply fn3 (list nil)))
+                                  (val2-again (scheme-apply fn2 (list nil)))
+                                  (val1-again (scheme-apply pocket-fn (list nil))))
+                              (if (not (and (numberp val3) (= val3 3)))
+                                  (progn
+                                    (format t "~%\"No; the third pocket function should return 3.\"~%")
+                                    nil)
+                                  (if (not (and (numberp val2-again) (= val2-again 12)))
+                                      (progn
+                                        (format t "~%\"No; the second pocket function should still return 12.\"~%")
+                                        nil)
+                                      (if (not (and (numberp val1-again) (= val1-again 8)))
+                                          (progn
+                                            (format t "~%\"No; the original pocket function should still return 8.\"~%")
+                                            nil)
+                                          (progn
+                                            (format t "~%\"Perfect.\"~%")
+                                            t))))))))))))))))
 
 ;;; ============================================================================
 ;;; GAME INTERFACE
@@ -1687,18 +1695,18 @@ what I have to teach? Yes or no will do.\"~%")
      (give-hint *genie-state*))))
 
 (defun give-hint (problem)
-  (when (= *hint-problem* -1)
-    (setf *hint-problem* 0)
-    (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
+  (if (= *hint-problem* -1)
+      (progn
+        (setf *hint-problem* 0)
+        (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
 to tell you, blah blah blah, irreparable loss of fun, blah blah, no refunds, fine. So if
-you still want help, ask again. If any hint I give isn't enough, ask again.\"~%")
-    (return-from give-hint))
+you still want help, ask again. If any hint I give isn't enough, ask again.\"~%"))
+      (progn
+        (when (/= *hint-problem* problem)
+          (setf *hint-problem* problem)
+          (setf *hint-level* 0))
 
-  (when (/= *hint-problem* problem)
-    (setf *hint-problem* problem)
-    (setf *hint-level* 0))
-
-  (incf *hint-level*)
+        (incf *hint-level*)
 
   ;; Simplified hints - just provide the basic guidance
   (cond
@@ -1759,7 +1767,7 @@ create a new pocket (if given an integer).\"~%"))
        (t (format t "\"The key insight: use static scoping. Each function remembers the
 environment where it was created.\"~%"))))
 
-    (t (error "Invalid problem number"))))
+    (t (error "Invalid problem number"))))))
 
 (defun cmd-about ()
   (format t "~%Lists And Lists is copyright 1996 by Andrew Plotkin.~%")
@@ -1889,7 +1897,7 @@ environment where it was created.\"~%"))))
              (setf *door-open* t))
            (setf *current-room* 'lab)
            (describe-room)
-           (return-from cmd-go t))
+           t)
          (format t "You can't go that way.~%")))
     ((cmd-matches-p direction "south" "s")
      ;; Go south - from lab to entry or leave game
@@ -1899,7 +1907,7 @@ environment where it was created.\"~%"))))
                (format t "~%You step back through the door...~%")
                (format t "~%*** You have won ***~%")
                (print-goodbye)
-               (return-from cmd-go t))
+               t)
              (format t "Leaving so soon?~%"))
          (format t "You ARE outside.~%")))
     ((cmd-matches-p direction "in")
