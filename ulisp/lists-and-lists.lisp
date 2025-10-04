@@ -306,8 +306,8 @@
   "Convert a Common Lisp list to a scheme cons structure"
   (if (null lst)
       nil
-      (make-scheme-cons :car (car lst)
-                        :cdr (scheme-list-to-cons (cdr lst)))))
+      (make-scheme-cons (car lst)
+                        (scheme-list-to-cons (cdr lst)))))
 
 (defun scheme-length (obj)
   "Return the length of a scheme list"
@@ -366,9 +366,9 @@
 
          ;; Lambda
          ((eq op 'lambda)
-          (make-scheme-function :params (car args)
-                                :body (cadr args)
-                                :env env))
+          (make-scheme-function (car args)
+                                (cadr args)
+                                env))
 
          ;; If
          ((eq op 'if)
@@ -474,10 +474,10 @@
     ((null expr) nil)
     ((numberp expr) expr)
     ((eq expr 't) t)
-    ((symbolp expr) (make-scheme-atom :name expr))
+    ((symbolp expr) (make-scheme-atom expr))
     ((consp expr)
-     (make-scheme-cons :car (scheme-read-quote (car expr))
-                       :cdr (scheme-read-quote (cdr expr))))
+     (make-scheme-cons (scheme-read-quote (car expr))
+                       (scheme-read-quote (cdr expr))))
     (t expr)))
 
 ;;; Printer
@@ -2078,11 +2078,15 @@ environment where it was created.\"~%"))))
 (defun save-user-env (env)
   "Save user-defined bindings from environment, recreating it on load"
   (let ((user-bindings (collect-user-bindings env)))
-    `(let ((new-env (init-global-env)))
-       ,@(mapcar (lambda (binding)
-                   `(env-define ',(car binding) ,(serialize-scheme-value (cdr binding)) new-env))
-                 user-bindings)
-       new-env)))
+    (cons 'let
+          (cons (list (list 'new-env (list 'init-global-env)))
+                (append (mapcar (lambda (binding)
+                                  (list 'env-define
+                                        (list 'quote (car binding))
+                                        (serialize-scheme-value (cdr binding))
+                                        'new-env))
+                                user-bindings)
+                        (list 'new-env))))))
 
 (defun collect-user-bindings (env)
   "Collect user-defined bindings (non-builtin) from environment"
@@ -2101,14 +2105,14 @@ environment where it was created.\"~%"))))
     ((null val) nil)
     ((numberp val) val)
     ((eq val t) t)
-    ((scheme-atom-p val) `(make-scheme-atom :name ',(scheme-atom-name val)))
+    ((scheme-atom-p val) `(make-scheme-atom ',(scheme-atom-name val)))
     ((scheme-cons-p val)
-     `(make-scheme-cons :car ,(serialize-scheme-value (scheme-cons-car val))
-                        :cdr ,(serialize-scheme-value (scheme-cons-cdr val))))
+     `(make-scheme-cons ,(serialize-scheme-value (scheme-cons-car val))
+                        ,(serialize-scheme-value (scheme-cons-cdr val))))
     ((scheme-function-p val)
-     `(make-scheme-function :params ,(serialize-scheme-value (scheme-function-params val))
-                           :body ,(serialize-scheme-value (scheme-function-body val))
-                           :env ,(serialize-scheme-env (scheme-function-env val))))
+     `(make-scheme-function ,(serialize-scheme-value (scheme-function-params val))
+                           ,(serialize-scheme-value (scheme-function-body val))
+                           ,(serialize-scheme-env (scheme-function-env val))))
     (t `',val)))
 
 (defun serialize-scheme-env (env)
@@ -2116,11 +2120,15 @@ environment where it was created.\"~%"))))
   (if (or (null env) (not (eq (car env) 'env)))
       '*global-env*
       (let ((bindings (collect-user-bindings env)))
-        `(let ((new-env (make-env *global-env*)))
-           ,@(mapcar (lambda (binding)
-                       `(env-define ',(car binding) ,(serialize-scheme-value (cdr binding)) new-env))
-                     bindings)
-           new-env))))
+        (cons 'let
+              (cons (list (list 'new-env (list 'make-env '*global-env*)))
+                    (append (mapcar (lambda (binding)
+                                      (list 'env-define
+                                            (list 'quote (car binding))
+                                            (serialize-scheme-value (cdr binding))
+                                            'new-env))
+                                    bindings)
+                            (list 'new-env)))))))
 
 ;;; ============================================================================
 ;;; MANUAL SYSTEM
