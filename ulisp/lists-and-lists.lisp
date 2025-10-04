@@ -1375,8 +1375,7 @@ keep working.")
 
   (loop
     (format t "~%> ")
-    (finish-output)
-    (let* ((input (read-line *standard-input* nil))
+    (let* ((input (read-line))
            (words (and input (parse-command input))))
       (cond
         ((null input)
@@ -1548,8 +1547,7 @@ or :? for a list of other : commands.]~%")
 (defun run-interpreter ()
   (loop
     (format t "~%>> ")
-    (finish-output)
-    (let ((line (read-line *standard-input* nil)))
+    (let ((line (read-line)))
       (when (null line)
         (return))
 
@@ -2989,7 +2987,6 @@ environment where it was created.\"~%"))))
   (if (or *manual-available* (>= *genie-state* 2))
       (loop
         (display-manual-menu)
-        (finish-output)
         (let ((input (read-line)))
           (cond
             ((or (string= input "q") (string= input "quit"))
