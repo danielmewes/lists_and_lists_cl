@@ -1,7 +1,6 @@
 ;;;; Lists and Lists - A uLisp Port
 ;;;; Copyright 1996 by Andrew Plotkin - original Z-machine version
-;;;; Common Lisp port 2025
-;;;; uLisp port 2025
+;;;; uLisp port 2025 by Daniel Mewes
 ;;;;
 ;;;; An Interactive Tutorial for learning Scheme/Lisp
 
