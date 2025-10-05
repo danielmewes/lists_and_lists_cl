@@ -63,7 +63,7 @@
                                      (string (char str (+ start i))))))
           result))))
 
-(defun symbol-function (f) f)
+; The following will be interpreted only by uLisp, not CL: (defun symbol-function (f) f)
 
 ;;; ============================================================================
 ;;; ULOS - uLisp Simple Object System
