@@ -8,96 +8,78 @@
 ;;; COMMON LISP FUNCTION STAND-INS FOR ULISP
 ;;; ============================================================================
 
-(defun string-downcase (str)
-  "Convert a string to lowercase using only uLisp built-in functions."
-  (let ((result ""))
-    (dotimes (i (length str))
-      (let* ((ch (char str i))
-             (code (char-code ch)))
-        ;; If character is uppercase - ASCII 65-90 -, convert to lowercase
-        (when (and (>= code 65) (<= code 90))
-          (setq code (+ code 32)))
-        (setq result (concatenate 'string result (string (code-char code))))))
-    result))
-
-(defun digit-char-p (ch)
-  "Check if character ch is a digit."
-  (let ((code (char-code ch)))
-    (and (>= code 48) (<= code 57))))
-
-(defun every (predicate sequence)
-  "Test whether predicate is true for every element of sequence.
-   Works with lists and strings."
-  (let ((result t))
-    (cond
-      ;; Handle strings
-      ((stringp sequence)
-       (dotimes (i (length sequence))
-         (unless (funcall predicate (char sequence i))
-           (setq result nil)
-           (return))))
-      ;; Handle lists
-      ((listp sequence)
-       (dolist (item sequence)
-         (unless (funcall predicate item)
-           (setq result nil)
-           (return)))))
-    result))
-
-(defun parse-integer (str)
-  "Parse a string of digits into an integer."
-  (let ((result 0)
-        (len (length str)))
-    (dotimes (i len)
-      (let* ((ch (char str i))
-             (digit (- (char-code ch) 48)))
-        (setq result (+ (* result 10) digit))))
-    result))
-
-(defun char-in-string-p (ch str)
-  "Check if character ch is in string str."
-  (let ((found nil))
-    (dotimes (i (length str))
-      (when (eq ch (char str i))
-        (setq found t)
-        (return)))
-    found))
-
-(defun remove-if (predicate lst)
-  "Remove all elements from lst for which predicate returns true."
-  (let ((result nil))
-    (dolist (item lst)
-      (unless (funcall predicate item)
-        (push item result)))
-    (reverse result)))
-
-(defun string-trim (char-bag str)
-  "Remove characters in char-bag from both ends of str."
-  (let ((start 0)
-        (end (- (length str) 1))
-        (len (length str)))
-    ;; Find first non-trimmable character
-    (loop
-      (when (or (>= start len)
-                (not (char-in-string-p (char str start) char-bag)))
-        (return))
-      (setq start (+ start 1)))
-    ;; Find last non-trimmable character
-    (loop
-      (when (or (< end 0)
-                (not (char-in-string-p (char str end) char-bag)))
-        (return))
-      (setq end (- end 1)))
-    ;; Extract substring
-    (if (> start end)
-        ""
-        (let ((result ""))
-          (dotimes (i (+ (- end start) 1))
-            (setq result (concatenate 'string result
-                                     (string (char str (+ start i))))))
-          result))))
-
-; The following will be interpreted only by uLisp, not CL: (defun symbol-function (f) f)
+; The following will be interpreted only by uLisp, not CL.
+; We make use of uLisp's comment limitation, which considers a line as a comment only up to the first opening parenthesis
+; (defun string-downcase (str)
+;  (let ((result ""))
+;    (dotimes (i (length str))
+;      (let* ((ch (char str i))
+;             (code (char-code ch)))
+;        (when (and (>= code 65) (<= code 90))
+;          (setq code (+ code 32)))
+;        (setq result (concatenate 'string result (string (code-char code)))))) result))
+;
+; (defun digit-char-p (ch)
+;   (let ((code (char-code ch)))
+;     (and (>= code 48) (<= code 57))))
+;
+; (defun every (predicate sequence)
+;   (let ((result t))
+;     (cond
+;       ((stringp sequence)
+;        (dotimes (i (length sequence))
+;          (unless (funcall predicate (char sequence i))
+;            (setq result nil)
+;            (return))))
+;       ((listp sequence)
+;        (dolist (item sequence)
+;          (unless (funcall predicate item)
+;            (setq result nil)
+;            (return))))) result))
+;
+; (defun parse-integer (str)
+;   (let ((result 0)
+;         (len (length str)))
+;     (dotimes (i len)
+;       (let* ((ch (char str i))
+;              (digit (- (char-code ch) 48)))
+;         (setq result (+ (* result 10) digit)))) result))
+;
+; (defun char-in-string-p (ch str)
+;   (let ((found nil))
+;     (dotimes (i (length str))
+;       (when (eq ch (char str i))
+;         (setq found t)
+;         (return))) found))
+;
+; (defun remove-if (predicate lst)
+;   (let ((result nil))
+;     (dolist (item lst)
+;       (unless (funcall predicate item)
+;         (push item result)))
+;     (reverse result)))
+;
+; (defun string-trim (char-bag str)
+;   (let ((start 0)
+;         (end (- (length str) 1))
+;         (len (length str)))
+;     (loop
+;       (when (or (>= start len)
+;                 (not (char-in-string-p (char str start) char-bag)))
+;         (return))
+;       (setq start (+ start 1)))
+;     (loop
+;       (when (or (< end 0)
+;                 (not (char-in-string-p (char str end) char-bag)))
+;         (return))
+;       (setq end (- end 1)))
+;     (if (> start end) ""
+;         (let ((result ""))
+;           (dotimes (i (+ (- end start) 1))
+;             (setq result (concatenate 'string result
+;                                      (string (char str (+ start i)))))) result))))
+;
+; (defun symbol-function (f) f)
 
 ;;; ============================================================================
 ;;; ULOS - uLisp Simple Object System
