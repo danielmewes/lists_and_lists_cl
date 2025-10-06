@@ -5,7 +5,7 @@
 ;;;; An Interactive Tutorial for learning Scheme/Lisp
 
 ;;; ============================================================================
-;;; UTILITY FUNCTIONS
+;;; COMMON LISP FUNCTION STAND-INS FOR ULISP
 ;;; ============================================================================
 
 (defun string-downcase (str)
@@ -19,6 +19,11 @@
           (setq code (+ code 32)))
         (setq result (concatenate 'string result (string (code-char code))))))
     result))
+
+(defun digit-char-p (ch)
+  "Check if character ch is a digit."
+  (let ((code (char-code ch)))
+    (and (>= code 48) (<= code 57))))
 
 (defun char-in-string-p (ch str)
   "Check if character ch is in string str."
