@@ -1600,7 +1600,7 @@ or :? for a list of other : commands.]~%")
 
         (t
          (handler-case
-             (let* ((expr (read-from-string line nil))
+             (let* ((expr (read-from-string line))
                     (*eval-fuel* 1000)
                     (result (scheme-eval expr *global-env*)))
                (format t " ")
