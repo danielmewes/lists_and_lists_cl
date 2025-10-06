@@ -193,10 +193,12 @@
     (t (list nil nil))))
 
 (defun env-define (sym val env)
-  (let ((pair (assoc sym (cddr env))))
+  (let ((pair (assoc sym (cddr env)))
+        ;; Workaround for uLisp not supporting cddr as place argument to push
+        (env_cdr (cdr env)))
     (if pair
         (setf (cdr pair) val)
-        (push (cons sym val) (cddr env))))
+        (push (cons sym val) (cdr env_cdr))))
   val)
 
 (defun env-set! (sym val env)
