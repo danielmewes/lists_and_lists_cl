@@ -1564,6 +1564,18 @@ or :? for a list of other : commands.]~%")
         (when parent
           (display-environment parent (1+ indent)))))))
 
+(defun balanced-parens-p (str)
+  "Check if parentheses are balanced in a string"
+  (let ((depth 0))
+    (dotimes (i (length str))
+      (let ((ch (char str i)))
+        (cond
+          ((eq ch #\() (setq depth (+ depth 1)))
+          ((eq ch #\)) (setq depth (- depth 1))))
+        (when (< depth 0)
+          (return nil))))
+    (= depth 0)))
+
 (defun run-interpreter ()
   (loop
     (format t "~%>> ")
@@ -1599,17 +1611,19 @@ or :? for a list of other : commands.]~%")
          (display-environment *global-env*))
 
         (t
-         (handler-case
-             (let* ((expr (read-from-string line))
-                    (*eval-fuel* 1000)
-                    (result (scheme-eval expr *global-env*)))
-               (format t " ")
-               (scheme-print result)
-               (terpri))
-           (end-of-file ()
-             (format t "[Incomplete expression]~%"))
-           (error (e)
-             (format t "[Error: ~a]~%" e))))))))
+         ;; Note: handler-case replaced with ignore-errors for uLisp compatibility
+         (if (not (balanced-parens-p line))
+             (format t "[Incomplete expression]~%")
+             (let ((result (ignore-errors
+                             (let* ((expr (read-from-string line))
+                                    (*eval-fuel* 1000)
+                                    (result (scheme-eval expr *global-env*)))
+                               (format t " ")
+                               (scheme-print result)
+                               (terpri)
+                               t))))
+               (when (eq result nothing)
+                 (format t "[Error occurred]~%")))))))))
 
 (defun cmd-yes ()
   (if (not (in-lab-p))
