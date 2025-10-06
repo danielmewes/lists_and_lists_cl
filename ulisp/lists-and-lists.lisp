@@ -25,6 +25,35 @@
   (let ((code (char-code ch)))
     (and (>= code 48) (<= code 57))))
 
+(defun every (predicate sequence)
+  "Test whether predicate is true for every element of sequence.
+   Works with lists and strings."
+  (let ((result t))
+    (cond
+      ;; Handle strings
+      ((stringp sequence)
+       (dotimes (i (length sequence))
+         (unless (funcall predicate (char sequence i))
+           (setq result nil)
+           (return))))
+      ;; Handle lists
+      ((listp sequence)
+       (dolist (item sequence)
+         (unless (funcall predicate item)
+           (setq result nil)
+           (return)))))
+    result))
+
+(defun parse-integer (str)
+  "Parse a string of digits into an integer."
+  (let ((result 0)
+        (len (length str)))
+    (dotimes (i len)
+      (let* ((ch (char str i))
+             (digit (- (char-code ch) 48)))
+        (setq result (+ (* result 10) digit))))
+    result))
+
 (defun char-in-string-p (ch str)
   "Check if character ch is in string str."
   (let ((found nil))
