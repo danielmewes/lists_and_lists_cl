@@ -161,7 +161,7 @@
     ;; Meta operations
     (env-define 'eval (make-scheme-builtin :name 'eval
                                            :fn (lambda (args)
-                                                 (scheme-eval (first args) *global-env*)))
+                                                 (scheme-eval (scheme-cons-to-list (first args)) *global-env*)))
                 env)
 
     ;; Special forms (syntax)
@@ -187,6 +187,18 @@
       nil
       (make-scheme-cons :car (car lst)
                         :cdr (scheme-list-to-cons (cdr lst)))))
+
+(defun scheme-cons-to-list (obj)
+  "Convert a scheme data structure back to a Common Lisp s-expression"
+  (cond
+    ((null obj) nil)
+    ((eq obj t) t)
+    ((numberp obj) obj)
+    ((scheme-atom-p obj) (scheme-atom-name obj))
+    ((scheme-cons-p obj)
+     (cons (scheme-cons-to-list (scheme-cons-car obj))
+           (scheme-cons-to-list (scheme-cons-cdr obj))))
+    (t obj)))
 
 (defun scheme-length (obj)
   "Return the length of a scheme list"

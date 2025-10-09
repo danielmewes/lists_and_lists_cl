@@ -191,6 +191,12 @@
            (result (scheme-eval '((lambda (x) (+ x 5)) 10) *global-env*)))
       (assert-number-equal result 15 "Testing: ((lambda (x) (+ x 5)) 10)"))))
 
+(run-test "Eval command with quoted expression"
+  (lambda ()
+    (let* ((*eval-fuel* 1000)
+           (result (scheme-eval '(eval (quote (+ 1 2))) *global-env*)))
+      (assert-number-equal result 3 "Testing: (eval '(+ 1 2))"))))
+
 ;; Test problem 2
 (run-test "Problem 2: TWENTYSEVEN"
   (lambda ()
