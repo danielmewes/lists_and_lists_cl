@@ -1189,13 +1189,16 @@ keep working.")
   (let* ((result (env-lookup 'twentyseven *global-env*))
          (val (car result))
          (found (cadr result)))
-    (if (and found (numberp val) (= val 27))
-        (progn
-          (format t "~%\"Aha! Very good.\"~%")
-          t)
-        (progn
-          (format t "~%\"Nope; that's not 27. Try again.\"~%")
-          nil))))
+    (cond
+      ((not found)
+       (format t "~%The genie shakes his head. \"Looks like TWENTYSEVEN isn't defined at all. Or if it is, you've done something really magical to it. Try again.\"~%")
+       nil)
+      ((and (numberp val) (= val 27))
+       (format t "~%\"Aha! Very good.\"~%")
+       t)
+      (t
+       (format t "~%\"Nope; that's not 27. Try again.\"~%")
+       nil))))
 
 (defun check-problem-3 ()
   (let* ((result1 (env-lookup 'cat *global-env*))
@@ -1221,7 +1224,12 @@ keep working.")
        (format t "~%\"Nope. Remember that CDR(CAT) and CDR(DOG) must be EQV?.\"~%")
        nil)
       (t
-       (format t "~%\"Perfect!\"~%")
+       (format t "~%\"Perfect! There are actually two ways to solve this problem.")
+       (if (and (scheme-cons-p cat) (null (scheme-cons-cdr (scheme-cons-cdr cat))))
+           ;; One-term list solution
+           (format t " You used the simpler one, using one-term lists. The trickier solution would be something like this:~%(define tail '(end))~%(define cat (cons 'head tail))~%(define dog (cons 'head tail))~%The cdrs are EQV? because they are both the thing defined on the first line. See?\"~%")
+           ;; Multi-term or shared cdr solution
+           (format t " The simple way is just to define both CAT and DOG to be one-term lists. That way, the cdrs are both NIL, and NIL is always EQV? to NIL.\"~%"))
        t))))
 
 (defun check-problem-4 ()
