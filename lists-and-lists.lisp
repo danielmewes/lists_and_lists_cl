@@ -1847,6 +1847,14 @@ environment where it was created.\"~%"))))))
      `(make-scheme-function :params ,(serialize-scheme-value (scheme-function-params val))
                            :body ,(serialize-scheme-value (scheme-function-body val))
                            :env ,(serialize-scheme-env (scheme-function-env val))))
+    ((scheme-builtin-p val)
+     ;; Built-ins cannot be serialized; return the builtin name as an atom
+     ;; They will be properly restored from init-global-env on load
+     `(make-scheme-atom :name ',(intern (string (scheme-builtin-name val)))))
+    ((scheme-syntax-p val)
+     ;; Syntax forms cannot be serialized; return the syntax name as an atom
+     ;; They will be properly restored from init-global-env on load
+     `(make-scheme-atom :name ',(intern (string (scheme-syntax-name val)))))
     (t `',val)))
 
 (defun serialize-scheme-env (env)
