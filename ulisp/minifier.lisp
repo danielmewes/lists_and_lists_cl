@@ -8,11 +8,7 @@
 ;;;; compatibility with various Lisp dialects (e.g., uLisp).
 ;;;;
 ;;;; Usage (with SBCL):
-;;;;   sbcl --script minify-lisp.lisp <input-file.lisp> <output-file.lisp>
-;;;;
-;;;; Example:
-;;;;   sbcl --script minify-lisp.lisp my-program.lisp my-program.min.lisp
-;;;;
+;;;;   sbcl --script minifier.lisp <input-file.lisp> <output-file.lisp>
 
 (defun minify-lisp-file (input-path output-path)
   "Reads Lisp source from input-path, removes comments and extraneous
@@ -74,7 +70,6 @@
 
 (defun main ()
   "Parses command-line arguments and executes the minification."
-  ;; This version uses SBCL-specific features to avoid external dependencies.
   (let* ((all-args #+sbcl sb-ext:*posix-argv*
                    #-sbcl (error "This script is configured to run with SBCL for command-line argument processing."))
          (script-name (car all-args))
