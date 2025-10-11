@@ -1233,16 +1233,19 @@ keep working.")))
      (format t "You can't read that.~%"))))
 
 (defun cmd-break (what)
-  (if (and (object-is-p what 'alarm-box)
+  (cond
+    ((null what)
+     (print-what-verb "break"))
+    ((and (object-is-p what 'alarm-box)
            (object-visible-p-by-name what))
-    (progn
-      (setf *alarm-box-used* t)
-      (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
+      (progn
+        (setf *alarm-box-used* t)
+        (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
 
 \"No no don't break it I'm awake!\"
 A gleaming hand catches your wrist. The genie gently -- very gently --
-removes the box from your grasp, and tucks it carefully away into nothing."))
-      (print-what-verb "break")))
+removes the box from your grasp, and tucks it carefully away into nothing.")))
+    (t (format t "If you're getting frustrated, maybe ask for help.~%"))))
 
 (defun cmd-push (what)
   (cond
