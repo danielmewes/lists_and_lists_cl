@@ -634,7 +634,6 @@
 ;;; Wake genie sequence
 (defun wake-genie (initial-action-msg)
   "Handle the sequence of waking the genie with a specific action message"
-  (setf *alarm-box-used* t)
   (setf *genie-state* 1)
   (setf *genie-waiting* t)
   (format t "~%~A~%" initial-action-msg)
@@ -797,9 +796,7 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone."
   "Examine the genie with state-dependent text"
   (if (not (genie-finished-p))
       (progn
-        (format t "You always thought genies were folklore, but now that you've encountered one
-you find you really can't mistake it. He's eight feet tall, bright shimmering bronze,
-absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~%")
+        (format t "~a~%" (object-description obj))
         (when (genie-asleep-p)
           (format t "He's also quite dead to the world, snoring like mad on the lumpy couch.~%")))
       (format t "The genie has departed.~%")))
@@ -816,8 +813,8 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.~
   (eq (value obj 'object-type) 'alarm-box-object))
 
 (defun alarm-box-object-visible-p (obj)
-  "Alarm box is visible in lab when genie is asleep and not used"
-  (and (in-lab-p) (genie-asleep-p) (not *alarm-box-used*)))
+  "Alarm box is visible in lab when genie is asleep"
+  (and (in-lab-p) (genie-asleep-p)))
 
 (defun open-alarm-box-object (obj)
   (format t "The translucent glass is seamless.~%"))
@@ -967,6 +964,12 @@ you see the words \"*** You have won ***\"")))
 (defun close-desk-object (obj)
   (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%"))
 
+(defun examine-desk-object (obj)
+  (format t "~a" (object-description obj))
+  (if (and (genie-asleep-p) (not *alarm-box-used*))
+    (format t " On the desk are a computer and a small glass box.~%")
+    (format t " On the desk is a computer.~%")))
+
 ;;; Bookshelves object
 (defun make-bookshelves-object ()
   (let ((base (make-game-object 'bookshelves '("bookshelves" "shelves" "bookshelf" "books") 'lab
@@ -1057,6 +1060,7 @@ you see the words \"*** You have won ***\"")))
     ((genie-object-p obj) (examine-genie-object obj))
     ((book-object-p obj) (examine-book-object obj))
     ((door-object-p obj) (examine-door-object obj))
+    ((desk-object-p obj) (examine-desk-object obj))
     (t (examine-object-default obj))))
 
 (defun open-object (obj)
@@ -1434,9 +1438,10 @@ keep working.")
              (return))
 
             ((cmd-matches-p cmd "look" "l")
-             (if (and rest (cmd-matches-p (first rest) "under"))
-                 (cmd-look-under (second rest))
-                 (describe-room)))
+            (cond
+              ((and rest (cmd-matches-p (first rest) "under")) (cmd-look-under (second rest)))
+              ((and rest (cmd-matches-p (first rest) "at")) (cmd-examine (second rest)))
+              (t (describe-room))))
 
             ;; Try hash table dispatch
             (t
@@ -1518,11 +1523,13 @@ keep working.")
 (defun cmd-break (what)
   (if (and (object-is-p what 'alarm-box)
            (object-visible-p-by-name what))
+    (progn
+      (setf *alarm-box-used* t)
       (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
 
 \"No no don't break it I'm awake!\"
 A gleaming hand catches your wrist. The genie gently -- very gently --
-removes the box from your grasp, and tucks it carefully away into nothing.")
+removes the box from your grasp, and tucks it carefully away into nothing."))
       (print-what-verb "break")))
 
 (defun cmd-push (what)
@@ -1698,8 +1705,10 @@ the couch follows.~%"))
          (setf *genie-state* 0)
          (setf *genie-waiting* nil)
          (format t "The genie frowns thunderously. \"Fine, go play around on your own. See where
-it gets you. Wake me when you're tired of wasting time.\" He turns over, and begins
-snoring. Thunderously.~%"))
+it gets you. Wake me when you're tired of wasting time.\" ")
+         (if *alarm-box-used*
+           (format t "He tosses you the glass box, turns over, and begins snoring. Thunderously.~%")
+           (format t "He turns over, and begins snoring. Thunderously.~%")))
 
         ((and (genie-teaching-p) *genie-waiting*)
          (setf *genie-waiting* nil)
