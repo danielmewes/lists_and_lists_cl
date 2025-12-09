@@ -2,11 +2,11 @@
 # Launcher script for Lists and Lists
 
 if command -v sbcl > /dev/null; then
-    sbcl --noinform --eval "(declaim (sb-ext:muffle-conditions style-warning))" --quit --load lists-and-lists.lisp --eval "(lists-and-lists:play-game)"
+    sbcl --noinform --eval "(declaim (sb-ext:muffle-conditions style-warning))" --quit --load ulisp/lists-and-lists.lisp --eval "(lists-and-lists:play-game)"
 elif command -v ccl > /dev/null; then
-    ccl --load lists-and-lists.lisp --eval "(lists-and-lists:play-game)" --eval "(quit)"
+    ccl --load ulisp/lists-and-lists.lisp --eval "(lists-and-lists:play-game)" --eval "(quit)"
 elif command -v clisp > /dev/null; then
-    clisp -q -i lists-and-lists.lisp -x "(lists-and-lists:play-game)"
+    clisp -q -i ulisp/lists-and-lists.lisp -x "(lists-and-lists:play-game)"
 else
     echo "No Common Lisp implementation found."
     echo "Please install SBCL, CCL, or CLISP."

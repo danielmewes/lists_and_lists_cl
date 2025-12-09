@@ -614,7 +614,7 @@
 
 (defun respond-genie-no-shout ()
   "Respond when player shouts at awake genie"
-  (format t "The genie looks at you quizzically. \"No need to shout.\"~%"))
+  (format t "The genie looks at you quizzically. \"No need to~%shout.\"~%"))
 
 (defun respond-genie-confused ()
   "Respond when genie doesn't understand"
@@ -639,9 +639,9 @@
   (setf *genie-state* 1)
   (setf *genie-waiting* t)
   (format t "~%~A~%" initial-action-msg)
-  (format t "~%The genie looks you over, squinching his face in a manner to which mere mortals cannot aspire. \"Okay, okay,\" he rumbles. \"Welcome to Hell. Might as well get to work.\"~%~%")
-  (format t "He leaps from the couch, lands soundlessly on the table, and gestures. \"Over here. Workstation. State of the art -- well, it was fifty years ago. But the language is timeless.\"~%~%")
-  (format t "\"Now. I am required by the Last Rite to offer you tutorial instruction. Do you want it?\"~%"))
+  (format t "~%The genie looks you over, squinching his face in a~%manner to which mere mortals cannot aspire. \"Okay,~%okay,\" he rumbles. \"Welcome to Hell. Might as well~%get to work.\"~%~%")
+  (format t "He leaps from the couch, lands soundlessly on the~%table, and gestures. \"Over here. Workstation. State~%of the art -- well, it was fifty years ago. But the~%language is timeless.\"~%~%")
+  (format t "\"Now. I am required by the Last Rite to offer you~%tutorial instruction. Do you want it?\"~%"))
 
 ;;; Command dispatch table
 (defvar *command-table* nil
@@ -781,9 +781,11 @@
 ;;; Genie object
 (defun make-genie-object ()
   (let ((base (make-game-object 'genie '("genie") 'lab
-    "You always thought genies were folklore, but now that you've encountered one
-you find you really can't mistake it. He's eight feet tall, bright shimmering bronze,
-absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone.")))
+    "You always thought genies were folklore, but now
+that you've encountered one you find you really can't
+mistake it. He's eight feet tall, bright shimmering
+bronze, absolutely covered with tasteless
+wrought-gold jewelry, and he smells of ozone.")))
     (update base 'object-type 'genie-object)
     base))
 
@@ -800,7 +802,7 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone."
       (progn
         (format t "~a~%" (object-description obj))
         (when (genie-asleep-p)
-          (format t "He's also quite dead to the world, snoring like mad on the lumpy couch.~%")))
+          (format t "He's also quite dead to the world, snoring like mad~%on the lumpy couch.~%")))
       (format t "The genie has departed.~%")))
 
 ;;; Alarm-box object
@@ -822,7 +824,7 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone."
   (format t "The translucent glass is seamless.~%"))
 
 (defun search-alarm-box-object (obj)
-  (format t "You can't make out what's inside the translucent box.~%"))
+  (format t "You can't make out what's inside the translucent~%box.~%"))
 
 ;;; Computer object
 (defun make-computer-object ()
@@ -859,8 +861,9 @@ absolutely covered with tasteless wrought-gold jewelry, and he smells of ozone."
 ;;; Plaque object
 (defun make-plaque-object ()
   (let ((base (make-game-object 'plaque '("plaque") 'lab
-    "It's a plate of thin gold, engraved with angular designs. In the center
-you see the words \"*** You have won ***\"")))
+    "It's a plate of thin gold, engraved with angular
+designs. In the center you see the words \"*** You
+have won ***\"")))
     (update base 'object-type 'plaque-object)
     base))
 
@@ -904,9 +907,9 @@ you see the words \"*** You have won ***\"")))
 
 (defun examine-door-object (obj)
   (if (eq *current-room* 'entry)
-      (format t "The door to the north is ancient, stained, knotted wood. It looks terribly out of place here. In fact, it IS out of place here. The door ~A.~%"
+      (format t "The door to the north is ancient, stained, knotted~%wood. It looks terribly out of place here. In fact,~%it IS out of place here. The door ~A.~%"
               (if *door-open* "stands open" "is closed"))
-      (format t "The door isn't nearly so interesting from the inside.~%")))
+      (format t "The door isn't nearly so interesting from the~%inside.~%")))
 
 (defun open-door-object (obj)
   (if (eq *current-room* 'entry)
@@ -936,7 +939,11 @@ you see the words \"*** You have won ***\"")))
 ;;; Couch object
 (defun make-couch-object ()
   (let ((base (make-game-object 'couch '("couch") 'lab
-    "The couch has that peculiar slump of cushion that says that this couch has seen much service, mostly to a single vast rear end. Indeed, the depression is perfectly molded to the tuchus that occupies it at this very moment.")))
+    "The couch has that peculiar slump of cushion that
+says that this couch has seen much service, mostly to
+a single vast rear end. Indeed, the depression is
+perfectly molded to the tuchus that occupies it at
+this very moment.")))
     (update base 'object-type 'couch-object)
     base))
 
@@ -953,7 +960,11 @@ you see the words \"*** You have won ***\"")))
 ;;; Desk object
 (defun make-desk-object ()
   (let ((base (make-game-object 'desk '("desk") 'lab
-    "The desk is obviously from that school of design that says that furniture should be clean, efficient, unadorned, and capable of being disassembled with allen wrenches and put into a box six feet by three feet by two inches high.")))
+    "The desk is obviously from that school of design
+that says that furniture should be clean, efficient,
+unadorned, and capable of being disassembled with
+allen wrenches and put into a box six feet by three
+feet by two inches high.")))
     (update base 'object-type 'desk-object)
     base))
 
@@ -961,16 +972,16 @@ you see the words \"*** You have won ***\"")))
   (eq (value obj 'object-type) 'desk-object))
 
 (defun open-desk-object (obj)
-  (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%"))
+  (format t "The desk doesn't have any drawers. It doesn't even~%have an inside.~%"))
 
 (defun close-desk-object (obj)
-  (format t "The desk doesn't have any drawers. It doesn't even have an inside.~%"))
+  (format t "The desk doesn't have any drawers. It doesn't even~%have an inside.~%"))
 
 (defun examine-desk-object (obj)
   (format t "~a" (object-description obj))
   (if (and (genie-asleep-p) (not *alarm-box-used*))
-    (format t " On the desk are a computer and a small glass box.~%")
-    (format t " On the desk is a computer.~%")))
+    (format t "On the desk are a computer and a small glass box.~%")
+    (format t "On the desk is a computer.~%")))
 
 ;;; Bookshelves object
 (defun make-bookshelves-object ()
@@ -1136,45 +1147,50 @@ you see the words \"*** You have won ***\"")))
 
 (defun problem-text (num)
   (cond
-    ((= num 2) "Your first problem is just to acquaint you with the system. Start up the machine,
-and define TWENTYSEVEN to have the value 27. You can ask me to 'check' when you're ready,
-or 'repeat' the problem if you need me to.")
+    ((= num 2) "Your first problem is just to acquaint you with the
+system. Start up the machine, and define TWENTYSEVEN
+to have the value 27. You can ask me to 'check' when
+you're ready, or 'repeat' the problem if you need me
+to.")
 
-    ((= num 3) "Let's try creating some lists. Define values for CAT and DOG so that CAT and DOG
-are EQUAL? but not EQV?. Furthermore, CDR(CAT) and CDR(DOG) must be EQV?.")
+    ((= num 3) "Let's try creating some lists. Define values for CAT
+and DOG so that CAT and DOG are EQUAL? but not EQV?.
+Furthermore, CDR(CAT) and CDR(DOG) must be EQV?.")
 
-    ((= num 4) "Define ABS to be the absolute value function for integers. That is, (ABS 4) should
-return 4; (ABS -5) should return 5; and (ABS 0) should return 0.")
+    ((= num 4) "Define ABS to be the absolute value function for
+integers. That is, (ABS 4) should return 4; (ABS -5)
+should return 5; and (ABS 0) should return 0.")
 
-    ((= num 5) "Define SUM to be a function that adds up a list of integers. So (SUM '(8 2 3))
-should return 13. Make sure it works correctly for the empty list; (SUM NIL) should
-return 0.")
+    ((= num 5) "Define SUM to be a function that adds up a list of
+integers. So (SUM '(8 2 3)) should return 13. Make
+sure it works correctly for the empty list; (SUM NIL)
+should return 0.")
 
-    ((= num 6) "This problem is like the last one, but more general. Define MEGASUM to add up an
-arbitrarily nested list of integers. That is, (MEGASUM '((8) 5 (2 () (9 1) 3))) should
-return 28.")
+    ((= num 6) "This problem is like the last one, but more general.
+Define MEGASUM to add up an arbitrarily nested list
+of integers. That is, (MEGASUM '((8) 5 (2 () (9 1)
+3))) should return 28.")
 
-    ((= num 7) "Define MAX to be a function that finds the maximum of a list of integers. So
-(MAX '(5 14 -3)) should return 14. You can assume the list will have at least one term.")
+    ((= num 7) "Define MAX to be a function that finds the maximum
+of a list of integers. So (MAX '(5 14 -3)) should
+return 14. You can assume the list will have at least
+one term.")
 
-    ((= num 8) "Last problem. You're going to define a function called POCKET. This function should
-take one argument. Now pay attention here: POCKET does two different things, depending on
-the argument. If you give it NIL as the argument, it should simply return 8. But if you
-give POCKET any integer as an argument, it should return a new pocket function -- a function
-just like POCKET, but with that new integer hidden inside, replacing the 8.
-
-Examples:
-  (POCKET NIL) => 8
-  (POCKET 12) => [function]
-  (DEFINE NEWPOCKET (POCKET 12)) => [function]
-  (NEWPOCKET NIL) => 12
-  (DEFINE THIRDPOCKET (NEWPOCKET 3)) => [function]
-  (THIRDPOCKET NIL) => 3
-  (NEWPOCKET NIL) => 12
-  (POCKET NIL) => 8
-
-Note that when you create a new pocket function, previously-existing functions should
-keep working.")
+    ((= num 8) "Last problem. You're going to define a function
+called POCKET. This function should take one
+argument. Now pay attention here: POCKET does two
+different things, depending on the argument. If you
+give it NIL as the argument, it should simply return
+8. But if you give POCKET any integer as an argument,
+it should return a new pocket function -- a function
+just like POCKET, but with that new integer hidden
+inside, replacing the 8. Examples: (POCKET NIL) => 8
+(POCKET 12) => [function] (DEFINE NEWPOCKET (POCKET
+12)) => [function] (NEWPOCKET NIL) => 12 (DEFINE
+THIRDPOCKET (NEWPOCKET 3)) => [function] (THIRDPOCKET
+NIL) => 3 (NEWPOCKET NIL) => 12 (POCKET NIL) => 8
+Note that when you create a new pocket function,
+previously-existing functions should keep working.")
     (t (error "Invalid problem number"))))
 
 (defun check-problem (num)
@@ -1188,7 +1204,7 @@ keep working.")
     ((= num 7) (check-problem-7))
     ((= num 8) (check-problem-8))
     (t (progn
-         (format t "~%The genie shakes his head. \"Invalid problem number.\"~%")
+         (format t "~%The genie shakes his head. \"Invalid problem~%number.\"~%")
          nil))))
 
 (defun check-problem-2 ()
@@ -1197,7 +1213,7 @@ keep working.")
          (found (cadr result)))
     (cond
       ((not found)
-       (format t "~%The genie shakes his head. \"Looks like TWENTYSEVEN isn't defined at all. Or if it is, you've done something really magical to it. Try again.\"~%")
+       (format t "~%The genie shakes his head. \"Looks like TWENTYSEVEN~%isn't defined at all. Or if it is, you've done~%something really magical to it. Try again.\"~%")
        nil)
       ((and (numberp val) (= val 27))
        (format t "~%\"Aha! Very good.\"~%")
@@ -1221,21 +1237,21 @@ keep working.")
        (format t "~%\"Oops -- that's not right. They should be EQUAL?.\"~%")
        nil)
       ((eql cat dog)
-       (format t "~%\"Oops -- that's not right. They should not be EQV?.\"~%")
+       (format t "~%\"Oops -- that's not right. They should not be~%EQV?.\"~%")
        nil)
       ((not (and (scheme-cons-p cat) (scheme-cons-p dog)))
        (format t "~%\"They need to be lists.\"~%")
        nil)
       ((not (eql (scheme-cons-cdr cat) (scheme-cons-cdr dog)))
-       (format t "~%\"Nope. Remember that CDR(CAT) and CDR(DOG) must be EQV?.\"~%")
+       (format t "~%\"Nope. Remember that CDR(CAT) and CDR(DOG) must be~%EQV?.\"~%")
        nil)
       (t
-       (format t "~%\"Perfect! There are actually two ways to solve this problem.")
+       (format t "~%\"Perfect! There are actually two ways to solve this~%problem.")
        (if (and (scheme-cons-p cat) (null (scheme-cons-cdr (scheme-cons-cdr cat))))
            ;; One-term list solution
-           (format t " You used the simpler one, using one-term lists. The trickier solution would be something like this:~%(define tail '(end))~%(define cat (cons 'head tail))~%(define dog (cons 'head tail))~%The cdrs are EQV? because they are both the thing defined on the first line. See?\"~%")
+           (format t "You used the simpler one, using one-term lists. The~%trickier solution would be something like this:~%(define tail '(end))~%(define cat (cons 'head tail))~%(define dog (cons 'head tail))~%The cdrs are EQV? because they are both the thing~%defined on the first line. See?\"~%")
            ;; Multi-term or shared cdr solution
-           (format t " The simple way is just to define both CAT and DOG to be one-term lists. That way, the cdrs are both NIL, and NIL is always EQV? to NIL.\"~%"))
+           (format t "The simple way is just to define both CAT and DOG to~%be one-term lists. That way, the cdrs are both NIL,~%and NIL is always EQV? to NIL.\"~%"))
        t))))
 
 (defun check-problem-4 ()
@@ -1276,7 +1292,7 @@ keep working.")
                    (expected (second test))
                    (result (scheme-apply sum-fn (list input))))
               (unless (and (numberp result) (= result expected))
-                (format t "~%\"Oops -- that's not right. The result should be ~a.\"~%"
+                (format t "~%\"Oops -- that's not right. The result should be~%~a.\"~%"
                         expected)
                 (return nil))))
           (format t "~%\"Seems to work.\"~%")
@@ -1300,7 +1316,7 @@ keep working.")
                    (expected (second test))
                    (result (scheme-apply megasum-fn (list input))))
               (unless (and (numberp result) (= result expected))
-                (format t "~%\"Oops -- that's not right. The result should be ~a.\"~%"
+                (format t "~%\"Oops -- that's not right. The result should be~%~a.\"~%"
                         expected)
                 (return nil))))
           (format t "~%\"Seems to work.\"~%")
@@ -1323,7 +1339,7 @@ keep working.")
                    (expected (second test))
                    (result (scheme-apply max-fn (list input))))
               (unless (and (numberp result) (= result expected))
-                (format t "~%\"Oops -- that's not right. The result should be ~a.\"~%"
+                (format t "~%\"Oops -- that's not right. The result should be~%~a.\"~%"
                         expected)
                 (return nil))))
           (format t "~%\"Seems to work.\"~%")
@@ -1341,21 +1357,21 @@ keep working.")
               (fn2 (scheme-apply pocket-fn (list 12))))
           (if (not (and (numberp val1) (= val1 8)))
               (progn
-                (format t "~%\"No; the initial pocket function should return 8 when given NIL.\"~%")
+                (format t "~%\"No; the initial pocket function should return 8~%when given NIL.\"~%")
                 nil)
               (if (not (scheme-function-p fn2))
                   (progn
-                    (format t "~%\"No; pocket should return a function when given an integer.\"~%")
+                    (format t "~%\"No; pocket should return a function when given an~%integer.\"~%")
                     nil)
                   (let ((val2 (scheme-apply fn2 (list nil)))
                         (fn3 (scheme-apply fn2 (list 3))))
                     (if (not (and (numberp val2) (= val2 12)))
                         (progn
-                          (format t "~%\"No; the new pocket function should return 12 when given NIL.\"~%")
+                          (format t "~%\"No; the new pocket function should return 12 when~%given NIL.\"~%")
                           nil)
                         (if (not (scheme-function-p fn3))
                             (progn
-                              (format t "~%\"No; a pocket function should return another function.\"~%")
+                              (format t "~%\"No; a pocket function should return another~%function.\"~%")
                               nil)
                             (let ((val3 (scheme-apply fn3 (list nil)))
                                   (val2-again (scheme-apply fn2 (list nil)))
@@ -1366,11 +1382,11 @@ keep working.")
                                     nil)
                                   (if (not (and (numberp val2-again) (= val2-again 12)))
                                       (progn
-                                        (format t "~%\"No; the second pocket function should still return 12.\"~%")
+                                        (format t "~%\"No; the second pocket function should still return~%12.\"~%")
                                         nil)
                                       (if (not (and (numberp val1-again) (= val1-again 8)))
                                           (progn
-                                            (format t "~%\"No; the original pocket function should still return 8.\"~%")
+                                            (format t "~%\"No; the original pocket function should still~%return 8.\"~%")
                                             nil)
                                           (progn
                                             (format t "~%\"Perfect.\"~%")
@@ -1384,27 +1400,27 @@ keep working.")
   (cond
     ((eq *current-room* 'entry)
      (format t "~%A Familiar Place~%")
-     (format t "Everything here is just like it always is, except for that door.~%")
+     (format t "Everything here is just like it always is, except~%for that door.~%")
      (format t "~%You can see a strange door to the north.~%"))
 
     ((eq *current-room* 'lab)
      (format t "~%White Room~%")
-     (format t "This is a comfortably cluttered room. Cluttered with bookshelves, mostly.~%")
-     (format t "To one side is a large desk, on which a computer squats regally.~%")
+     (format t "This is a comfortably cluttered room. Cluttered with~%bookshelves, mostly.~%")
+     (format t "To one side is a large desk, on which a computer~%squats regally.~%")
      (when (not (genie-finished-p))
        (format t "A lumpy couch is the only other furniture of note.~%"))
      (format t "~%You can see:~%")
      (when (not (genie-finished-p))
        (if (genie-asleep-p)
-           (format t "  a huge genie (sleeping on the couch)~%")
-           (format t "  a huge genie (on the couch)~%")))
-     (format t "  a computer (with green and yellow buttons)~%")
+           (format t "a huge genie (sleeping on the couch)~%")
+           (format t "a huge genie (on the couch)~%")))
+     (format t "a computer (with green and yellow buttons)~%")
      (when (and (genie-asleep-p) (not *alarm-box-used*))
-       (format t "  a small glass box~%"))
+       (format t "a small glass box~%"))
      (when *manual-available*
-       (format t "  a massive book~%"))
+       (format t "a massive book~%"))
      (when *prize-won*
-       (format t "  a gold plaque~%")))
+       (format t "a gold plaque~%")))
 
     (t (error "Invalid room"))))
 
@@ -1415,12 +1431,12 @@ keep working.")
   (format t "(Common Lisp port 2025 by Daniel Mewes)~%")
   (format t "~%(First-time players should type 'about')~%~%")
 
-  (format t "Hey, that door wasn't there last time you walked by this spot. What the heck?~%")
+  (format t "Hey, that door wasn't there last time you walked by~%this spot. What the heck?~%")
 
   (describe-room)
 
   (loop
-    (format t "~%> ")
+    (format t "~%>")
     (let* ((input (read-line))
            (words (and input (parse-command input))))
       (cond
@@ -1530,11 +1546,11 @@ keep working.")
            (object-visible-p-by-name what))
       (progn
         (setf *alarm-box-used* t)
-        (wake-genie "You turn the box over carefully, then shrug and swing it sharply...
-
-\"No no don't break it I'm awake!\"
-A gleaming hand catches your wrist. The genie gently -- very gently --
-removes the box from your grasp, and tucks it carefully away into nothing.")))
+        (wake-genie "You turn the box over carefully, then shrug and
+swing it sharply... \"No no don't break it I'm
+awake!\" A gleaming hand catches your wrist. The
+genie gently -- very gently -- removes the box from
+your grasp, and tucks it carefully away into nothing.")))
     (t (format t "If you're getting frustrated, maybe ask for help.~%"))))
 
 (defun cmd-push (what)
@@ -1555,17 +1571,15 @@ removes the box from your grasp, and tucks it carefully away into nothing.")))
         (when (null *global-env*)
           (init-global-env))
 
-        (format t "~%The computer comes to life: whirr, feeple, feep! You settle yourself
-before the keyboard as text appears on the screen...~%")
-        (format t "~%[Welcome to the interpreter. Enter :q to exit, or :m for documentation,
-or :? for a list of other : commands.]~%")
+        (format t "~%The computer comes to life: whirr, feeple, feep! You~%settle yourself before the keyboard as text appears~%on the screen...~%")
+        (format t "~%[Welcome to the interpreter. Enter :q to exit, or :m~%for documentation, or :? for a list of other :~%commands.]~%")
 
         (run-interpreter)
 
-        (format t "~%[Suspending interpreter. Press green button to reactivate.]~%")
+        (format t "~%[Suspending interpreter. Press green button to~%reactivate.]~%")
         (when (genie-teaching-p)
           (setf *genie-waiting* t)
-          (format t "~%You lean back. The genie glances over, and asks, \"Got it working yet?\"~%")))))
+          (format t "~%You lean back. The genie glances over, and asks,~%\"Got it working yet?\"~%")))))
 
 (defun cmd-reset-interpreter ()
   (if (not (in-lab-p))
@@ -1588,7 +1602,7 @@ or :? for a list of other : commands.]~%")
           (dolist (binding bindings)
             (let ((sym (car binding))
                   (val (cdr binding)))
-              (format t "  ~a = " sym)
+              (format t "~a =" sym)
               (scheme-print val)
               (terpri)))
           (terpri))
@@ -1610,7 +1624,7 @@ or :? for a list of other : commands.]~%")
 
 (defun run-interpreter ()
   (loop
-    (format t "~%>> ")
+    (format t "~%>>")
     (let ((line (read-line)))
       (when (null line)
         (return))
@@ -1620,13 +1634,13 @@ or :? for a list of other : commands.]~%")
          (return))
 
         ((string= line ":?")
-         (format t "[The following codes have special meaning at the >> prompt:~%")
-         (format t "  :?  Print this list.~%")
-         (format t "  :q  Leave the interpreter.~%")
-         (format t "  :m  Read the manual.~%")
-         (format t "  :r  Redisplay the current problem.~%")
-         (format t "  :c  Cancel the expression you are typing.~%")
-         (format t "  :e  Display everything in the current environment.]~%"))
+         (format t "[The following codes have special meaning at the >>~%prompt:~%")
+         (format t ":? Print this list.~%")
+         (format t ":q Leave the interpreter.~%")
+         (format t ":m Read the manual.~%")
+         (format t ":r Redisplay the current problem.~%")
+         (format t ":c Cancel the expression you are typing.~%")
+         (format t ":e Display everything in the current environment.]~%"))
 
         ((string= line ":m")
          (cmd-manual))
@@ -1650,7 +1664,7 @@ or :? for a list of other : commands.]~%")
                              (let* ((expr (read-from-string line))
                                     (*eval-fuel* 1000)
                                     (result (scheme-eval expr *global-env*)))
-                               (format t " ")
+                               (format t "")
                                (scheme-print result)
                                (terpri)
                                t))))
@@ -1668,13 +1682,10 @@ or :? for a list of other : commands.]~%")
          (setf *genie-state* 2)
          (setf *genie-waiting* nil)
          (setf *manual-available* t)
-         (format t "~%The genie nods in satisfaction. \"Right. Let's see, let's see...\"~%")
-         (format t "He pulls a massive tome out of nowhere; opens it; pokes studiously at it;
-turns a page; snorts. Then he arises from the couch to his full height, raises the book,
-and booms...~%")
+         (format t "~%The genie nods in satisfaction. \"Right. Let's see,~%let's see...\"~%")
+         (format t "He pulls a massive tome out of nowhere; opens it;~%pokes studiously at it; turns a page; snorts. Then~%he~%arises from the couch to his full height, raises the~%book, and booms...~%")
          (format t "~%\"HOW TO PROGRAM IN LISP!\"~%")
-         (format t "~%Then he plops back into the couch, and adds, \"...a self-paced course.\"
-He hands you the book.~%")
+         (format t "~%Then he plops back into the couch, and adds, \"...a~%self-paced course.\" He hands you the book.~%")
          (format t "~%~a~%" (problem-text 2)))
 
         ((genie-teaching-p)
@@ -1687,11 +1698,8 @@ He hands you the book.~%")
                      (if (genie-finished-p)
                          (progn
                            (setf *prize-won* t)
-                           (format t "~%\"Congratulations,\" the genie booms. \"You are now an accredited
-hacker of Lisp.\" He hands you something. \"I'll let you keep playing with the machine.
-I,\" he adds with sudden intensity, \"am going to return to my nap.\"~%")
-                           (format t "~%The genie vanishes in a puff of silver smoke. A moment later,
-the couch follows.~%"))
+                           (format t "~%\"Congratulations,\" the genie booms. \"You are now~%an accredited hacker of Lisp.\" He hands you~%something. \"I'll let you keep playing with the~%machine. I,\" he adds with sudden intensity, \"am~%going to return to my nap.\"~%")
+                           (format t "~%The genie vanishes in a puff of silver smoke. A~%moment later, the couch follows.~%"))
                          (format t "~%~a~%" (problem-text *genie-state*))))
                    (format t "~%(Try again!)~%")))
              (respond-genie-confused)))
@@ -1709,10 +1717,9 @@ the couch follows.~%"))
         ((= *genie-state* 1)
          (setf *genie-state* 0)
          (setf *genie-waiting* nil)
-         (format t "The genie frowns thunderously. \"Fine, go play around on your own. See where
-it gets you. Wake me when you're tired of wasting time.\" ")
+         (format t "The genie frowns thunderously. \"Fine, go play~%around on your own. See where it gets you. Wake me~%when you're tired of wasting time.\"")
          (if *alarm-box-used*
-           (format t "He tosses you the glass box, turns over, and begins snoring. Thunderously.~%")
+           (format t "He tosses you the glass box, turns over, and begins~%snoring. Thunderously.~%")
            (format t "He turns over, and begins snoring. Thunderously.~%")))
 
         ((and (genie-teaching-p) *genie-waiting*)
@@ -1735,8 +1742,7 @@ it gets you. Wake me when you're tired of wasting time.\" ")
       (if (genie-teaching-p)
           (format t "~%~a~%" (problem-text *genie-state*))
           (if (= *genie-state* 1)
-              (format t "\"I thought the question was simple enough. Are you interested in learning
-what I have to teach? Yes or no will do.\"~%")
+              (format t "\"I thought the question was simple enough. Are you~%interested in learning what I have to teach? Yes or~%no will do.\"~%")
               (print-what-problem)))))
 
 (defun cmd-help ()
@@ -1762,9 +1768,7 @@ what I have to teach? Yes or no will do.\"~%")
   (if (= *hint-problem* -1)
       (progn
         (setf *hint-problem* 0)
-        (format t "The genie glowers hugely at you. \"Sigh. Yes, I do give hints. I am required
-to tell you, blah blah blah, irreparable loss of fun, blah blah, no refunds, fine. So if
-you still want help, ask again. If any hint I give isn't enough, ask again.\"~%"))
+        (format t "The genie glowers hugely at you. \"Sigh. Yes, I do~%give hints. I am required to tell you, blah blah~%blah, irreparable loss of fun, blah blah, no refunds,~%fine. So if you still want help, ask again. If any~%hint I give isn't enough, ask again.\"~%"))
       (progn
         (when (/= *hint-problem* problem)
           (setf *hint-problem* problem)
@@ -1776,68 +1780,55 @@ you still want help, ask again. If any hint I give isn't enough, ask again.\"~%"
   (cond
     ((= problem 2)
      (case *hint-level*
-       (1 (format t "\"Have you read up through chapter 6 of the manual?\"~%"))
+       (1 (format t "\"Have you read up through chapter 6 of the~%manual?\"~%"))
        (2 (format t "\"You need to use the DEFINE command.\"~%"))
        (t (format t "\"Do this: (DEFINE TWENTYSEVEN 27)\"~%"))))
 
     ((= problem 3)
      (case *hint-level*
-       (1 (format t "\"Have you read up through chapter 10 of the manual?\"~%"))
-       (2 (format t "\"If you define CAT and DOG to be identical lists, that will satisfy
-the first condition. They will be EQUAL?, but since they are created in two separate places,
-they will not be EQV?.\"~%"))
-       (t (format t "\"Define a single list to be the cdr for both of them, then use CONS to
-attach atoms to it. Do this:
-  (DEFINE TAIL '(END))
-  (DEFINE CAT (CONS 'HEAD TAIL))
-  (DEFINE DOG (CONS 'HEAD TAIL))\"~%"))))
+       (1 (format t "\"Have you read up through chapter 10 of the~%manual?\"~%"))
+       (2 (format t "\"If you define CAT and DOG to be identical lists,~%that will satisfy the first condition. They will be~%EQUAL?, but since they are created in two separate~%places, they will not be EQV?.\"~%"))
+       (t (format t "\"Define a single list to be the cdr for both of~%them, then use CONS to attach atoms to it. Do this:~%(DEFINE TAIL '(END)) (DEFINE CAT (CONS 'HEAD TAIL))~%(DEFINE DOG (CONS 'HEAD TAIL))\"~%"))))
 
     ((= problem 4)
      (case *hint-level*
-       (1 (format t "\"Have you read up through chapter 12 of the manual?\"~%"))
+       (1 (format t "\"Have you read up through chapter 12 of the~%manual?\"~%"))
        (2 (format t "\"You can modify the example from chapter 11.\"~%"))
-       (t (format t "\"Use LAMBDA and COND with tests for positive, negative, and zero.\"~%"))))
+       (t (format t "\"Use LAMBDA and COND with tests for positive,~%negative, and zero.\"~%"))))
 
     ((= problem 5)
      (case *hint-level*
-       (1 (format t "\"Have you read up through chapter 13 of the manual?\"~%"))
-       (2 (format t "\"Use recursion, like the LAST example in chapter 13.\"~%"))
-       (3 (format t "\"The base case is when the list is empty; then return 0.\"~%"))
-       (t (format t "\"If the list is not empty, add the first term to the sum of the rest.\"~%"))))
+       (1 (format t "\"Have you read up through chapter 13 of the~%manual?\"~%"))
+       (2 (format t "\"Use recursion, like the LAST example in chapter~%13.\"~%"))
+       (3 (format t "\"The base case is when the list is empty; then~%return 0.\"~%"))
+       (t (format t "\"If the list is not empty, add the first term to~%the sum of the rest.\"~%"))))
 
     ((= problem 6)
      (case *hint-level*
-       (1 (format t "\"You can build MEGASUM the same way you built SUM, with one change.\"~%"))
-       (2 (format t "\"The change is that the first term might be a list instead of a number.\"~%"))
-       (t (format t "\"Use COND and test the first term with LIST?. If it is a list, call
-MEGASUM recursively to add it up.\"~%"))))
+       (1 (format t "\"You can build MEGASUM the same way you built SUM,~%with one change.\"~%"))
+       (2 (format t "\"The change is that the first term might be a list~%instead of a number.\"~%"))
+       (t (format t "\"Use COND and test the first term with LIST?. If it~%is a list, call MEGASUM recursively to add it up.\"~%"))))
 
     ((= problem 7)
      (case *hint-level*
-       (1 (format t "\"Have you read up through chapter 14 of the manual?\"~%"))
-       (2 (format t "\"Consider using LET. Look at the first term, look at MAX of the remaining
-terms, choose the larger.\"~%"))
-       (t (format t "\"The base case is a one-term list, not an empty list.\"~%"))))
+       (1 (format t "\"Have you read up through chapter 14 of the~%manual?\"~%"))
+       (2 (format t "\"Consider using LET. Look at the first term, look~%at MAX of the remaining terms, choose the larger.\"~%"))
+       (t (format t "\"The base case is a one-term list, not an empty~%list.\"~%"))))
 
     ((= problem 8)
      (case *hint-level*
-       (1 (format t "\"The obvious approach won't work. You can't use a top-level variable
-because you need multiple pocket functions working at once.\"~%"))
-       (2 (format t "\"Think about a pocket-generator function that takes a value and returns
-a pocket function containing that value.\"~%"))
-       (3 (format t "\"Use LETREC to create a recursive function. The generator should return
-a function that either returns its stored value (if given NIL) or calls the generator to
-create a new pocket (if given an integer).\"~%"))
-       (t (format t "\"The key insight: use static scoping. Each function remembers the
-environment where it was created.\"~%"))))
+       (1 (format t "\"The obvious approach won't work. You can't use a~%top-level variable because you need multiple pocket~%functions working at once.\"~%"))
+       (2 (format t "\"Think about a pocket-generator function that takes~%a value and returns a pocket function containing that~%value.\"~%"))
+       (3 (format t "\"Use LETREC to create a recursive function. The~%generator should return a function that either~%returns its stored value (if given NIL) or calls the~%generator to create a new pocket (if given an~%integer).\"~%"))
+       (t (format t "\"The key insight: use static scoping. Each function~%remembers the environment where it was created.\"~%"))))
 
     (t (error "Invalid problem number"))))))
 
 (defun cmd-about ()
   (format t "~%Lists And Lists is copyright 1996 by Andrew Plotkin.~%")
   (format t "It may be copied, distributed, and played freely.~%")
-  (format t "~%Type 'help' for help with whatever you are currently stuck on.~%")
-  (format t "~%This is a Common Lisp port of the original Z-machine version.~%"))
+  (format t "~%Type 'help' for help with whatever you are currently~%stuck on.~%")
+  (format t "~%This is a Common Lisp port of the original Z-machine~%version.~%"))
 
 (defun cmd-wake (what)
   "Handle WAKE verb"
@@ -1851,9 +1842,9 @@ environment where it was created.\"~%"))))
              (case (random 3)
                (0 (format t "The genie rolls over.~%"))
                (1 (format t "The genie snorts. \"'z a louse,\" he mumbles.~%"))
-               (2 (format t "The genie mumbles, \"M'm awake, mmf,\" and throws an arm over his ear.~%")))
+               (2 (format t "The genie mumbles, \"M'm awake, mmf,\" and throws an~%arm over his ear.~%")))
              ;; Genie is awake
-             (format t "The genie glances up at you. \"I'm not about to fall asleep, not with you muttering to yourself and scribbling all those notes.\"~%"))))
+             (format t "The genie glances up at you. \"I'm not about to fall~%asleep, not with you muttering to yourself and~%scribbling all those notes.\"~%"))))
     (t
      (format t "That's not something you can wake.~%"))))
 
@@ -1890,7 +1881,8 @@ environment where it was created.\"~%"))))
      (if (require-object what)
          (if (genie-asleep-p)
              ;; Attacking the sleeping genie wakes him
-             (wake-genie "A gleaming hand catches your fist. The genie gently -- very gently -- stops your attack.")
+             (wake-genie "A gleaming hand catches your fist. The genie gently
+-- very gently -- stops your attack.")
              (format t "Violence is not the answer. The genie frowns at you.~%"))))
     (t
      (format t "That's not something you want to attack.~%"))))
@@ -1904,8 +1896,9 @@ environment where it was created.\"~%"))))
      (if (require-object what)
          (if (genie-asleep-p)
              ;; Kissing the sleeping genie wakes him
-             (wake-genie "A gleaming hand catches your wrist. The genie gently -- very gently -- pushes you away.")
-             (format t "The genie looks at you with amusement. \"Let's keep this professional.\"~%"))))
+             (wake-genie "A gleaming hand catches your wrist. The genie gently
+-- very gently -- pushes you away.")
+             (format t "The genie looks at you with amusement. \"Let's keep~%this professional.\"~%"))))
     (t
      (format t "That's not something you want to kiss.~%"))))
 
@@ -2138,7 +2131,7 @@ environment where it was created.\"~%"))))
           (progn
             (format t "Game loaded from ~A~%" save-file)
             (describe-room))
-          (format t "Error: Could not load game (file not found or SD card not available?)~%")))))
+          (format t "Error: Could not load game (file not found or SD~%card not available?)~%")))))
 
 (defun save-user-env (env)
   "Save user-defined bindings from environment, recreating it on load"
@@ -2231,10 +2224,10 @@ environment where it was created.\"~%"))))
 
 (defun print-example (input &optional (output nil) (output-supplied-p nil))
   "Print a Scheme example with optional output"
-  (format t " >>~a~%" input)
+  (format t ">>~a~%" input)
   (when output-supplied-p
     (when output
-      (format t " ~a~%" output))))
+      (format t "~a~%" output))))
 
 (defun print-chapter-0 ()
 
@@ -3046,9 +3039,9 @@ environment where it was created.\"~%"))))
   (format t "~%")
   (print-example "(last '(a))" "a" t)
   (print-example "(last '(a bb))" "bb" t)
+  (wait-for-enter)
   (print-example "(last '(a bb c))" "c" t)
   (print-example "(last '(a bb c (xx)))" "(xx)" t)
-  (wait-for-enter)
   (format t "~%")
   (format t "And lo, it works.~%")
   (format t "~%")
@@ -3175,8 +3168,8 @@ environment where it was created.\"~%"))))
   (format t "~%")
   (print-example "thing" "[function]" t)
   (print-example "(thing)" "[function]" t)
-  (print-example "((thing))" "[function]" t)
   (wait-for-enter)
+  (print-example "((thing))" "[function]" t)
   (print-example "(eqv? thing (thing))" "t" t)
   (format t "~%")
   (format t "Even eqv? agrees: the function assigned to thing is~%")
@@ -3196,6 +3189,7 @@ environment where it was created.\"~%"))))
   (format t "~%")
   (print-example "(thing)" "[Error: undefined atom: a]" t)
   (format t "~%")
+  (wait-for-enter)
   (format t "Like we said, all the values in a let are evaluated~%")
   (format t "before any of the assignments are made. So that~%")
   (format t "lambda-expression is evaluated, producing a function~%")
@@ -3204,9 +3198,10 @@ environment where it was created.\"~%"))))
   (format t "remember static binding -- functions are all wrapped~%")
   (format t "up in themselves. The function can't see the~%")
   (format t "temporary assignment to a which is made later on.~%")
-  (format t "That assignment only exists within the scope of the~%")
-  (format t "let statement. You can do it with letrec, because all~%")
   (wait-for-enter)
+  (format t "That assignment only exists within the scope of the~%")
+  (wait-for-enter)
+  (format t "let statement. You can do it with letrec, because all~%")
   (format t "the assignments in a letrec exist within each other's~%")
   (format t "scope. (Although they're incomplete, in a funny~%")
   (format t "sense, which is why they have to be protected in a~%")
@@ -3244,6 +3239,7 @@ environment where it was created.\"~%"))))
   (format t "  >  (lambda () selfer))~%")
   (format t " [function]~%")
   (format t "~%")
+  (wait-for-enter)
   (format t "Well, yes, that works. But it's dependent on the~%")
   (format t "global definition of selfer. If you break that, the~%")
   (format t "function stops working.~%")
@@ -3340,8 +3336,8 @@ environment where it was created.\"~%"))))
   (format t "(eqv? v w) : 2 arguments Returns t if v and w are~%")
   (format t "both nil, or are the same atom, or were created at~%")
   (format t "the same time. Returns nil otherwise.~%")
-  (format t "~%")
   (wait-for-enter)
+  (format t "~%")
   (format t "(equal? v w) : 2 arguments Returns t if v and w are~%")
   (format t "eqv?, or are lists of the same length all of whose~%")
   (format t "terms are equal?.~%")
@@ -3368,12 +3364,12 @@ environment where it was created.\"~%"))))
   (format t "Otherwise returns nil. If there is only one argument,~%")
   (format t "always returns t.~%")
   (format t "~%")
+  (wait-for-enter)
   (format t "(< v ...) : 1 or more arguments (all numbers) Returns~%")
   (format t "t if all the arguments are numbers in strictly~%")
   (format t "ascending sequence. Otherwise returns nil. If there~%")
   (format t "is only one argument, always returns t.~%")
   (format t "~%")
-  (wait-for-enter)
   (format t "(<= v ...) : 1 or more arguments (all numbers)~%")
   (format t "Returns t if all the arguments are numbers in~%")
   (format t "ascending sequence, not necessarily strictly.~%")
@@ -3428,8 +3424,8 @@ environment where it was created.\"~%"))))
   (format t "top-level definition). If atom already has a~%")
   (format t "top-level definition, the older definition is~%")
   (format t "replaced. The new value is also returned.~%")
-  (format t "~%")
   (wait-for-enter)
+  (format t "~%")
   (format t "(lambda arglist v) : two arguments Returns a~%")
   (format t "function. The scope of the function is the scope in~%")
   (format t "which the lambda-expression is evaluated to produce~%")
@@ -3446,6 +3442,7 @@ environment where it was created.\"~%"))))
   (format t "(let ((atom1 def1) ...) v) : two arguments; the first~%")
   (format t "is a list of clauses; each clause is a list of two~%")
   (format t "terms All the definitions in the list of clauses are~%")
+  (wait-for-enter)
   (format t "evaluated, in the current scope. Then a new scope is~%")
   (format t "created, in which those values are assigned to their~%")
   (format t "respective atoms (a local or temporary definition.) v~%")
@@ -3459,9 +3456,9 @@ environment where it was created.\"~%"))))
   (format t "assigned to atom1. In this new scope, def2 is~%")
   (format t "evaluated. A newer scope is created in which the~%")
   (format t "resulting value is assigned to atom2. This continues~%")
+  (wait-for-enter)
   (format t "until all clauses are handled. v is evaluated in the~%")
   (format t "final scope, and the result is returned.~%")
-  (wait-for-enter)
   (format t "~%")
   (format t "(letrec ((atom1 def1) ...) v) : two arguments; the~%")
   (format t "first is a list of clauses; each clause is a list of~%")
